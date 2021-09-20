@@ -9,6 +9,7 @@ type RewardSourceType int
 const (
 	LiquidityPool RewardSourceType = iota
 	Staking
+	Validator
 )
 
 func (s RewardSourceType) String() string {
@@ -17,6 +18,8 @@ func (s RewardSourceType) String() string {
 		return "LiquidityPool"
 	case Staking:
 		return "Staking"
+	case Validator:
+		return "Validator"
 	}
 	return "unknown"
 }
