@@ -1,6 +1,6 @@
 collect-all
 pooling-strategy:Best-pool
-Best-pool:70,30
+Best-pool:100
 staking-strategy:intact
 staking:50
 pooling:50
