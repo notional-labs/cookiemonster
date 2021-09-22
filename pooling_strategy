@@ -1,7 +1,0 @@
-collect-all
-pooling-strategy:Best-pool
-Best-pool:100
-staking-strategy:intact
-staking:50
-pooling:50
-

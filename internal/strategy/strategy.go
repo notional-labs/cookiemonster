@@ -5,7 +5,7 @@ package strategy
 
 
 
-type strategy struct {
+type fund struct {
 
 
 } 

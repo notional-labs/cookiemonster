@@ -1,0 +1,15 @@
+[
+    {
+        "key_name":"april",
+        "transfer_to":{"adam":0.4,"tung_bda_handsome_and_talented":0.6},
+        "pool_percentage":0.5,
+        "pool_strategy":{"name":"greedy","config":{"1":70,"2":30}}
+    },
+    {
+        "key_name": "pancreas",
+        "pool_percentage":0.75,
+        "pool_strategy":{"name":"greedy","config":{"1":100}},
+        "transfer_to":{"adam":"100000000000000uosmo"}
+    }
+]
+
