@@ -51,18 +51,18 @@ func setContextFromTxOption(clientCtx client.Context, txOpt TxOption) (client.Co
 		clientCtx = clientCtx.WithSignModeStr(signModeStr)
 	}
 
-	if clientCtx.FeeGranter == nil {
-		granter := ""
+	// if clientCtx.FeeGranter == nil {
+	// 	granter := ""
 
-		if granter != "" {
-			granterAcc, err := sdk.AccAddressFromBech32(granter)
-			if err != nil {
-				return clientCtx, err
-			}
+	// 	if granter != "" {
+	// 		granterAcc, err := sdk.AccAddressFromBech32(granter)
+	// 		if err != nil {
+	// 			return clientCtx, err
+	// 		}
 
-			clientCtx = clientCtx.WithFeeGranterAddress(granterAcc)
-		}
-	}
+	// 		clientCtx = clientCtx.WithFeeGranterAddress(granterAcc)
+	// 	}
+	// }
 
 	if clientCtx.From == "" {
 		from := txOpt.KeyName
