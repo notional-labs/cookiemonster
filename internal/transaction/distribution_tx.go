@@ -13,7 +13,7 @@ import (
 
 func ClaimReward(txOpt TxOption) error {
 	clientCtx := client.Context{}
-	setContextFromTxOption(clientCtx, txOpt)
+	SetContextFromTxOption(clientCtx, txOpt)
 
 	delAddr := clientCtx.GetFromAddress()
 

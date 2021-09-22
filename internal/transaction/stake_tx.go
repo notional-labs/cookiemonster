@@ -22,7 +22,7 @@ func Delegate(txOpt TxOption, delOpt DelegateOption) error {
 
 	// build tx context
 	clientCtx := client.Context{}
-	setContextFromTxOption(clientCtx, txOpt)
+	SetContextFromTxOption(clientCtx, txOpt)
 	txf := NewFactoryCLI(clientCtx)
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }
@@ -42,7 +42,7 @@ func Undelegate(txOpt TxOption, undelOpt UndelegateOption) error {
 
 	// build tx context
 	clientCtx := client.Context{}
-	setContextFromTxOption(clientCtx, txOpt)
+	SetContextFromTxOption(clientCtx, txOpt)
 	txf := NewFactoryCLI(clientCtx)
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }

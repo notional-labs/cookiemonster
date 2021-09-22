@@ -34,7 +34,7 @@ func JoinPool(txOpt TxOption, poolOpt PoolOption) error {
 
 	// build tx context
 	clientCtx := client.Context{}
-	setContextFromTxOption(clientCtx, txOpt)
+	SetContextFromTxOption(clientCtx, txOpt)
 	txf := NewFactoryCLI(clientCtx)
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }
