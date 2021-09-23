@@ -11,9 +11,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
-func ClaimReward(txOpt TxOption) error {
+func ClaimReward(keyName string) error {
 	clientCtx := client.Context{}
-	SetContextFromTxOption(clientCtx, txOpt)
+	SetContextFromKeyName(clientCtx, keyName)
 
 	delAddr := clientCtx.GetFromAddress()
 

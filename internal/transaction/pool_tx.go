@@ -23,18 +23,19 @@ func NewMsgJoinPool(fromAddr sdk.AccAddress, poolId uint64, shareOutAmount sdk.I
 	return msg
 }
 
-func JoinPool(txOpt TxOption, poolOpt PoolOption) error {
+func JoinPool(keyName string, poolOpt PoolOption) error {
+	// build tx context
+	clientCtx := client.Context{}
+	SetContextFromKeyName(clientCtx, keyName)
+	txf := NewFactoryCLI(clientCtx)
+
 	// build msg for tx
-	fromAddr := txOpt.FromAddr
+	fromAddr := clientCtx.FromAddress
 	poolId := poolOpt.PoolId
 	shareOutAmount := poolOpt.ShareOutAmount
 	maxAmountsIn := poolOpt.MaxAmountsIn
 
 	msg := NewMsgJoinPool(fromAddr, poolId, shareOutAmount, maxAmountsIn)
 
-	// build tx context
-	clientCtx := client.Context{}
-	SetContextFromTxOption(clientCtx, txOpt)
-	txf := NewFactoryCLI(clientCtx)
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }

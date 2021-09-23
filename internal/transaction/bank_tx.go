@@ -15,17 +15,18 @@ type BankSendOption struct {
 	Amount sdk.Int
 }
 
-func BankSend(txOpt TxOption, sendOpt BankSendOption) error {
+func BankSend(keyName string, sendOpt BankSendOption) error {
+	// build tx context
+	clientCtx := client.Context{}
+	SetContextFromKeyName(clientCtx, keyName)
+	txf := NewFactoryCLI(clientCtx)
+
 	// build msg for tx
 	toAddr := sendOpt.ToAddr
-	fromAddr := txOpt.FromAddr
+	fromAddr := clientCtx.GetFromAddress()
 	coin := sdk.Coin{Denom: sendOpt.Denom, Amount: sendOpt.Amount}
 	coins := sdk.Coins([]sdk.Coin{coin})
 	msg := types.NewMsgSend(fromAddr, toAddr, coins)
 
-	// build tx context
-	clientCtx := client.Context{}
-	SetContextFromTxOption(clientCtx, txOpt)
-	txf := NewFactoryCLI(clientCtx)
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }

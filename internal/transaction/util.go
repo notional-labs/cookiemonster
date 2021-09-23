@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/notional-labs/cookiemonster/internal/osmosis"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -13,8 +14,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 )
 
-func SetContextFromTxOption(clientCtx client.Context, txOpt TxOption) (client.Context, error) {
-	clientCtx, err := SetBasicContextFromTxOption(clientCtx, txOpt)
+func SetContextFromKeyName(clientCtx client.Context, keyName string) (client.Context, error) {
+	clientCtx, err := SetBasicContextFromKeyName(clientCtx, keyName)
 	if err != nil {
 		return clientCtx, err
 	}
@@ -57,7 +58,7 @@ func SetContextFromTxOption(clientCtx client.Context, txOpt TxOption) (client.Co
 	// }
 
 	if clientCtx.From == "" {
-		from := txOpt.KeyName
+		from := keyName
 		fromAddr, fromName, keyType, err := client.GetFromFields(clientCtx.Keyring, from, clientCtx.GenerateOnly)
 		if err != nil {
 			return clientCtx, err
@@ -74,7 +75,7 @@ func SetContextFromTxOption(clientCtx client.Context, txOpt TxOption) (client.Co
 	return clientCtx, nil
 }
 
-func SetBasicContextFromTxOption(clientCtx client.Context, txOpt TxOption) (client.Context, error) {
+func SetBasicContextFromKeyName(clientCtx client.Context, keyName string) (client.Context, error) {
 	if clientCtx.OutputFormat == "" {
 		output := "json"
 		clientCtx = clientCtx.WithOutputFormat(output)
@@ -96,7 +97,7 @@ func SetBasicContextFromTxOption(clientCtx client.Context, txOpt TxOption) (clie
 	}
 
 	if clientCtx.ChainID == "" {
-		chainID := txOpt.ChainId
+		chainID := osmosis.ChainId
 		clientCtx = clientCtx.WithChainID(chainID)
 	}
 	if clientCtx.Keyring == nil {
@@ -112,7 +113,7 @@ func SetBasicContextFromTxOption(clientCtx client.Context, txOpt TxOption) (clie
 		}
 	}
 	if clientCtx.Client == nil {
-		rpcURI := txOpt.Node
+		rpcURI := osmosis.Node
 		if rpcURI != "" {
 			clientCtx = clientCtx.WithNodeURI(rpcURI)
 

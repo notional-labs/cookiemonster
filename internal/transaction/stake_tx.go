@@ -13,17 +13,18 @@ type DelegateOption struct {
 	Amount  sdk.Int
 }
 
-func Delegate(txOpt TxOption, delOpt DelegateOption) error {
+func Delegate(keyName string, delOpt DelegateOption) error {
+	// build tx context
+	clientCtx := client.Context{}
+	SetContextFromKeyName(clientCtx, keyName)
+	txf := NewFactoryCLI(clientCtx)
+
 	// build msg for tx
 	valAddr := delOpt.ValAddr
-	delAddr := txOpt.FromAddr
+	delAddr := clientCtx.FromAddress
 	amount := sdk.Coin{Denom: delOpt.Denom, Amount: delOpt.Amount}
 	msg := types.NewMsgDelegate(delAddr, valAddr, amount)
 
-	// build tx context
-	clientCtx := client.Context{}
-	SetContextFromTxOption(clientCtx, txOpt)
-	txf := NewFactoryCLI(clientCtx)
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }
 
@@ -33,16 +34,17 @@ type UndelegateOption struct {
 	Amount  sdk.Int
 }
 
-func Undelegate(txOpt TxOption, undelOpt UndelegateOption) error {
+func Undelegate(keyName string, undelOpt UndelegateOption) error {
+	// build tx context
+	clientCtx := client.Context{}
+	SetContextFromKeyName(clientCtx, keyName)
+	txf := NewFactoryCLI(clientCtx)
+
 	// build msg for tx
 	valAddr := undelOpt.ValAddr
-	delAddr := txOpt.FromAddr
+	delAddr := clientCtx.FromAddress
 	amount := sdk.Coin{Denom: undelOpt.Denom, Amount: undelOpt.Amount}
 	msg := types.NewMsgDelegate(delAddr, valAddr, amount)
 
-	// build tx context
-	clientCtx := client.Context{}
-	SetContextFromTxOption(clientCtx, txOpt)
-	txf := NewFactoryCLI(clientCtx)
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }

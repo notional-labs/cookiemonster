@@ -35,7 +35,7 @@ func swapAmountInRoutes(swapOpt SwapOption) ([]types.SwapAmountInRoute, error) {
 	return routes, nil
 }
 
-func NewMsgSwapExactAmountIn(swapOpt SwapOption, txOpt TxOption) (sdk.Msg, error) {
+func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.Msg, error) {
 	routes, err := swapAmountInRoutes(swapOpt)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func NewMsgSwapExactAmountIn(swapOpt SwapOption, txOpt TxOption) (sdk.Msg, error
 	tokenOutMinAmt := swapOpt.tokenOutMinAmt
 
 	msg := &types.MsgSwapExactAmountIn{
-		Sender:            txOpt.FromAddr.String(),
+		Sender:            fromAddr.String(),
 		Routes:            routes,
 		TokenIn:           tokenIn,
 		TokenOutMinAmount: tokenOutMinAmt,
@@ -54,15 +54,18 @@ func NewMsgSwapExactAmountIn(swapOpt SwapOption, txOpt TxOption) (sdk.Msg, error
 	return msg, nil
 }
 
-func Swap(txOpt TxOption, swapOpt SwapOption) error {
+func Swap(keyName string, swapOpt SwapOption) error {
+	// build tx context
+	clientCtx := client.Context{}
+	SetContextFromKeyName(clientCtx, keyName)
+	txf := NewFactoryCLI(clientCtx)
+
 	// build msg for tx
-	msg, err := NewMsgSwapExactAmountIn(swapOpt, txOpt)
+	fromAddr := clientCtx.GetFromAddress()
+	msg, err := NewMsgSwapExactAmountIn(fromAddr, swapOpt)
 	if err != nil {
 		return err
 	}
-	// build tx context
-	clientCtx := client.Context{}
-	SetContextFromTxOption(clientCtx, txOpt)
-	txf := NewFactoryCLI(clientCtx)
+
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
 }
