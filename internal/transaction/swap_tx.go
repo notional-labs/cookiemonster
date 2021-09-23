@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
+	gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
 )
 
 type SwapOption struct {
@@ -56,7 +57,8 @@ func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.M
 
 func Swap(keyName string, swapOpt SwapOption) error {
 	// build tx context
-	clientCtx := client.Context{}
+	cmd := gammcli.NewSwapExactAmountInCmd()
+	clientCtx := client.GetClientContextFromCmd(cmd)
 	SetContextFromKeyName(clientCtx, keyName)
 	txf := NewFactoryCLI(clientCtx)
 

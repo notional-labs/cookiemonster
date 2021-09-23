@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	bankcli "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
@@ -17,7 +17,8 @@ type BankSendOption struct {
 
 func BankSend(keyName string, sendOpt BankSendOption) error {
 	// build tx context
-	clientCtx := client.Context{}
+	cmd := bankcli.NewSendTxCmd()
+	clientCtx := client.GetClientContextFromCmd(cmd)
 	SetContextFromKeyName(clientCtx, keyName)
 	txf := NewFactoryCLI(clientCtx)
 

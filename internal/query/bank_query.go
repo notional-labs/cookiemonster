@@ -2,71 +2,50 @@ package query
 
 import (
 	"github.com/cosmos/cosmos-sdk/client"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
-
 	"github.com/notional-labs/cookiemonster/internal/transaction"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/types/query"
+	bankcli "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 )
 
-func QueryOsmoBalance(keyName string) {
-	// build tx context
-	clientCtx := client.Context{}
+func QueryBalances(keyName string) (sdk.Coins, error) {
+	cmd := bankcli.GetBalancesCmd()
+
+	// build context
+	clientCtx := client.GetClientContextFromCmd(cmd)
 	transaction.SetContextFromKeyName(clientCtx, keyName)
-	txf := transaction.NewFactoryCLI(clientCtx)
-
 	queryClient := types.NewQueryClient(clientCtx)
-
 	addr := clientCtx.FromAddress
+	pageReq := &query.PageRequest{
+		Key:        []byte(""),
+		Offset:     uint64(0),
+		Limit:      uint64(100),
+		CountTotal: false,
+	}
+	params := types.NewQueryAllBalancesRequest(addr, pageReq)
+	res, err := queryClient.AllBalances(cmd.Context(), params)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	pageReq, err := client.ReadPageRequest(cmd.Flags())
-	if err != nil {
-		return err
-	}
-
-	if denom == "" {
-		params := types.NewQueryAllBalancesRequest(addr, pageReq)
-
-		res, err := queryClient.AllBalances(cmd.Context(), params)
-		if err != nil {
-			return err
-		}
-		return clientCtx.PrintProto(res)
-	}
-
-	params := types.NewQueryBalanceRequest(addr, denom)
-	res, err := queryClient.Balance(cmd.Context(), params)
-	if err != nil {
-		return err
-	}
-
-	return clientCtx.PrintProto(res.Balance)
+	return res.Balances, nil
 }
 
-func ReadPageRequest() (*query.PageRequest, error) {
-	pageKey := ""
-	offset := 0
-	limit := 100
-	countTotal := false
-	page := 1
+func QueryOsmoBalance(keyName string) (sdk.Coin, error) {
+	cmd := bankcli.GetBalancesCmd()
 
-	if page > 1 && offset > 0 {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "page and offset cannot be used together")
+	// build context
+	clientCtx := client.GetClientContextFromCmd(cmd)
+	transaction.SetContextFromKeyName(clientCtx, keyName)
+	queryClient := types.NewQueryClient(clientCtx)
+	addr := clientCtx.FromAddress
+
+	params := types.NewQueryBalanceRequest(addr, "uosmo")
+	res, err := queryClient.Balance(cmd.Context(), params)
+	if err != nil {
+		return sdk.Coin{}, err
 	}
 
-	if page > 1 {
-		offset = (page - 1) * limit
-	}
-
-	return &query.PageRequest{
-		Key:        []byte(pageKey),
-		Offset:     uint64(offset),
-		Limit:      uint64(limit),
-		CountTotal: countTotal,
-	}, nil
+	return *res.Balance, nil
 }

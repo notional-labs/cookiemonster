@@ -8,11 +8,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	distributioncli "github.com/cosmos/cosmos-sdk/x/distribution/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 func ClaimReward(keyName string) error {
-	clientCtx := client.Context{}
+	cmd := distributioncli.NewWithdrawAllRewardsCmd()
+	clientCtx := client.GetClientContextFromCmd(cmd)
 	SetContextFromKeyName(clientCtx, keyName)
 
 	delAddr := clientCtx.GetFromAddress()

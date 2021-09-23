@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	stakingcli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -15,7 +16,8 @@ type DelegateOption struct {
 
 func Delegate(keyName string, delOpt DelegateOption) error {
 	// build tx context
-	clientCtx := client.Context{}
+	cmd := stakingcli.NewDelegateCmd()
+	clientCtx := client.GetClientContextFromCmd(cmd)
 	SetContextFromKeyName(clientCtx, keyName)
 	txf := NewFactoryCLI(clientCtx)
 
@@ -36,7 +38,8 @@ type UndelegateOption struct {
 
 func Undelegate(keyName string, undelOpt UndelegateOption) error {
 	// build tx context
-	clientCtx := client.Context{}
+	cmd := stakingcli.NewUnbondCmd()
+	clientCtx := client.GetClientContextFromCmd(cmd)
 	SetContextFromKeyName(clientCtx, keyName)
 	txf := NewFactoryCLI(clientCtx)
 
