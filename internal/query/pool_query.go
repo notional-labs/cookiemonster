@@ -37,7 +37,7 @@ func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (floa
 }
 
 func QueryEpochProvision(epoch epoch.EpochInfo) cosmostypes.Dec {
-	return cosmostypes.NewDec(1234)
+	return cosmostypes.NewDec(821917808219.178082191780821917)
 }
 
 
@@ -60,20 +60,60 @@ type DistributionProportions struct {
 type Pool struct {
 	TotalValueLocked cosmostypes.Dec // probably wrong.
 	DistributionProportions DistributionProportions
+	GuageId   int32
+	PotWeight cosmostypes.Dec
+	PoolId    int32
+	PoolIncentives cosmostypes.Dec
+	EpochIdentifier string
+	TotalWeight cosmostypes.Dec// total weight of funds in poolId
+	Duration int64 // duration in seconds that funds are locked in pool.
 }
 
-func QueryAPY(pool Pool, duration time.Duration) cosmostypes.Dec {
+//Need different pool for each duration or to change this model. I think it makes sense for every time to have it's own pool.
+var pool = Pool{
+	TotalValueLocked: cosmostypes.NewDec(1004366),
+	DistributionProportions: DistributionProportions{
+		PoolIncentives: cosmostypes.NewDec(1234),
+	},
+	PoolId:         1,
+	GuageId:        1,
+	PotWeight:      cosmostypes.NewDec(359034),
+	TotalWeight:    cosmostypes.NewDec(1004366),
+	Duration:       86400,
+	EpochIdentifier: "day",
+	PoolIncentives: cosmostypes.NewDec(0.45),
+}
+/**
+ osmosisd q mint params --node http://95.217.196.54:2001
+
+distribution_proportions:
+  community_pool: "0.050000000000000000"
+  developer_rewards: "0.250000000000000000"
+  pool_incentives: "0.450000000000000000"
+  staking: "0.250000000000000000"
+epoch_identifier: day
+genesis_epoch_provisions: "821917808219.178082191780821917"
+mint_denom: uosmo
+minting_rewards_distribution_start_epoch: "1"
+reduction_factor: "0.666666666666666666"
+reduction_period_in_epochs: "365"
+
+ */
 
 
+func CalculatePoolAPY(pool Pool, duration time.Duration) cosmostypes.Dec {
+
+	// From API /osmosis/pool-incentives/v1beta1/incentivized_pools
 	// From API `/osmosis/pool-incentives/v1beta1/distr_info
-	var totalWeight = cosmostypes.NewDec(1.0); // Weight 50/50.  Need to actually get from Pool.
+	var totalWeight = pool.TotalWeight;
 	//const gaugeId = this.getIncentivizedGaugeId(poolId, duration);
-	var potWeight = cosmostypes.NewDec(0.5) //const potWeight = this.queryDistrInfo.getWeight(gaugeId);
-	var poolIncentives = cosmostypes.NewDec(100); //this.queryMintParmas.distributionProportions.poolIncentives
+	var potWeight = pool.PotWeight            //const potWeight = this.queryDistrInfo.getWeight(gaugeId); comes from distr_info.
+	var poolIncentives = pool.PoolIncentives; //See above, we need to get mint params.
 	var oneYearMilliseconds int64 = 365*24*60*60*1000;
 	var epochIdentifier = "OK";
-	var epoch = getEpoch(epochIdentifier);
-	var epochProvision = QueryEpochProvision(epoch);
+	var epoch = getEpoch(epochIdentifier); // still not sure how to get a valid epochID
+	// example epochProvision response: 821917808219.178082191780821917
+	var epochProvision = QueryEpochProvision(epoch); //osmosisd q mint epoch-provisions --node http://95.217.196.54:2001
 	var numEpochPerYear = oneYearMilliseconds / epoch.Duration.Milliseconds();
 	var yearProvision cosmostypes.Dec = epochProvision.Mul(cosmostypes.NewDec(numEpochPerYear))
 
@@ -114,3 +154,151 @@ func QueryAPY(pool Pool, duration time.Duration) cosmostypes.Dec {
 //.maxDecimals(2)
 //.trim(true);
 //}
+
+/**
+incentivized_pools:
+- gauge_id: "1"
+  lockable_duration: 86400s
+  pool_id: "1"
+- gauge_id: "2"
+  lockable_duration: 604800s
+  pool_id: "1"
+- gauge_id: "3"
+  lockable_duration: 1209600s
+  pool_id: "1"
+- gauge_id: "4"
+  lockable_duration: 86400s
+  pool_id: "2"
+- gauge_id: "5"
+  lockable_duration: 604800s
+  pool_id: "2"
+- gauge_id: "6"
+  lockable_duration: 1209600s
+  pool_id: "2"
+- gauge_id: "7"
+  lockable_duration: 86400s
+  pool_id: "3"
+- gauge_id: "8"
+  lockable_duration: 604800s
+  pool_id: "3"
+- gauge_id: "9"
+  lockable_duration: 1209600s
+  pool_id: "3"
+- gauge_id: "10"
+  lockable_duration: 86400s
+  pool_id: "4"
+- gauge_id: "11"
+  lockable_duration: 604800s
+  pool_id: "4"
+- gauge_id: "12"
+  lockable_duration: 1209600s
+  pool_id: "4"
+- gauge_id: "13"
+  lockable_duration: 86400s
+  pool_id: "5"
+- gauge_id: "14"
+  lockable_duration: 604800s
+  pool_id: "5"
+- gauge_id: "15"
+  lockable_duration: 1209600s
+  pool_id: "5"
+- gauge_id: "16"
+  lockable_duration: 86400s
+  pool_id: "6"
+- gauge_id: "17"
+  lockable_duration: 604800s
+  pool_id: "6"
+- gauge_id: "18"
+  lockable_duration: 1209600s
+  pool_id: "6"
+- gauge_id: "19"
+  lockable_duration: 86400s
+  pool_id: "7"
+- gauge_id: "20"
+  lockable_duration: 604800s
+  pool_id: "7"
+- gauge_id: "21"
+  lockable_duration: 1209600s
+  pool_id: "7"
+- gauge_id: "22"
+  lockable_duration: 86400s
+  pool_id: "8"
+- gauge_id: "23"
+  lockable_duration: 604800s
+  pool_id: "8"
+- gauge_id: "24"
+  lockable_duration: 1209600s
+  pool_id: "8"
+- gauge_id: "25"
+  lockable_duration: 86400s
+  pool_id: "9"
+- gauge_id: "26"
+  lockable_duration: 604800s
+  pool_id: "9"
+- gauge_id: "27"
+  lockable_duration: 1209600s
+  pool_id: "9"
+- gauge_id: "28"
+  lockable_duration: 86400s
+  pool_id: "10"
+- gauge_id: "29"
+  lockable_duration: 604800s
+  pool_id: "10"
+- gauge_id: "30"
+  lockable_duration: 1209600s
+  pool_id: "10"
+- gauge_id: "37"
+  lockable_duration: 86400s
+  pool_id: "13"
+- gauge_id: "38"
+  lockable_duration: 604800s
+  pool_id: "13"
+- gauge_id: "39"
+  lockable_duration: 1209600s
+  pool_id: "13"
+- gauge_id: "43"
+  lockable_duration: 86400s
+  pool_id: "15"
+- gauge_id: "44"
+  lockable_duration: 604800s
+  pool_id: "15"
+- gauge_id: "45"
+  lockable_duration: 1209600s
+  pool_id: "15"
+- gauge_id: "64"
+  lockable_duration: 86400s
+  pool_id: "22"
+- gauge_id: "65"
+  lockable_duration: 604800s
+  pool_id: "22"
+- gauge_id: "66"
+  lockable_duration: 1209600s
+  pool_id: "22"
+- gauge_id: "124"
+  lockable_duration: 86400s
+  pool_id: "42"
+- gauge_id: "125"
+  lockable_duration: 604800s
+  pool_id: "42"
+- gauge_id: "126"
+  lockable_duration: 1209600s
+  pool_id: "42"
+- gauge_id: "558"
+  lockable_duration: 86400s
+  pool_id: "183"
+- gauge_id: "559"
+  lockable_duration: 604800s
+  pool_id: "183"
+- gauge_id: "560"
+  lockable_duration: 1209600s
+  pool_id: "183"
+- gauge_id: "600"
+  lockable_duration: 86400s
+  pool_id: "197"
+- gauge_id: "601"
+  lockable_duration: 604800s
+  pool_id: "197"
+- gauge_id: "602"
+  lockable_duration: 1209600s
+  pool_id: "197"
+ */
