@@ -1,17 +1,18 @@
-package query
+package main
 
 import (
-	//"github.com/cosmos/cosmos-sdk/client"
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
 	"math"
 	"strconv"
-
-	//gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
-	//"github.com/osmosis-labs/osmosis/x/gamm/types"
-	//"strconv"
+	"fmt"
 	"time"
 )
+//	//gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
+//	//"github.com/osmosis-labs/osmosis/x/gamm/types"
+//	//"strconv"
+//	"time"
+//)
 //
 //func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
 //	cmd := gammcli.GetCmdSpotPrice()
@@ -40,12 +41,14 @@ import (
 //}
 
 func QueryEpochProvision(epoch epoch.EpochInfo) cosmostypes.Dec {
-	var epochProvision int64 = int64(math.Round(821917808219.178082191780821917))
-	return cosmostypes.NewDec(epochProvision)
+	//var epochProvision int64 = int64(821917808219178082191780821917) //from API: 821917808219.178082191780821917
+	return cosmostypes.MustNewDecFromStr("821917808219178082191780821917")
 }
 
 
-
+/**
+This is just test data.
+ */
 func getEpoch(epochIdentifier string) epoch.EpochInfo {
 	return epoch.EpochInfo{
 		Identifier: "OK",
@@ -83,7 +86,7 @@ var pool = Pool{
 	},
 	PoolId:         1,
 	GuageId:        1,
-	PotWeight:      cosmostypes.NewDec(359034),
+	PotWeight:      cosmostypes.NewDec(359034), //359034n
 	TotalWeight:    cosmostypes.NewDec(1004366),
 	Duration:       86400,
 	EpochIdentifier: "day",
@@ -128,14 +131,29 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 	var epoch = getEpoch(epochIdentifier); // still not sure how to get a valid epochID
 	// example epochProvision response: 821917808219.178082191780821917
 	var epochProvision = QueryEpochProvision(epoch); //osmosisd q mint epoch-provisions --node http://95.217.196.54:2001
+	fmt.Println("EpochProvision")
+	fmt.Println(epochProvision);
 	var numEpochPerYear = oneYearMilliseconds / epoch.Duration.Milliseconds();
 	var yearProvision cosmostypes.Dec = epochProvision.Mul(cosmostypes.NewDec(numEpochPerYear))
 
 	//var yearProvisionToPots = yearProvision.Mul(poolIncentives)
 	var yearProvisionToPot = yearProvision.Mul(potWeight.Quo(totalWeight));
+	var poolTLV = pool.TotalValueLocked; // should be 821917808219178082191780821917n
+	fmt.Println("PoolTLV");
+	fmt.Println(poolTLV)
+	//return new IntPretty(yearProvisionToPotPrice.quo(poolTVL.toDec()))
+	//.decreasePrecision(2)
+	//.maxDecimals(2)
+	//.trim(true);
 	var APY = yearProvisionToPot.Quo(pool.TotalValueLocked)
+
 	pool.APY = toFloat64(APY)
+	fmt.Println(pool.APY)
 	return pool;
+}
+
+func main() {
+	CalculatePoolAPY(pool, time.Duration(100))
 }
 
 //const poolTVL = pool.computeTotalValueLocked(priceStore, fiatCurrency);
