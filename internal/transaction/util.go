@@ -132,7 +132,7 @@ func SetBasicContextFromKeyName(clientCtx client.Context, keyName string) (clien
 func NewFactoryCLI(clientCtx client.Context) tx.Factory {
 	signModeStr := clientCtx.SignModeStr
 
-	f := tx.Factory{}
+	transactionFactory := tx.Factory{}
 
 	signMode := signing.SignMode_SIGN_MODE_UNSPECIFIED
 	switch signModeStr {
@@ -152,24 +152,24 @@ func NewFactoryCLI(clientCtx client.Context) tx.Factory {
 	gasStr := ""
 	gasSetting, _ := flags.ParseGasSetting(gasStr)
 
-	f.WithTxConfig(clientCtx.TxConfig)
-	f.WithAccountRetriever(clientCtx.AccountRetriever)
-	f.WithKeybase(clientCtx.Keyring)
-	f.WithChainID(clientCtx.ChainID)
-	f.WithGas(gasSetting.Gas)
-	f.WithSimulateAndExecute(gasSetting.Simulate)
-	f.WithAccountNumber(uint64(accNum))
-	f.WithSequence(uint64(accSeq))
-	f.WithTimeoutHeight(uint64(timeoutHeight))
-	f.WithGasAdjustment(float64(gasAdj))
-	f.WithMemo(memo)
-	f.WithSignMode(signMode)
+	transactionFactory.WithTxConfig(clientCtx.TxConfig)
+	transactionFactory.WithAccountRetriever(clientCtx.AccountRetriever)
+	transactionFactory.WithKeybase(clientCtx.Keyring)
+	transactionFactory.WithChainID(clientCtx.ChainID)
+	transactionFactory.WithGas(gasSetting.Gas)
+	transactionFactory.WithSimulateAndExecute(gasSetting.Simulate)
+	transactionFactory.WithAccountNumber(uint64(accNum))
+	transactionFactory.WithSequence(uint64(accSeq))
+	transactionFactory.WithTimeoutHeight(uint64(timeoutHeight))
+	transactionFactory.WithGasAdjustment(float64(gasAdj))
+	transactionFactory.WithMemo(memo)
+	transactionFactory.WithSignMode(signMode)
 
 	feesStr := ""
-	f = f.WithFees(feesStr)
+	transactionFactory = transactionFactory.WithFees(feesStr)
 
 	gasPricesStr := ""
-	f = f.WithGasPrices(gasPricesStr)
+	transactionFactory = transactionFactory.WithGasPrices(gasPricesStr)
 
-	return f
+	return transactionFactory
 }
