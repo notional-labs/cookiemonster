@@ -1,43 +1,47 @@
 package query
 
 import (
-	"github.com/cosmos/cosmos-sdk/client"
+	//"github.com/cosmos/cosmos-sdk/client"
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
-	gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
-	"github.com/osmosis-labs/osmosis/x/gamm/types"
+	"math"
 	"strconv"
+
+	//gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
+	//"github.com/osmosis-labs/osmosis/x/gamm/types"
+	//"strconv"
 	"time"
 )
-
-func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
-	cmd := gammcli.GetCmdSpotPrice()
-	clientCtx, err := client.GetClientQueryContext(cmd)
-	if err != nil {
-		return 0, err
-	}
-	queryClient := types.NewQueryClient(clientCtx)
-
-	if err != nil {
-		return 0, err
-	}
-
-	res, err := queryClient.SpotPrice(cmd.Context(), &types.QuerySpotPriceRequest{
-		PoolId:        uint64(poolId),
-		TokenInDenom:  tokenInDenom,
-		TokenOutDenom: tokenOutDenom,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	spotPriceString := res.GetSpotPrice()
-	spotPrice, _ := strconv.ParseFloat(spotPriceString, 64)
-	return spotPrice, nil
-}
+//
+//func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
+//	cmd := gammcli.GetCmdSpotPrice()
+//	clientCtx, err := client.GetClientQueryContext(cmd)
+//	if err != nil {
+//		return 0, err
+//	}
+//	queryClient := types.NewQueryClient(clientCtx)
+//
+//	if err != nil {
+//		return 0, err
+//	}
+//
+//	res, err := queryClient.SpotPrice(cmd.Context(), &types.QuerySpotPriceRequest{
+//		PoolId:        uint64(poolId),
+//		TokenInDenom:  tokenInDenom,
+//		TokenOutDenom: tokenOutDenom,
+//	})
+//	if err != nil {
+//		return 0, err
+//	}
+//
+//	spotPriceString := res.GetSpotPrice()
+//	spotPrice, _ := strconv.ParseFloat(spotPriceString, 64)
+//	return spotPrice, nil
+//}
 
 func QueryEpochProvision(epoch epoch.EpochInfo) cosmostypes.Dec {
-	return cosmostypes.NewDec(821917808219.178082191780821917)
+	var epochProvision int64 = int64(math.Round(821917808219.178082191780821917))
+	return cosmostypes.NewDec(epochProvision)
 }
 
 
@@ -70,6 +74,7 @@ type Pool struct {
 	APY float64
 }
 
+var samplePoolIncentive = 0.45;
 //Need different pool for each duration or to change this model. I think it makes sense for every time to have it's own pool.
 var pool = Pool{
 	TotalValueLocked: cosmostypes.NewDec(1004366),
@@ -82,7 +87,7 @@ var pool = Pool{
 	TotalWeight:    cosmostypes.NewDec(1004366),
 	Duration:       86400,
 	EpochIdentifier: "day",
-	PoolIncentives: cosmostypes.NewDec(0.45),
+	PoolIncentives: cosmostypes.NewDec(int64(float64(samplePoolIncentive) * float64(math.Pow(10, 18)))),
 	APY: 0,
 }
 /**
@@ -102,6 +107,13 @@ reduction_period_in_epochs: "365"
 
  */
 
+func toFloat64(d cosmostypes.Dec) float64 {
+	if value, err := strconv.ParseFloat(d.String(), 64); err != nil {
+		panic(err)
+	} else {
+		return value
+	}
+}
 
 func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 
@@ -110,7 +122,7 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 	var totalWeight = pool.TotalWeight;
 	//const gaugeId = this.getIncentivizedGaugeId(poolId, duration);
 	var potWeight = pool.PotWeight            //const potWeight = this.queryDistrInfo.getWeight(gaugeId); comes from distr_info.
-	var poolIncentives = pool.PoolIncentives; //See above, we need to get mint params.
+	//var poolIncentives = pool.PoolIncentives; //See above, we need to get mint params.
 	var oneYearMilliseconds int64 = 365*24*60*60*1000;
 	var epochIdentifier = "OK";
 	var epoch = getEpoch(epochIdentifier); // still not sure how to get a valid epochID
@@ -119,10 +131,10 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 	var numEpochPerYear = oneYearMilliseconds / epoch.Duration.Milliseconds();
 	var yearProvision cosmostypes.Dec = epochProvision.Mul(cosmostypes.NewDec(numEpochPerYear))
 
-	var yearProvisionToPots = yearProvision.Mul(poolIncentives)
+	//var yearProvisionToPots = yearProvision.Mul(poolIncentives)
 	var yearProvisionToPot = yearProvision.Mul(potWeight.Quo(totalWeight));
 	var APY = yearProvisionToPot.Quo(pool.TotalValueLocked)
-	pool.APY = APY.MustFloat64()
+	pool.APY = toFloat64(APY)
 	return pool;
 }
 
