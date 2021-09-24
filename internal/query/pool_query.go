@@ -67,6 +67,7 @@ type Pool struct {
 	EpochIdentifier string
 	TotalWeight cosmostypes.Dec// total weight of funds in poolId
 	Duration int64 // duration in seconds that funds are locked in pool.
+	APY float64
 }
 
 //Need different pool for each duration or to change this model. I think it makes sense for every time to have it's own pool.
@@ -82,6 +83,7 @@ var pool = Pool{
 	Duration:       86400,
 	EpochIdentifier: "day",
 	PoolIncentives: cosmostypes.NewDec(0.45),
+	APY: 0,
 }
 /**
  osmosisd q mint params --node http://95.217.196.54:2001
@@ -101,7 +103,7 @@ reduction_period_in_epochs: "365"
  */
 
 
-func CalculatePoolAPY(pool Pool, duration time.Duration) cosmostypes.Dec {
+func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 
 	// From API /osmosis/pool-incentives/v1beta1/incentivized_pools
 	// From API `/osmosis/pool-incentives/v1beta1/distr_info
@@ -120,7 +122,8 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) cosmostypes.Dec {
 	var yearProvisionToPots = yearProvision.Mul(poolIncentives)
 	var yearProvisionToPot = yearProvision.Mul(potWeight.Quo(totalWeight));
 	var APY = yearProvisionToPot.Quo(pool.TotalValueLocked)
-	return APY // this is a Dec, need to figure out if we should adjust type.
+	pool.APY = APY.MustFloat64()
+	return pool;
 }
 
 //const poolTVL = pool.computeTotalValueLocked(priceStore, fiatCurrency);
