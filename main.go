@@ -48,8 +48,9 @@ func BankSend(keyName string, sendOpt BankSendOption) error {
 	if err != nil {
 		return err
 	}
-	txf := NewFactoryCLI(initClientCtx)
-
+	txf := NewFactoryCLI(clientCtx)
+	// fmt.Printf("%+v\n", clientCtx)
+	// fmt.Printf("%+v\n", txf)
 	// build msg for tx
 	toAddr := sendOpt.ToAddr
 	fromAddr := clientCtx.GetFromAddress()
@@ -154,12 +155,12 @@ func SetBasicContextFromKeyName(clientCtx client.Context, keyName string) (clien
 	}
 
 	if clientCtx.ChainID == "" {
-		chainID := "osmosis-1"
+		chainID := "test"
 		clientCtx = clientCtx.WithChainID(chainID)
 	}
 	if clientCtx.Keyring == nil {
 		keyringBackend := "os"
-
+		fmt.Println("os")
 		if keyringBackend != "" {
 			kr, err := client.NewKeyringFromBackend(clientCtx, keyringBackend)
 			if err != nil {
@@ -209,24 +210,25 @@ func NewFactoryCLI(clientCtx client.Context) tx.Factory {
 	gasStr := ""
 	gasSetting, _ := flags.ParseGasSetting(gasStr)
 
-	transactionFactory.WithTxConfig(clientCtx.TxConfig)
-	transactionFactory.WithAccountRetriever(clientCtx.AccountRetriever)
-	transactionFactory.WithKeybase(clientCtx.Keyring)
-	transactionFactory.WithChainID(clientCtx.ChainID)
-	transactionFactory.WithGas(gasSetting.Gas)
-	transactionFactory.WithSimulateAndExecute(gasSetting.Simulate)
-	transactionFactory.WithAccountNumber(uint64(accNum))
-	transactionFactory.WithSequence(uint64(accSeq))
-	transactionFactory.WithTimeoutHeight(uint64(timeoutHeight))
-	transactionFactory.WithGasAdjustment(float64(gasAdj))
-	transactionFactory.WithMemo(memo)
-	transactionFactory.WithSignMode(signMode)
+	transactionFactory = transactionFactory.WithTxConfig(clientCtx.TxConfig)
+	transactionFactory = transactionFactory.WithAccountRetriever(clientCtx.AccountRetriever)
+	transactionFactory = transactionFactory.WithKeybase(clientCtx.Keyring)
+	transactionFactory = transactionFactory.WithChainID(clientCtx.ChainID)
+	transactionFactory = transactionFactory.WithGas(gasSetting.Gas)
+	transactionFactory = transactionFactory.WithSimulateAndExecute(gasSetting.Simulate)
+	transactionFactory = transactionFactory.WithAccountNumber(uint64(accNum))
+	transactionFactory = transactionFactory.WithSequence(uint64(accSeq))
+	transactionFactory = transactionFactory.WithTimeoutHeight(uint64(timeoutHeight))
+	transactionFactory = transactionFactory.WithGasAdjustment(float64(gasAdj))
+	transactionFactory = transactionFactory.WithMemo(memo)
+	transactionFactory = transactionFactory.WithSignMode(signMode)
 
 	feesStr := ""
 	transactionFactory = transactionFactory.WithFees(feesStr)
 
 	gasPricesStr := ""
 	transactionFactory = transactionFactory.WithGasPrices(gasPricesStr)
-
+	fmt.Printf("%+v\n", transactionFactory)
+	fmt.Printf("%+v\n", clientCtx)
 	return transactionFactory
 }
