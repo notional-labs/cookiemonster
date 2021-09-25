@@ -4,8 +4,6 @@ import (
 	"github.com/notional-labs/cookiemonster/internal/invest/phase"
 )
 
-
-
 type Fund struct {
 	KeyName         string
 	TransferTo      map[string]float32
@@ -17,7 +15,5 @@ type Fund struct {
 type Funds []Fund
 
 func (fund Fund) Invest() {
-	phase.ClaimRewardFromFund(fund)
 
 }
-

@@ -16,7 +16,6 @@ func DefaultNodeHome() string {
 	if err != nil {
 		panic(err)
 	}
-
 	DefaultNodeHome := filepath.Join(userHomeDir, ".osmosisd")
 	return DefaultNodeHome
 }
