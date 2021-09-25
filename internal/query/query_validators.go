@@ -41,9 +41,7 @@ func newSplitAndApply(
 
 
 func withdrawFromDelegation(clientCtx client.Context, commandCtx gocontext.Context, flags *pflag.FlagSet) error {
-
 	var delAddr sdk.AccAddress
-
 	// The transaction cannot be generated offline since it requires a query
 	// to get all the validators.
 	if clientCtx.Offline {
@@ -71,5 +69,6 @@ func withdrawFromDelegation(clientCtx client.Context, commandCtx gocontext.Conte
 	}
 
 	chunkSize :=  10   // cmd.Flags().GetInt(FlagMaxMessagesPerTx)
+	// This needs to be refactored, as it will prompt before confirmation.
 	return newSplitAndApply(tx.GenerateOrBroadcastTxCLI, clientCtx, flags, msgs, chunkSize)
 }
