@@ -1,10 +1,9 @@
 package transaction
 
 import (
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
+	"github.com/notional-labs/cookiemonster/internal/osmosis"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
 
@@ -26,9 +25,11 @@ func NewMsgJoinPool(fromAddr sdk.AccAddress, poolId uint64, shareOutAmount sdk.I
 
 func JoinPool(keyName string, poolOpt PoolOption) error {
 	// build tx context
-	cmd := gammcli.NewJoinPoolCmd()
-	clientCtx := client.GetClientContextFromCmd(cmd)
-	SetContextFromKeyName(clientCtx, keyName)
+	clientCtx := osmosis.DefaultClientCtx
+	clientCtx, err := ContextWithKeyName(clientCtx, keyName)
+	if err != nil {
+		return err
+	}
 	txf := NewFactoryCLI(clientCtx)
 
 	// build msg for tx

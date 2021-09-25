@@ -3,11 +3,10 @@ package transaction
 import (
 	"errors"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/notional-labs/cookiemonster/internal/osmosis"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
-	gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
 )
 
 type SwapOption struct {
@@ -57,9 +56,12 @@ func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.M
 
 func Swap(keyName string, swapOpt SwapOption) error {
 	// build tx context
-	cmd := gammcli.NewSwapExactAmountInCmd()
-	clientCtx := client.GetClientContextFromCmd(cmd)
-	SetContextFromKeyName(clientCtx, keyName)
+	clientCtx := osmosis.DefaultClientCtx
+	clientCtx, err := ContextWithKeyName(clientCtx, keyName)
+	if err != nil {
+		return err
+	}
+
 	txf := NewFactoryCLI(clientCtx)
 
 	// build msg for tx
