@@ -1,33 +1,22 @@
 package osmosis
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 var (
-	ChainId string
-	Node    string
+	ChainId = "test"
+	Node    = "http://0.0.0.0:26657"
+	HomeDir = DefaultNodeHome()
 )
 
-func GetChainIdAndNodeFromFile() error {
-	// Open our jsonFile
-	jsonFile, err := os.Open("../osmosis_config.json")
+func DefaultNodeHome() string {
+	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		return err
+		panic(err)
 	}
-	// if we os.Open returns an error then handle it
 
-	// defer the closing of our jsonFile so that we can parse it later on
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return err
-	}
-	var result map[string]string
-	json.Unmarshal([]byte(byteValue), &result)
-
-	ChainId = result["ChainId"]
-	Node = result["Node"]
-	return nil
+	DefaultNodeHome := filepath.Join(userHomeDir, ".osmosisd")
+	return DefaultNodeHome
 }
