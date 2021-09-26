@@ -1,11 +1,10 @@
 package transaction
 
 import (
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingcli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
 type DelegateOption struct {
@@ -16,10 +15,13 @@ type DelegateOption struct {
 
 func Delegate(keyName string, delOpt DelegateOption) error {
 	// build tx context
-	cmd := stakingcli.NewDelegateCmd()
-	clientCtx := client.GetClientContextFromCmd(cmd)
-	SetContextFromKeyName(clientCtx, keyName)
-	txf := NewFactoryCLI(clientCtx)
+	clientCtx := osmosis.DefaultClientCtx
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	if err != nil {
+		return err
+	}
+
+	txf := NewTxFactoryFromClientCtx(clientCtx)
 
 	// build msg for tx
 	valAddr := delOpt.ValAddr
@@ -38,10 +40,13 @@ type UndelegateOption struct {
 
 func Undelegate(keyName string, undelOpt UndelegateOption) error {
 	// build tx context
-	cmd := stakingcli.NewUnbondCmd()
-	clientCtx := client.GetClientContextFromCmd(cmd)
-	SetContextFromKeyName(clientCtx, keyName)
-	txf := NewFactoryCLI(clientCtx)
+	clientCtx := osmosis.DefaultClientCtx
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	if err != nil {
+		return err
+	}
+
+	txf := NewTxFactoryFromClientCtx(clientCtx)
 
 	// build msg for tx
 	valAddr := undelOpt.ValAddr

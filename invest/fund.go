@@ -1,10 +1,8 @@
 package invest
 
 import (
-	"github.com/notional-labs/cookiemonster/internal/invest/phase"
+	"github.com/notional-labs/cookiemonster/invest/phase"
 )
-
-
 
 type Fund struct {
 	KeyName         string
@@ -17,7 +15,5 @@ type Fund struct {
 type Funds []Fund
 
 func (fund Fund) Invest() {
-	phase.ClaimRewardFromFund(fund)
 
 }
-

@@ -1,8 +1,9 @@
 // step 1 is claim reward from staking
 package phase
+
 //
 //import (
-//	"internal/transaction"
+//	"transaction"
 //)
 //
 //func ClaimRewardFromFund(fund invest.Fund) error {
