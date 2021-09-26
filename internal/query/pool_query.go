@@ -1,62 +1,88 @@
 package main
 
 import (
-	cosmostypes "github.com/cosmos/cosmos-sdk/types"
-	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
+	"context"
+	"fmt"
 	"math"
 	"strconv"
-	"fmt"
 	"time"
+
+	cosmostypes "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/query"
+	"github.com/notional-labs/cookiemonster/internal/osmosis"
+	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
+	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
-//	//gammcli "github.com/osmosis-labs/osmosis/x/gamm/client/cli"
-//	//"github.com/osmosis-labs/osmosis/x/gamm/types"
-//	//"strconv"
-//	"time"
-//)
-//
-//func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
-//	cmd := gammcli.GetCmdSpotPrice()
-//	clientCtx, err := client.GetClientQueryContext(cmd)
-//	if err != nil {
-//		return 0, err
-//	}
-//	queryClient := types.NewQueryClient(clientCtx)
-//
-//	if err != nil {
-//		return 0, err
-//	}
-//
-//	res, err := queryClient.SpotPrice(cmd.Context(), &types.QuerySpotPriceRequest{
-//		PoolId:        uint64(poolId),
-//		TokenInDenom:  tokenInDenom,
-//		TokenOutDenom: tokenOutDenom,
-//	})
-//	if err != nil {
-//		return 0, err
-//	}
-//
-//	spotPriceString := res.GetSpotPrice()
-//	spotPrice, _ := strconv.ParseFloat(spotPriceString, 64)
-//	return spotPrice, nil
-//}
+
+func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
+	clientCtx := osmosis.DefaultClientCtx
+
+	queryClient := types.NewQueryClient(clientCtx)
+
+	res, err := queryClient.SpotPrice(context.Background(), &types.QuerySpotPriceRequest{
+		PoolId:        uint64(poolId),
+		TokenInDenom:  tokenInDenom,
+		TokenOutDenom: tokenOutDenom,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	spotPriceString := res.GetSpotPrice()
+	spotPrice, _ := strconv.ParseFloat(spotPriceString, 64)
+	return spotPrice, nil
+}
+
+func QueryPools() (*types.QueryPoolsResponse, error) {
+	clientCtx := osmosis.DefaultClientCtx
+
+	queryClient := types.NewQueryClient(clientCtx)
+
+	pageReq := &query.PageRequest{
+		Key:        []byte(""),
+		Offset:     uint64(0),
+		Limit:      uint64(100),
+		CountTotal: false,
+	}
+
+	res, err := queryClient.Pools(context.Background(), &types.QueryPoolsRequest{
+		Pagination: pageReq,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func QueryPoolId(poolId int) (*types.QueryPoolResponse, error) {
+	clientCtx := osmosis.DefaultClientCtx
+	queryClient := types.NewQueryClient(clientCtx)
+
+	res, err := queryClient.Pool(context.Background(), &types.QueryPoolRequest{
+		PoolId: uint64(poolId),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
 
 func QueryEpochProvision(epoch epoch.EpochInfo) cosmostypes.Dec {
 	//var epochProvision int64 = int64(821917808219178082191780821917) //from API: 821917808219.178082191780821917
 	return cosmostypes.MustNewDecFromStr("821917808219178082191780821917")
 }
 
-
 /**
 This is just test data.
- */
+*/
 func getEpoch(epochIdentifier string) epoch.EpochInfo {
 	return epoch.EpochInfo{
-		Identifier: "OK",
-		StartTime: time.Now(),
-		Duration: time.Duration(1234123413),
-		CurrentEpoch: int64(1234),
+		Identifier:            "OK",
+		StartTime:             time.Now(),
+		Duration:              time.Duration(1234123413),
+		CurrentEpoch:          int64(1234),
 		CurrentEpochStartTime: time.Now(),
-		EpochCountingStarted: true,
+		EpochCountingStarted:  true,
 	}
 }
 
@@ -65,34 +91,36 @@ type DistributionProportions struct {
 }
 
 type Pool struct {
-	TotalValueLocked cosmostypes.Dec // probably wrong.
+	TotalValueLocked        cosmostypes.Dec // probably wrong.
 	DistributionProportions DistributionProportions
-	GuageId   int32
-	PotWeight cosmostypes.Dec
-	PoolId    int32
-	PoolIncentives cosmostypes.Dec
-	EpochIdentifier string
-	TotalWeight cosmostypes.Dec// total weight of funds in poolId
-	Duration int64 // duration in seconds that funds are locked in pool.
-	APY float64
+	GuageId                 int32
+	PotWeight               cosmostypes.Dec
+	PoolId                  int32
+	PoolIncentives          cosmostypes.Dec
+	EpochIdentifier         string
+	TotalWeight             cosmostypes.Dec // total weight of funds in poolId
+	Duration                int64           // duration in seconds that funds are locked in pool.
+	APY                     float64
 }
 
-var samplePoolIncentive = 0.45;
+var samplePoolIncentive = 0.45
+
 //Need different pool for each duration or to change this model. I think it makes sense for every time to have it's own pool.
 var pool = Pool{
 	TotalValueLocked: cosmostypes.NewDec(1004366),
 	DistributionProportions: DistributionProportions{
 		PoolIncentives: cosmostypes.NewDec(1234),
 	},
-	PoolId:         1,
-	GuageId:        1,
-	PotWeight:      cosmostypes.NewDec(359034), //359034n
-	TotalWeight:    cosmostypes.NewDec(1004366),
-	Duration:       86400,
+	PoolId:          1,
+	GuageId:         1,
+	PotWeight:       cosmostypes.NewDec(359034), //359034n
+	TotalWeight:     cosmostypes.NewDec(1004366),
+	Duration:        86400,
 	EpochIdentifier: "day",
-	PoolIncentives: cosmostypes.NewDec(int64(float64(samplePoolIncentive) * float64(math.Pow(10, 18)))),
-	APY: 0,
+	PoolIncentives:  cosmostypes.NewDec(int64(float64(samplePoolIncentive) * float64(math.Pow(10, 18)))),
+	APY:             0,
 }
+
 /**
  osmosisd q mint params --node http://95.217.196.54:2001
 
@@ -108,7 +136,7 @@ minting_rewards_distribution_start_epoch: "1"
 reduction_factor: "0.666666666666666666"
 reduction_period_in_epochs: "365"
 
- */
+*/
 
 func toFloat64(d cosmostypes.Dec) float64 {
 	if value, err := strconv.ParseFloat(d.String(), 64); err != nil {
@@ -122,24 +150,24 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 
 	// From API /osmosis/pool-incentives/v1beta1/incentivized_pools
 	// From API `/osmosis/pool-incentives/v1beta1/distr_info
-	var totalWeight = pool.TotalWeight;
+	var totalWeight = pool.TotalWeight
 	//const gaugeId = this.getIncentivizedGaugeId(poolId, duration);
-	var potWeight = pool.PotWeight            //const potWeight = this.queryDistrInfo.getWeight(gaugeId); comes from distr_info.
+	var potWeight = pool.PotWeight //const potWeight = this.queryDistrInfo.getWeight(gaugeId); comes from distr_info.
 	//var poolIncentives = pool.PoolIncentives; //See above, we need to get mint params.
-	var oneYearMilliseconds int64 = 365*24*60*60*1000;
-	var epochIdentifier = "OK";
-	var epoch = getEpoch(epochIdentifier); // still not sure how to get a valid epochID
+	var oneYearMilliseconds int64 = 365 * 24 * 60 * 60 * 1000
+	var epochIdentifier = "OK"
+	var epoch = getEpoch(epochIdentifier) // still not sure how to get a valid epochID
 	// example epochProvision response: 821917808219.178082191780821917
-	var epochProvision = QueryEpochProvision(epoch); //osmosisd q mint epoch-provisions --node http://95.217.196.54:2001
+	var epochProvision = QueryEpochProvision(epoch) //osmosisd q mint epoch-provisions --node http://95.217.196.54:2001
 	fmt.Println("EpochProvision")
-	fmt.Println(epochProvision);
-	var numEpochPerYear = oneYearMilliseconds / epoch.Duration.Milliseconds();
+	fmt.Println(epochProvision)
+	var numEpochPerYear = oneYearMilliseconds / epoch.Duration.Milliseconds()
 	var yearProvision cosmostypes.Dec = epochProvision.Mul(cosmostypes.NewDec(numEpochPerYear))
 
 	//var yearProvisionToPots = yearProvision.Mul(poolIncentives)
-	var yearProvisionToPot = yearProvision.Mul(potWeight.Quo(totalWeight));
-	var poolTLV = pool.TotalValueLocked; // should be 821917808219178082191780821917n
-	fmt.Println("PoolTLV");
+	var yearProvisionToPot = yearProvision.Mul(potWeight.Quo(totalWeight))
+	var poolTLV = pool.TotalValueLocked // should be 821917808219178082191780821917n
+	fmt.Println("PoolTLV")
 	fmt.Println(poolTLV)
 	//return new IntPretty(yearProvisionToPotPrice.quo(poolTVL.toDec()))
 	//.decreasePrecision(2)
@@ -149,7 +177,7 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 
 	pool.APY = toFloat64(APY)
 	fmt.Println(pool.APY)
-	return pool;
+	return pool
 }
 
 func main() {
@@ -334,4 +362,4 @@ incentivized_pools:
 - gauge_id: "602"
   lockable_duration: 1209600s
   pool_id: "197"
- */
+*/
