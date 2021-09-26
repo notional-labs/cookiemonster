@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	ChainId = "test"
-	Node    = "http://0.0.0.0:26657"
+	ChainId = "osmosis-1"
+	Node    = "http://95.217.196.54:2001"
 	HomeDir = DefaultNodeHome()
 )
 

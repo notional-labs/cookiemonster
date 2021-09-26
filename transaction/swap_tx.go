@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/notional-labs/cookiemonster/internal/osmosis"
+	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
 
@@ -41,7 +41,7 @@ func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.M
 		return nil, err
 	}
 
-	tokenIn := sdk.Coin{Denom: swapOpt.tokenInDenom, Amount: swapOpt.tokenOutMinAmt}
+	tokenIn := sdk.Coin{Denom: swapOpt.tokenInDenom, Amount: swapOpt.tokenInAmount}
 
 	tokenOutMinAmt := swapOpt.tokenOutMinAmt
 
@@ -57,12 +57,12 @@ func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.M
 func Swap(keyName string, swapOpt SwapOption) error {
 	// build tx context
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := ContextWithKeyName(clientCtx, keyName)
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return err
 	}
 
-	txf := NewFactoryCLI(clientCtx)
+	txf := NewTxFactoryFromClientCtx(clientCtx)
 
 	// build msg for tx
 	fromAddr := clientCtx.GetFromAddress()

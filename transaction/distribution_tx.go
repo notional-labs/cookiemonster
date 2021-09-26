@@ -9,13 +9,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/notional-labs/cookiemonster/internal/osmosis"
+	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
 func ClaimReward(keyName string) error {
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := ContextWithKeyName(clientCtx, keyName)
-
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	if err != nil {
+		return err
+	}
 	delAddr := clientCtx.GetFromAddress()
 
 	// The transaction cannot be generated offline since it requires a query
@@ -60,7 +62,7 @@ func newSplitAndApply(clientCtx client.Context, msgs []sdk.Msg, chunkSize int,
 ) error {
 
 	if chunkSize == 0 {
-		txf := NewFactoryCLI(clientCtx)
+		txf := NewTxFactoryFromClientCtx(clientCtx)
 		return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msgs...)
 	}
 
@@ -74,7 +76,7 @@ func newSplitAndApply(clientCtx client.Context, msgs []sdk.Msg, chunkSize int,
 		}
 
 		msgChunk := msgs[i:sliceEnd]
-		txf := NewFactoryCLI(clientCtx)
+		txf := NewTxFactoryFromClientCtx(clientCtx)
 		if err := tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msgChunk...); err != nil {
 			return err
 		}

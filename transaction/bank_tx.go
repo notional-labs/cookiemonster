@@ -1,7 +1,7 @@
 package transaction
 
 import (
-	"github.com/notional-labs/cookiemonster/internal/osmosis"
+	"github.com/notional-labs/cookiemonster/osmosis"
 
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,11 +17,11 @@ type BankSendOption struct {
 func BankSend(keyName string, sendOpt BankSendOption) error {
 	// build tx context
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := ContextWithKeyName(clientCtx, keyName)
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return err
 	}
-	txf := NewFactoryCLI(clientCtx)
+	txf := NewTxFactoryFromClientCtx(clientCtx)
 
 	// build msg for tx
 	toAddr := sendOpt.ToAddr

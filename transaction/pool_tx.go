@@ -3,7 +3,7 @@ package transaction
 import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/notional-labs/cookiemonster/internal/osmosis"
+	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
 
@@ -26,11 +26,11 @@ func NewMsgJoinPool(fromAddr sdk.AccAddress, poolId uint64, shareOutAmount sdk.I
 func JoinPool(keyName string, poolOpt PoolOption) error {
 	// build tx context
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := ContextWithKeyName(clientCtx, keyName)
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return err
 	}
-	txf := NewFactoryCLI(clientCtx)
+	txf := NewTxFactoryFromClientCtx(clientCtx)
 
 	// build msg for tx
 	fromAddr := clientCtx.FromAddress

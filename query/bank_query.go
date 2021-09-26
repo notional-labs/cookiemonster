@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/notional-labs/cookiemonster/internal/osmosis"
+	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
 func QueryBalances(keyName string) (sdk.Coins, error) {

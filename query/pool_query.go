@@ -9,7 +9,7 @@ import (
 
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/notional-labs/cookiemonster/internal/osmosis"
+	"github.com/notional-labs/cookiemonster/osmosis"
 	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
@@ -178,10 +178,6 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 	pool.APY = toFloat64(APY)
 	fmt.Println(pool.APY)
 	return pool
-}
-
-func main() {
-	CalculatePoolAPY(pool, time.Duration(100))
 }
 
 //const poolTVL = pool.computeTotalValueLocked(priceStore, fiatCurrency);

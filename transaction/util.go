@@ -10,7 +10,7 @@ import (
 )
 
 // set fields in client context with keyname
-func ContextWithKeyName(clientCtx client.Context, keyName string) (client.Context, error) {
+func SetKeyNameToContext(clientCtx client.Context, keyName string) (client.Context, error) {
 	from := keyName
 	fromAddr, fromName, _, err := client.GetFromFields(clientCtx.Keyring, from, clientCtx.GenerateOnly)
 	if err != nil {
@@ -21,8 +21,7 @@ func ContextWithKeyName(clientCtx client.Context, keyName string) (client.Contex
 	return clientCtx, nil
 }
 
-// NewFactoryCLI creates a new Factory.
-func NewFactoryCLI(clientCtx client.Context) tx.Factory {
+func NewTxFactoryFromClientCtx(clientCtx client.Context) tx.Factory {
 	transactionFactory := tx.Factory{}
 	// set fields from clientCtx
 	transactionFactory = transactionFactory.WithTxConfig(clientCtx.TxConfig).

@@ -1,7 +1,7 @@
 package invest
 
 import (
-	"github.com/notional-labs/cookiemonster/internal/invest/phase"
+	"github.com/notional-labs/cookiemonster/invest/phase"
 )
 
 type Fund struct {
