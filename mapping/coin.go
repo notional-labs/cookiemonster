@@ -2,7 +2,6 @@ package mapping
 
 import (
 	"math/big"
-	"strconv"
 
 	query "github.com/notional-labs/cookiemonster/query"
 )
@@ -20,19 +19,19 @@ func GetMapFromDenomsToPoolId() error {
 		return err
 	}
 
-	for _, pool := range pools.Pools {
-		poolId, err := strconv.Atoi(pool.id)
+	for _, pool := range pools {
+		poolId := int(pool.Id)
 		if err != nil {
 			return err
 		}
 
 		denom := ""
 		amount := big.NewInt(0)
-		for _, coin := range pool.poolAssets {
-			denom += coin.denom
-			amount += coin.amount
+		for _, coin := range pool.PoolAssets {
+			denom += coin.Token.Denom
+			amount.Add(amount, coin.Token.Amount.BigInt())
 		}
-		mapFromPoolIdToAmount[poolId] = amount
+		mapFromPoolIdToAmount[poolId] = *amount
 		if idOfPoolWithSameDenom, ok := mapFromDenomToPoolId[denom]; ok {
 			if mapFromPoolIdToAmount[poolId] > mapFromPoolIdToAmount[idOfPoolWithSameDenom] {
 				mapFromDenomToPoolId[denom] = poolId

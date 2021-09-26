@@ -34,7 +34,7 @@ func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (floa
 	return spotPrice, nil
 }
 
-func QueryPools() ([]*types.Pool, error) {
+func QueryPools() ([]types.Pool, error) {
 	clientCtx := osmosis.DefaultClientCtx
 	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, "april")
 	if err != nil {
@@ -53,17 +53,17 @@ func QueryPools() ([]*types.Pool, error) {
 	res, err := queryClient.Pools(context.Background(), &types.QueryPoolsRequest{
 		Pagination: pageReq,
 	})
-	pools := res.GetPools()
+	poolsAny := res.GetPools()
 	if err != nil {
 		return nil, err
 	}
-
-	for _, any := range pools {
+	var pools []types.Pool
+	for _, any := range poolsAny {
 		var pool types.Pool
 		pool.XXX_Unmarshal(any.Value)
-		fmt.Println(pool)
+		pools = append(pools, pool)
 	}
-	return nil, nil
+	return pools, nil
 }
 
 func QueryPoolId(poolId int) (*types.Pool, error) {
