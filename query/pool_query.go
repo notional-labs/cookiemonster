@@ -1,4 +1,4 @@
-package main
+package query
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/notional-labs/cookiemonster/osmosis"
+	"github.com/notional-labs/cookiemonster/transaction"
 	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
@@ -33,8 +34,12 @@ func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (floa
 	return spotPrice, nil
 }
 
-func QueryPools() (*types.QueryPoolsResponse, error) {
+func QueryPools() ([]*types.Pool, error) {
 	clientCtx := osmosis.DefaultClientCtx
+	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, "april")
+	if err != nil {
+		return nil, err
+	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 
@@ -48,23 +53,38 @@ func QueryPools() (*types.QueryPoolsResponse, error) {
 	res, err := queryClient.Pools(context.Background(), &types.QueryPoolsRequest{
 		Pagination: pageReq,
 	})
+	pools := res.GetPools()
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+
+	for _, any := range pools {
+		var pool types.Pool
+		pool.XXX_Unmarshal(any.Value)
+		fmt.Println(pool)
+	}
+	return nil, nil
 }
 
-func QueryPoolId(poolId int) (*types.QueryPoolResponse, error) {
+func QueryPoolId(poolId int) (*types.Pool, error) {
 	clientCtx := osmosis.DefaultClientCtx
+	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, "april")
+	if err != nil {
+		return nil, err
+	}
+
 	queryClient := types.NewQueryClient(clientCtx)
 
 	res, err := queryClient.Pool(context.Background(), &types.QueryPoolRequest{
 		PoolId: uint64(poolId),
 	})
+	var pool types.Pool
+	pool.XXX_Unmarshal(res.GetPool().Value)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+
+	return &pool, nil
 }
 
 func QueryEpochProvision(epoch epoch.EpochInfo) cosmostypes.Dec {
