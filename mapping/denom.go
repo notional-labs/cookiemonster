@@ -11,18 +11,18 @@ var (
 	GetMapFromDenomToIBCDenom map[string]string
 )
 
-func GetMapFromDenomsToPoolId() error {
+func GetMapFromDenomsToPoolId() map[string]int {
 	var mapFromDenomToPoolId map[string]int
-	var mapFromPoolIdToAmount map[int]big.Int
+	var mapFromPoolIdToAmount map[int]*big.Int
 	pools, err := query.QueryPools()
 	if err != nil {
-		return err
+		return nil
 	}
 
 	for _, pool := range pools {
 		poolId := int(pool.Id)
 		if err != nil {
-			return err
+			return nil
 		}
 
 		denom := ""
@@ -31,9 +31,9 @@ func GetMapFromDenomsToPoolId() error {
 			denom += coin.Token.Denom
 			amount.Add(amount, coin.Token.Amount.BigInt())
 		}
-		mapFromPoolIdToAmount[poolId] = *amount
+		mapFromPoolIdToAmount[poolId] = amount
 		if idOfPoolWithSameDenom, ok := mapFromDenomToPoolId[denom]; ok {
-			if mapFromPoolIdToAmount[poolId] > mapFromPoolIdToAmount[idOfPoolWithSameDenom] {
+			if mapFromPoolIdToAmount[poolId].Cmp(mapFromPoolIdToAmount[idOfPoolWithSameDenom]) == 1 {
 				mapFromDenomToPoolId[denom] = poolId
 			}
 		} else {
@@ -41,7 +41,7 @@ func GetMapFromDenomsToPoolId() error {
 		}
 	}
 
-	return nil
+	return mapFromDenomToPoolId
 }
 
 func GetMapFromDenomToIBCDenom() error {
