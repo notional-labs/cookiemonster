@@ -7,13 +7,12 @@ import (
 )
 
 var (
-	MapFromDenomToPoolId      map[string]string
-	GetMapFromDenomToIBCDenom map[string]string
+	MapFromDenomToPoolId = GetMapFromDenomsToPoolId()
 )
 
 func GetMapFromDenomsToPoolId() map[string]int {
-	var mapFromDenomToPoolId map[string]int
-	var mapFromPoolIdToAmount map[int]*big.Int
+	mapFromDenomToPoolId := map[string]int{}
+	mapFromPoolIdToAmount := map[int]*big.Int{}
 	pools, err := query.QueryPools()
 	if err != nil {
 		return nil
@@ -42,8 +41,4 @@ func GetMapFromDenomsToPoolId() map[string]int {
 	}
 
 	return mapFromDenomToPoolId
-}
-
-func GetMapFromDenomToIBCDenom() error {
-
 }

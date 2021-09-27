@@ -9,7 +9,7 @@
 {
     "KeyName": "pancreas",
     "PoolPercentage":0.75,
-    "PoolPtrategy":{"name":"custom","config":{"1":100}},
+    "PoolPtrategy":{"name":"custom","config":{"1":100},"config_type":"percentages"},
     "TransferTo":{"adam":"100000000000000uosmo"},
     "StakePercentage":0.25
 }

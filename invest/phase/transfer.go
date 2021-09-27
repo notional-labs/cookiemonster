@@ -3,10 +3,6 @@ package phase
 
 import "fmt"
 
-type PoolStrategy struct {
-
-}
-
 func doThings() {
-	fmt.Println("I ran");
+	fmt.Println("I ran")
 }

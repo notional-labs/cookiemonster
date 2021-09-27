@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/notional-labs/cookiemonster/query"
 )
 
 func main() {
@@ -14,9 +12,9 @@ func main() {
 	// 	Amount: sdk.NewInt(12),
 	// }
 	// fmt.Println(transaction.BankSend("april", bankSendOpt))
-	pool, err := query.QueryPools()
-	if err != nil {
-		fmt.Println(err, "fsasdfa")
-	}
-	fmt.Println(pool)
+	// pool, err := query.QuerySpotPrice()
+	// if err != nil {
+	// 	fmt.Println(err, "fsasdfa")
+	// }
+	fmt.Println(10e2)
 }

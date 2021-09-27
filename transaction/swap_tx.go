@@ -2,20 +2,21 @@ package transaction
 
 import (
 	"errors"
+	"os"
 
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
+	"gopkg.in/yaml.v3"
 )
 
 type SwapOption struct {
 	SwapRoutePoolIds []int
 	SwapRouteDenoms  []string
-	Route            []types.SwapAmountInRoute
-	tokenInAmount    sdk.Int
-	tokenInDenom     string
-	tokenOutMinAmt   sdk.Int
+	TokenInAmount    sdk.Int
+	TokenInDenom     string
+	TokenOutMinAmt   sdk.Int
 }
 
 func swapAmountInRoutes(swapOpt SwapOption) ([]types.SwapAmountInRoute, error) {
@@ -41,9 +42,9 @@ func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.M
 		return nil, err
 	}
 
-	tokenIn := sdk.Coin{Denom: swapOpt.tokenInDenom, Amount: swapOpt.tokenInAmount}
+	tokenIn := sdk.Coin{Denom: swapOpt.TokenInDenom, Amount: swapOpt.TokenInAmount}
 
-	tokenOutMinAmt := swapOpt.tokenOutMinAmt
+	tokenOutMinAmt := swapOpt.TokenOutMinAmt
 
 	msg := &types.MsgSwapExactAmountIn{
 		Sender:            fromAddr.String(),
@@ -72,4 +73,35 @@ func Swap(keyName string, swapOpt SwapOption) error {
 	}
 
 	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
+}
+
+type SwapTx struct {
+	KeyName string
+	SwapOpt SwapOption
+}
+
+func (swapTx SwapTx) Execute() error {
+
+	keyName := swapTx.KeyName
+	swapOpt := swapTx.SwapOpt
+	err := Swap(keyName, swapOpt)
+	return err
+}
+
+func (swapTx SwapTx) Report() {
+
+	swapOpt := swapTx.SwapOpt
+	keyName := swapTx.KeyName
+
+	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+
+	f.WriteString("\nSwap Transaction\n")
+	f.WriteString("\nKeyname: " + keyName + "\n")
+	f.WriteString("\nSwap Option\n\n")
+
+	txData, _ := yaml.Marshal(swapOpt)
+	_, _ = f.Write(txData)
+	f.WriteString(transactionSeperator)
+
+	f.Close()
 }

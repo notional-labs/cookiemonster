@@ -3,6 +3,7 @@ package transaction
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -55,7 +56,6 @@ func ClaimReward(keyName string) error {
 	}
 
 	return newSplitAndApply(clientCtx, msgs, chunkSize)
-
 }
 
 func newSplitAndApply(clientCtx client.Context, msgs []sdk.Msg, chunkSize int,
@@ -82,4 +82,27 @@ func newSplitAndApply(clientCtx client.Context, msgs []sdk.Msg, chunkSize int,
 		}
 	}
 	return nil
+}
+
+type ClaimTx struct {
+	KeyName string
+}
+
+func (claimTx ClaimTx) Execute() error {
+	keyName := claimTx.KeyName
+	err := ClaimReward(keyName)
+	return err
+}
+
+func (claimTx ClaimTx) Report() {
+
+	keyName := claimTx.KeyName
+
+	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+
+	f.WriteString("\nClaim Reward Transaction\n")
+	f.WriteString("\nKeyname: " + keyName + "\n")
+	f.WriteString(transactionSeperator)
+
+	f.Close()
 }
