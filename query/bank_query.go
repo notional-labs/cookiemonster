@@ -37,7 +37,7 @@ func QueryBalances(keyName string) (sdk.Coins, error) {
 	return res.Balances, nil
 }
 
-func QueryOsmoBalance(keyName string) (*big.Int, error) {
+func QueryUosmoBalance(keyName string) (*big.Int, error) {
 	// build context
 	clientCtx := osmosis.DefaultClientCtx
 	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, keyName)

@@ -8,3 +8,5 @@ type Transaction interface {
 	Execute() error
 	Report()
 }
+
+type Transactions []Transaction
