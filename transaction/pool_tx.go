@@ -76,3 +76,65 @@ func (joinPoolTx JoinPoolTx) Report() {
 
 	f.Close()
 }
+
+type SwapAndPoolOption struct {
+	PoolId            uint64
+	TokenInAmount     sdk.Int
+	TokenInDenom      string
+	ShareOutMinAmount sdk.Int
+}
+
+func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption) error {
+	// build tx context
+	clientCtx := osmosis.DefaultClientCtx
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	if err != nil {
+		return err
+	}
+	txf := NewTxFactoryFromClientCtx(clientCtx)
+
+	// build msg for tx
+	fromAddr := clientCtx.FromAddress
+	poolId := swapAndPoolOption.PoolId
+	shareOutMinAmount := swapAndPoolOption.ShareOutMinAmount
+	tokenIn := sdk.Coin{Amount: swapAndPoolOption.TokenInAmount, Denom: swapAndPoolOption.TokenInDenom}
+
+	msg := &types.MsgJoinSwapExternAmountIn{
+		Sender:            fromAddr.String(),
+		PoolId:            poolId,
+		TokenIn:           tokenIn,
+		ShareOutMinAmount: shareOutMinAmount,
+	}
+	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
+}
+
+type SwapAndPoolTx struct {
+	KeyName        string
+	SwapAndPoolOpt SwapAndPoolOption
+}
+
+func (swapAndPoolTx SwapAndPoolTx) Execute() error {
+
+	keyName := swapAndPoolTx.KeyName
+	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
+	err := SwapAndPool(keyName, swapAndPoolOpt)
+	return err
+}
+
+func (swapAndPoolTx SwapAndPoolTx) Report() {
+
+	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
+	keyName := swapAndPoolTx.KeyName
+
+	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+
+	f.WriteString("\nJoin Pool Transaction\n")
+	f.WriteString("\nKeyname: " + keyName + "\n")
+	f.WriteString("\nJoin Pool Option\n\n")
+
+	txData, _ := yaml.Marshal(swapAndPoolOpt)
+	_, _ = f.Write(txData)
+	f.WriteString(transactionSeperator)
+
+	f.Close()
+}
