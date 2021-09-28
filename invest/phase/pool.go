@@ -25,16 +25,16 @@ type PoolStrategy struct {
 type MapFromPoolToAmount map[int]*big.Int
 
 // create txs from a strategy
-func (poolStrategy PoolStrategy) GetTransactions(keyName string) (transaction.Transactions, error) {
-	mapFromPoolToAmount, err := poolStrategy.GetMapFromPoolToAmount(keyName)
+func (poolStrategy PoolStrategy) MakeTransactions(keyName string) (transaction.Transactions, error) {
+	mapFromPoolToAmount, err := poolStrategy.MakeMapFromPoolToAmount(keyName)
 	if err != nil {
 		return nil, err
 	}
-	BatchPool(mapFromPoolToAmount, keyName)
+	MakeTransactionsFrom(mapFromPoolToAmount, keyName)
 
 }
 
-func (poolStrategy PoolStrategy) GetMapFromPoolToAmount(keyName string) (MapFromPoolToAmount, error) {
+func (poolStrategy PoolStrategy) MakeMapFromPoolToAmount(keyName string) (MapFromPoolToAmount, error) {
 	uosmoBalance, err := query.QueryUosmoBalance(keyName)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (poolStrategy PoolStrategy) GetMapFromPoolToAmount(keyName string) (MapFrom
 	}
 }
 
-func BatchPool(mapFromPoolToAmount MapFromPoolToAmount, keyName string) ([]transaction.Transaction, error) {
+func MakeTransactionsFrom(mapFromPoolToAmount MapFromPoolToAmount, keyName string) (transaction.Transactions, error) {
 	transactions := transaction.Transactions{}
 	for poolId, poolAmount := range mapFromPoolToAmount {
 		swapTx, err := SwapHalfAmountToPool(poolId, poolAmount, keyName)
@@ -84,11 +84,13 @@ func BatchPool(mapFromPoolToAmount MapFromPoolToAmount, keyName string) ([]trans
 		}
 		transactions = append(transactions, swapTx)
 
+
+		
 	}
 }
 
 // pool using the specified amount of osmo
-func Pool(poolId int, uosmoAmount *big.Int, keyName string) {
+func MakeTransactionsForPool(poolId int, uosmoAmount *big.Int, keyName string) {
 
 }
 
@@ -132,6 +134,10 @@ func SwapHalfAmountToPool(poolId int, uosmoAmount *big.Int, keyName string) (tra
 	}
 	return swapTx, nil
 }
+
+func MakePoolTx(poolId int, uosmoAmount *big.Int, keyName)
+
+
 
 func BigIntMulFloat(x *big.Int, y float64) *big.Int {
 	yDec, _ := sdk.NewDecFromStr(strconv.FormatFloat(y, 'f', -1, 64))
