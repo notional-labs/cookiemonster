@@ -74,7 +74,7 @@ func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string, to
 	}
 }
 
-func loadPoolStrategy(fileLocation string) (*PoolStrategy, error) {
+func loadPoolStrategy(fileLocation string) (*[]PoolStrategy, error) {
 	file, err := os.Open(fileLocation)
 	if (err!=nil) {
 		fmt.Println("Unable to open json at "+fileLocation)
@@ -83,13 +83,13 @@ func loadPoolStrategy(fileLocation string) (*PoolStrategy, error) {
 	reader := bufio.NewReader(file)
 	jsonData, _ := ioutil.ReadAll(reader)
 
-	var strategy PoolStrategy
-	jsonErr := json.Unmarshal(jsonData, &strategy)
+	var strategies []PoolStrategy;
+	jsonErr := json.Unmarshal(jsonData, &strategies)
 	if jsonErr != nil {
 		fmt.Println("Unable to map JSON at "+fileLocation+" to a PoolStrategy");
 		return nil, jsonErr
 	}
-	return &strategy, nil
+	return &strategies, nil
 }
 
 func NewSwapAndPoolTransaction(poolId int, uosmoAmount sdk.Int, keyName string) transaction.Transaction {
