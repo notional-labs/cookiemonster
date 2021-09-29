@@ -2,8 +2,12 @@
 package phase
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/big"
+	"os"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -26,6 +30,7 @@ type MapFromPoolToAmount map[int]*big.Int
 
 // create txs from a strategy
 func (poolStrategy PoolStrategy) MakeTransactions(keyName string) (transaction.Transactions, error) {
+	// is a map of poolid to a bigint.
 	mapFromPoolToAmount, err := poolStrategy.MakeMapFromPoolToAmount(keyName)
 	if err != nil {
 		return nil, err
@@ -83,15 +88,30 @@ func MakeTransactionsFrom(mapFromPoolToAmount MapFromPoolToAmount, keyName strin
 			return nil, err
 		}
 		transactions = append(transactions, swapTx)
-
-
-		
 	}
 }
 
 // pool using the specified amount of osmo
 func MakeTransactionsForPool(poolId int, uosmoAmount *big.Int, keyName string) {
 
+}
+
+func loadPoolStrategy(fileLocation string) (*PoolStrategy, error) {
+	file, err := os.Open(fileLocation)
+	if (err!=nil) {
+		fmt.Println("Unable to open json at "+fileLocation)
+		return nil, err
+	}
+ 	reader := bufio.NewReader(file)
+	jsonData, _ := ioutil.ReadAll(reader)
+
+	var strategy PoolStrategy
+	jsonErr := json.Unmarshal(jsonData, &strategy)
+	if jsonErr != nil {
+		fmt.Println("Unable to map JSON at "+fileLocation+" to a PoolStrategy");
+		return nil, jsonErr
+	}
+	return &strategy, nil
 }
 
 // swap half the osmo amount to aonther token in the pool of specified id
@@ -136,6 +156,7 @@ func SwapHalfAmountToPool(poolId int, uosmoAmount *big.Int, keyName string) (tra
 }
 
 func MakePoolTx(poolId int, uosmoAmount *big.Int, keyName)
+
 
 
 
