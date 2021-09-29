@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	// "github.com/notional-labs/cookiemonster/osmosis"
+	// "github.com/notional-labs/cookiemonster/transaction"
 )
 
 func main() {
@@ -17,4 +19,10 @@ func main() {
 	// 	fmt.Println(err, "fsasdfa")
 	// }
 	fmt.Println(10e2)
+
+	err1 := fmt.Errorf("test").Error()
+	err2 := fmt.Errorf("test").Error()
+	fmt.Println(err1 == err2)
+	// txf := transaction.NewTxFactoryFromClientCtx(osmosis.DefaultClientCtx)
+	// fmt.Printf("%+v\n", txf)
 }

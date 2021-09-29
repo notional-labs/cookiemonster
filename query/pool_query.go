@@ -10,7 +10,6 @@ import (
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/notional-labs/cookiemonster/osmosis"
-	"github.com/notional-labs/cookiemonster/transaction"
 	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
@@ -36,10 +35,6 @@ func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (floa
 
 func QueryPools() ([]types.Pool, error) {
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, "april")
-	if err != nil {
-		return nil, err
-	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 
@@ -68,10 +63,6 @@ func QueryPools() ([]types.Pool, error) {
 
 func QueryPoolId(poolId int) (*types.Pool, error) {
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, "april")
-	if err != nil {
-		return nil, err
-	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 

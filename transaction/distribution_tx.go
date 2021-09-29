@@ -5,32 +5,30 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
+	"github.com/notional-labs/cookiemonster/query"
 )
 
-func ClaimReward(keyName string) error {
+func ClaimReward(keyName string, gas uint64) (string, error) {
 	clientCtx := osmosis.DefaultClientCtx
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	delAddr := clientCtx.GetFromAddress()
 
 	// The transaction cannot be generated offline since it requires a query
 	// to get all the validators.
 	if clientCtx.Offline {
-		return fmt.Errorf("cannot generate tx in offline mode")
+		return "", fmt.Errorf("cannot generate tx in offline mode")
 	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 	delValsRes, err := queryClient.DelegatorValidators(context.Background(), &types.QueryDelegatorValidatorsRequest{DelegatorAddress: delAddr.String()})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	validators := delValsRes.Validators
@@ -39,59 +37,60 @@ func ClaimReward(keyName string) error {
 	for _, valAddr := range validators {
 		val, err := sdk.ValAddressFromBech32(valAddr)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		msg := types.NewMsgWithdrawDelegatorReward(delAddr, val)
 		if err := msg.ValidateBasic(); err != nil {
-			return err
+			return "", err
 		}
 		msgs = append(msgs, msg)
 	}
-
-	chunkSize := 0
-	if clientCtx.BroadcastMode != flags.BroadcastBlock && chunkSize > 0 {
-		return fmt.Errorf("cannot use broadcast mode %[1]s with max-msgs != 0",
-			clientCtx.BroadcastMode)
+	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
+	code, txHash, err := BroadcastTx(clientCtx, txf, msgs...)
+	if err != nil {
+		return txHash, err
 	}
-
-	return newSplitAndApply(clientCtx, msgs, chunkSize)
-}
-
-func newSplitAndApply(clientCtx client.Context, msgs []sdk.Msg, chunkSize int,
-) error {
-
-	if chunkSize == 0 {
-		txf := NewTxFactoryFromClientCtx(clientCtx)
-		return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msgs...)
+	if code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-
-	// split messages into slices of length chunkSize
-	totalMessages := len(msgs)
-	for i := 0; i < len(msgs); i += chunkSize {
-
-		sliceEnd := i + chunkSize
-		if sliceEnd > totalMessages {
-			sliceEnd = totalMessages
-		}
-
-		msgChunk := msgs[i:sliceEnd]
-		txf := NewTxFactoryFromClientCtx(clientCtx)
-		if err := tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msgChunk...); err != nil {
-			return err
-		}
+	broadcastedTx, err := query.QueryTx(txHash)
+	if err != nil {
+		return txHash, err
 	}
-	return nil
+	if broadcastedTx.Code == 11 {
+		return txHash, fmt.Errorf("insufficient fee")
+
+	}
+	if broadcastedTx.Code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
+	}
+	return txHash, nil
+
 }
 
 type ClaimTx struct {
 	KeyName string
 }
 
-func (claimTx ClaimTx) Execute() error {
+func (claimTx ClaimTx) Execute() (string, error) {
 	keyName := claimTx.KeyName
-	err := ClaimReward(keyName)
-	return err
+	gas := 200000
+	var err error
+	var txHash string
+
+	// if tx failed because of insufficient fee , retry
+	for i := 0; i < 4; i++ {
+		txHash, err = ClaimReward(keyName, uint64(gas))
+		if err == nil {
+			return txHash, nil
+		}
+		if err.Error() != "insufficient fee" {
+			return txHash, err
+		}
+		gas += 300000
+	}
+	return txHash, err
 }
 
 func (claimTx ClaimTx) Report() {
@@ -105,4 +104,14 @@ func (claimTx ClaimTx) Report() {
 	f.WriteString(transactionSeperator)
 
 	f.Close()
+}
+
+func (claimTx ClaimTx) Prompt() {
+	keyName := claimTx.KeyName
+
+	fmt.Print("\nClaim Reward Transaction\n")
+	fmt.Print("\nKeyname: " + keyName + "\n")
+	fmt.Print("\nClaim Reward Option\n\n")
+	fmt.Print(transactionSeperator)
+
 }

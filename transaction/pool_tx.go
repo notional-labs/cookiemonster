@@ -1,11 +1,12 @@
 package transaction
 
 import (
+	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
+	"github.com/notional-labs/cookiemonster/query"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 	"gopkg.in/yaml.v3"
 )
@@ -26,14 +27,14 @@ func NewMsgJoinPool(fromAddr sdk.AccAddress, poolId uint64, shareOutAmount sdk.I
 	return msg
 }
 
-func JoinPool(keyName string, joinPoolOpt JoinPoolOption) error {
+func JoinPool(keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, error) {
 	// build tx context
 	clientCtx := osmosis.DefaultClientCtx
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
-		return err
+		return "", err
 	}
-	txf := NewTxFactoryFromClientCtx(clientCtx)
+	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
 
 	// build msg for tx
 	fromAddr := clientCtx.FromAddress
@@ -42,8 +43,25 @@ func JoinPool(keyName string, joinPoolOpt JoinPoolOption) error {
 	maxAmountsIn := joinPoolOpt.MaxAmountsIn
 
 	msg := NewMsgJoinPool(fromAddr, poolId, shareOutAmount, maxAmountsIn)
+	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+	if err != nil {
+		return txHash, err
+	}
+	if code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
+	}
+	broadcastedTx, err := query.QueryTx(txHash)
+	if err != nil {
+		return txHash, err
+	}
+	if broadcastedTx.Code == 11 {
+		return txHash, fmt.Errorf("insufficient fee")
 
-	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
+	}
+	if broadcastedTx.Code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
+	}
+	return txHash, nil
 }
 
 type JoinPoolTx struct {
@@ -51,12 +69,27 @@ type JoinPoolTx struct {
 	JoinPoolOpt JoinPoolOption
 }
 
-func (joinPoolTx JoinPoolTx) Execute() error {
+func (joinPoolTx JoinPoolTx) Execute() (string, error) {
 
 	keyName := joinPoolTx.KeyName
 	joinPoolOpt := joinPoolTx.JoinPoolOpt
-	err := JoinPool(keyName, joinPoolOpt)
-	return err
+
+	gas := 200000
+	var err error
+	var txHash string
+
+	// if tx failed because of insufficient fee , retry
+	for i := 0; i < 4; i++ {
+		txHash, err = JoinPool(keyName, joinPoolOpt, uint64(gas))
+		if err == nil {
+			return txHash, nil
+		}
+		if err.Error() != "insufficient fee" {
+			return txHash, err
+		}
+		gas += 300000
+	}
+	return txHash, err
 }
 
 func (joinPoolTx JoinPoolTx) Report() {
@@ -77,6 +110,17 @@ func (joinPoolTx JoinPoolTx) Report() {
 	f.Close()
 }
 
+func (joinPoolTx JoinPoolTx) Prompt() {
+	joinPoolOpt := joinPoolTx.JoinPoolOpt
+	keyName := joinPoolTx.KeyName
+
+	fmt.Print("\nJoin Pool Transaction\n")
+	fmt.Print("\nKeyname: " + keyName + "\n")
+	fmt.Print("\nJoin Pool Option\n\n")
+	fmt.Printf("%+v\n", joinPoolOpt)
+	fmt.Print(transactionSeperator)
+}
+
 type SwapAndPoolOption struct {
 	PoolId            uint64
 	TokenInAmount     sdk.Int
@@ -84,14 +128,14 @@ type SwapAndPoolOption struct {
 	ShareOutMinAmount sdk.Int
 }
 
-func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption) error {
+func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64) (string, error) {
 	// build tx context
 	clientCtx := osmosis.DefaultClientCtx
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
-		return err
+		return "", err
 	}
-	txf := NewTxFactoryFromClientCtx(clientCtx)
+	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
 
 	// build msg for tx
 	fromAddr := clientCtx.FromAddress
@@ -105,7 +149,25 @@ func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption) error {
 		TokenIn:           tokenIn,
 		ShareOutMinAmount: shareOutMinAmount,
 	}
-	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
+	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+	if err != nil {
+		return txHash, err
+	}
+	if code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
+	}
+	broadcastedTx, err := query.QueryTx(txHash)
+	if err != nil {
+		return txHash, err
+	}
+	if broadcastedTx.Code == 11 {
+		return txHash, fmt.Errorf("insufficient fee")
+
+	}
+	if broadcastedTx.Code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
+	}
+	return txHash, nil
 }
 
 type SwapAndPoolTx struct {
@@ -113,12 +175,26 @@ type SwapAndPoolTx struct {
 	SwapAndPoolOpt SwapAndPoolOption
 }
 
-func (swapAndPoolTx SwapAndPoolTx) Execute() error {
+func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
 
 	keyName := swapAndPoolTx.KeyName
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
-	err := SwapAndPool(keyName, swapAndPoolOpt)
-	return err
+	gas := 200000
+	var err error
+	var txHash string
+
+	// if tx failed because of insufficient fee , retry
+	for i := 0; i < 4; i++ {
+		txHash, err = SwapAndPool(keyName, swapAndPoolOpt, uint64(gas))
+		if err == nil {
+			return txHash, nil
+		}
+		if err.Error() != "insufficient fee" {
+			return txHash, err
+		}
+		gas += 300000
+	}
+	return txHash, err
 }
 
 func (swapAndPoolTx SwapAndPoolTx) Report() {
@@ -137,4 +213,16 @@ func (swapAndPoolTx SwapAndPoolTx) Report() {
 	f.WriteString(transactionSeperator)
 
 	f.Close()
+}
+
+func (swapAndPoolTx SwapAndPoolTx) Prompt() {
+	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
+	keyName := swapAndPoolTx.KeyName
+
+	fmt.Print("\nSwap And Pool Transaction\n")
+	fmt.Print("\nKeyname: " + keyName + "\n")
+	fmt.Print("\nSwap And Pool Option\n\n")
+	fmt.Printf("%+v\n", swapAndPoolOpt)
+	fmt.Print(transactionSeperator)
+
 }
