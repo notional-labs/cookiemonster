@@ -2,8 +2,12 @@
 package phase
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/big"
+	"os"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -68,6 +72,24 @@ func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string, to
 		return nil, fmt.Errorf("unknown config denom")
 
 	}
+}
+
+func loadPoolStrategy(fileLocation string) (*PoolStrategy, error) {
+	file, err := os.Open(fileLocation)
+	if (err!=nil) {
+		fmt.Println("Unable to open json at "+fileLocation)
+		return nil, err
+	}
+	reader := bufio.NewReader(file)
+	jsonData, _ := ioutil.ReadAll(reader)
+
+	var strategy PoolStrategy
+	jsonErr := json.Unmarshal(jsonData, &strategy)
+	if jsonErr != nil {
+		fmt.Println("Unable to map JSON at "+fileLocation+" to a PoolStrategy");
+		return nil, jsonErr
+	}
+	return &strategy, nil
 }
 
 func NewSwapAndPoolTransaction(poolId int, uosmoAmount sdk.Int, keyName string) transaction.Transaction {
