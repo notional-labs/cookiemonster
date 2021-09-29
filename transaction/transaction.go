@@ -6,7 +6,7 @@ var (
 )
 
 type Transaction interface {
-	Execute()
+	Execute() (string, error)
 	Report()
 	Prompt()
 }
