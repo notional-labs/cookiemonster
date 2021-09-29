@@ -2,24 +2,33 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/osmosis-labs/osmosis/app/params"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "schlepp",
-	Short: "Gets rewards and puts them into a reward pool.",
-	Long:  `You knowz it.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	Run: RunSchlepp,
+
+func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
+
+	rootCmd := &cobra.Command{
+		Use:   "schlepp",
+		Short: "Gets rewards and puts them into a reward pool.",
+		Long:  `You knowz it.`,
+		// Uncomment the following line if your bare application
+		// has an action associated with it:
+		Run: RunSchlepp,
+	}
+
 }
 
 func RunSchlepp(cmd *cobra.Command, args []string) {
+	strategyPath := args[0]
+
 	// pull from staking
 	// stick in pool.
 }

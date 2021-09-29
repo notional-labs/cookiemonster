@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/notional-labs/cookiemonster/query"
 	"github.com/notional-labs/cookiemonster/transaction"
 )
 
@@ -21,8 +20,8 @@ type PoolStrategy struct {
 type MapFromPoolToUosmoAmount map[int]*big.Int
 
 // create txs from a strategy
-func (poolStrategy PoolStrategy) MakeTransactions(keyName string) transaction.Transactions {
-	mapFromPoolToUosmoAmount, err := poolStrategy.MakeMapFromPoolToUosmoAmount(keyName)
+func (poolStrategy PoolStrategy) MakeTransactions(keyName string, totalPoolAmount *big.Int) transaction.Transactions {
+	mapFromPoolToUosmoAmount, err := poolStrategy.MakeMapFromPoolToUosmoAmount(keyName, totalPoolAmount)
 	if err != nil {
 		return nil
 	}
@@ -34,11 +33,7 @@ func (poolStrategy PoolStrategy) MakeTransactions(keyName string) transaction.Tr
 	return transactionBatch
 }
 
-func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string) (MapFromPoolToUosmoAmount, error) {
-	uosmoBalance, err := query.QueryUosmoBalance(keyName)
-	if err != nil {
-		return nil, err
-	}
+func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string, totalPoolAmount *big.Int) (MapFromPoolToUosmoAmount, error) {
 	if poolStrategy.Name == "greedy" {
 		fmt.Println("do something")
 	}
@@ -51,7 +46,7 @@ func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string) (M
 				return nil, err
 			}
 			poolAmountUosmo := &big.Int{}
-			poolAmountUosmo.Mul(big.NewInt(int64(percentage)), uosmoBalance)
+			poolAmountUosmo.Mul(big.NewInt(int64(percentage)), totalPoolAmount)
 			poolAmountUosmo.Div(poolAmountUosmo, big.NewInt(100))
 			mapFromPoolToUosmoAmount[poolId] = poolAmountUosmo
 		}

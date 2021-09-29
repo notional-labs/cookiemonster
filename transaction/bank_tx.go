@@ -1,12 +1,13 @@
 package transaction
 
 import (
+	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
+	"github.com/notional-labs/cookiemonster/query"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,14 +17,14 @@ type BankSendOption struct {
 	Amount sdk.Int
 }
 
-func BankSend(keyName string, bankSendOpt BankSendOption) error {
+func BankSend(keyName string, bankSendOpt BankSendOption, gas uint64) (string, error) {
 	// build tx context
 	clientCtx := osmosis.DefaultClientCtx
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
-		return err
+		return "", err
 	}
-	txf := NewTxFactoryFromClientCtx(clientCtx)
+	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
 
 	// build msg for tx
 	toAddr := bankSendOpt.ToAddr
@@ -32,7 +33,25 @@ func BankSend(keyName string, bankSendOpt BankSendOption) error {
 	coins := sdk.Coins([]sdk.Coin{coin})
 	msg := types.NewMsgSend(fromAddr, toAddr, coins)
 
-	return tx.GenerateOrBroadcastTxWithFactory(clientCtx, txf, msg)
+	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+	if err != nil {
+		return txHash, err
+	}
+	if code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
+	}
+	broadcastedTx, err := query.QueryTx(txHash)
+	if err != nil {
+		return txHash, err
+	}
+	if broadcastedTx.Code == 11 {
+		return txHash, fmt.Errorf("insufficient fee")
+
+	}
+	if broadcastedTx.Code != 0 {
+		return txHash, fmt.Errorf("tx failed with code %d", code)
+	}
+	return txHash, nil
 }
 
 type BankSendTx struct {
@@ -40,11 +59,25 @@ type BankSendTx struct {
 	KeyName     string
 }
 
-func (bankSendTx BankSendTx) Execute() error {
+func (bankSendTx BankSendTx) Execute() (string, error) {
 	keyName := bankSendTx.KeyName
 	bankSendOpt := bankSendTx.BankSendOpt
-	err := BankSend(keyName, bankSendOpt)
-	return err
+	gas := 200000
+	var err error
+	var txHash string
+
+	// if tx failed because of insufficient fee , retry
+	for i := 0; i < 4; i++ {
+		txHash, err = BankSend(keyName, bankSendOpt, uint64(gas))
+		if err == nil {
+			return txHash, nil
+		}
+		if err.Error() != "insufficient fee" {
+			return txHash, err
+		}
+		gas += 300000
+	}
+	return txHash, err
 }
 
 func (bankSendTx BankSendTx) Report() {
@@ -63,4 +96,16 @@ func (bankSendTx BankSendTx) Report() {
 	f.WriteString(transactionSeperator)
 
 	f.Close()
+}
+
+func (bankSendTx BankSendTx) Prompt() {
+	bankSendOpt := bankSendTx.BankSendOpt
+	keyName := bankSendTx.KeyName
+
+	fmt.Print("\nBank Send Transaction\n")
+	fmt.Print("\nKeyname: " + keyName + "\n")
+	fmt.Print("\nBank Send Option\n\n")
+	fmt.Printf("%+v\n", bankSendOpt)
+	fmt.Print(transactionSeperator)
+
 }
