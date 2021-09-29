@@ -15,31 +15,30 @@ import (
 	"github.com/notional-labs/cookiemonster/transaction"
 )
 
-var (
-	slippagePercentage float64 = 0.003
-)
-
 type PoolStrategy struct {
 	Name        string
 	Config      map[string]int
 	ConfigDenom string
 }
 
-// map from pool id to pooling amount in uosmo
-type MapFromPoolToAmount map[int]*big.Int
+// map from pool id to uosmo amount to be pooled
+type MapFromPoolToUosmoAmount map[int]*big.Int
 
 // create txs from a strategy
-func (poolStrategy PoolStrategy) MakeTransactions(keyName string) (transaction.Transactions, error) {
-	// is a map of poolid to a bigint.
-	mapFromPoolToAmount, err := poolStrategy.MakeMapFromPoolToAmount(keyName)
+func (poolStrategy PoolStrategy) MakeTransactions(keyName string) transaction.Transactions {
+	mapFromPoolToUosmoAmount, err := poolStrategy.MakeMapFromPoolToUosmoAmount(keyName)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	MakeTransactionsFrom(mapFromPoolToAmount, keyName)
-
+	transactionBatch := transaction.Transactions{}
+	for poolId, poolUosmoAmount := range mapFromPoolToUosmoAmount {
+		swapAndPoolTx := NewSwapAndPoolTransaction(poolId, sdk.NewIntFromBigInt(poolUosmoAmount), keyName)
+		transactionBatch = append(transactionBatch, swapAndPoolTx)
+	}
+	return transactionBatch
 }
 
-func (poolStrategy PoolStrategy) MakeMapFromPoolToAmount(keyName string) (MapFromPoolToAmount, error) {
+func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string) (MapFromPoolToUosmoAmount, error) {
 	uosmoBalance, err := query.QueryUosmoBalance(keyName)
 	if err != nil {
 		return nil, err
@@ -49,7 +48,7 @@ func (poolStrategy PoolStrategy) MakeMapFromPoolToAmount(keyName string) (MapFro
 	}
 
 	if poolStrategy.ConfigDenom == "percentages" {
-		mapFromPoolToAmount := MapFromPoolToAmount{}
+		mapFromPoolToUosmoAmount := MapFromPoolToUosmoAmount{}
 		for poolIdString, percentage := range poolStrategy.Config {
 			poolId, err := strconv.Atoi(poolIdString)
 			if err != nil {
@@ -58,11 +57,11 @@ func (poolStrategy PoolStrategy) MakeMapFromPoolToAmount(keyName string) (MapFro
 			poolAmountUosmo := &big.Int{}
 			poolAmountUosmo.Mul(big.NewInt(int64(percentage)), uosmoBalance)
 			poolAmountUosmo.Div(poolAmountUosmo, big.NewInt(100))
-			mapFromPoolToAmount[poolId] = poolAmountUosmo
+			mapFromPoolToUosmoAmount[poolId] = poolAmountUosmo
 		}
-		return mapFromPoolToAmount, nil
+		return mapFromPoolToUosmoAmount, nil
 	} else if poolStrategy.ConfigDenom == "osmo" {
-		mapFromPoolToAmount := MapFromPoolToAmount{}
+		mapFromPoolToUosmoAmount := MapFromPoolToUosmoAmount{}
 		for poolIdString, poolAmountOsmo := range poolStrategy.Config {
 			poolId, err := strconv.Atoi(poolIdString)
 			if err != nil {
@@ -70,30 +69,14 @@ func (poolStrategy PoolStrategy) MakeMapFromPoolToAmount(keyName string) (MapFro
 			}
 			poolAmountUosmo := &big.Int{}
 			temp := &big.Int{}
-			poolAmountUosmo.Mul(big.NewInt(int64(poolAmountOsmo)), temp.SetUint64(10e17))
-			mapFromPoolToAmount[poolId] = poolAmountUosmo
+			poolAmountUosmo.Mul(big.NewInt(int64(poolAmountOsmo)), temp.SetUint64(1e18))
+			mapFromPoolToUosmoAmount[poolId] = poolAmountUosmo
 		}
-		return mapFromPoolToAmount, nil
+		return mapFromPoolToUosmoAmount, nil
 	} else {
 		return nil, fmt.Errorf("unknown config denom")
 
 	}
-}
-
-func MakeTransactionsFrom(mapFromPoolToAmount MapFromPoolToAmount, keyName string) (transaction.Transactions, error) {
-	transactions := transaction.Transactions{}
-	for poolId, poolAmount := range mapFromPoolToAmount {
-		swapTx, err := SwapHalfAmountToPool(poolId, poolAmount, keyName)
-		if err != nil {
-			return nil, err
-		}
-		transactions = append(transactions, swapTx)
-	}
-}
-
-// pool using the specified amount of osmo
-func MakeTransactionsForPool(poolId int, uosmoAmount *big.Int, keyName string) {
-
 }
 
 func loadPoolStrategy(fileLocation string) (*PoolStrategy, error) {
@@ -102,7 +85,7 @@ func loadPoolStrategy(fileLocation string) (*PoolStrategy, error) {
 		fmt.Println("Unable to open json at "+fileLocation)
 		return nil, err
 	}
- 	reader := bufio.NewReader(file)
+	reader := bufio.NewReader(file)
 	jsonData, _ := ioutil.ReadAll(reader)
 
 	var strategy PoolStrategy
@@ -114,63 +97,19 @@ func loadPoolStrategy(fileLocation string) (*PoolStrategy, error) {
 	return &strategy, nil
 }
 
-// swap half the osmo amount to aonther token in the pool of specified id
-func SwapHalfAmountToPool(poolId int, uosmoAmount *big.Int, keyName string) (transaction.Transaction, error) {
-	halfUosmoAmount := &big.Int{}
-	halfUosmoAmount.Div(uosmoAmount, big.NewInt(2))
+func NewSwapAndPoolTransaction(poolId int, uosmoAmount sdk.Int, keyName string) transaction.Transaction {
 
-	pool, err := query.QueryPoolId(poolId)
-	if err != nil {
-		return nil, err
+	swapAndPoolOpt := transaction.SwapAndPoolOption{
+		TokenInAmount:     uosmoAmount,
+		PoolId:            uint64(poolId),
+		TokenInDenom:      "uosmo",
+		ShareOutMinAmount: sdk.NewInt(1),
 	}
 
-	tokenOutDenom := pool.PoolAssets[0].Token.Denom
-	// uosmo price in tokenOut
-	tokenOutPrice, err := query.QuerySpotPrice(poolId, tokenOutDenom, "uosmo")
-	if err != nil {
-		return nil, err
+	swapAndPoolTx := transaction.SwapAndPoolTx{
+		KeyName:        keyName,
+		SwapAndPoolOpt: swapAndPoolOpt,
 	}
-	tokenOutAmount := BigIntMulFloat(halfUosmoAmount, tokenOutPrice)
 
-	swapFeePercentage := pool.PoolParams.SwapFee
-	swapFeeAmount := BigIntMulSDKDec(tokenOutAmount, swapFeePercentage)
-
-	tokenOutAmount.Sub(tokenOutAmount, swapFeeAmount)
-
-	slippageAmount := BigIntMulFloat(tokenOutAmount, slippagePercentage)
-
-	tokenOutAmount.Sub(tokenOutAmount, slippageAmount)
-
-	swapOpt := transaction.SwapOption{
-		SwapRoutePoolIds: []int{poolId},
-		SwapRouteDenoms:  []string{tokenOutDenom},
-		TokenInAmount:    sdk.NewIntFromBigInt(halfUosmoAmount),
-		TokenInDenom:     "uosmo",
-		TokenOutMinAmt:   sdk.NewIntFromBigInt(tokenOutAmount),
-	}
-	swapTx := transaction.SwapTx{
-		SwapOpt: swapOpt,
-		KeyName: keyName,
-	}
-	return swapTx, nil
-}
-
-func MakePoolTx(poolId int, uosmoAmount *big.Int, keyName)
-
-
-
-
-func BigIntMulFloat(x *big.Int, y float64) *big.Int {
-	yDec, _ := sdk.NewDecFromStr(strconv.FormatFloat(y, 'f', -1, 64))
-	return BigIntMulSDKDec(x, yDec)
-}
-
-func BigIntMulSDKDec(x *big.Int, y sdk.Dec) *big.Int {
-	yBigInt := y.BigInt()
-
-	temp := &big.Int{}
-	z := &big.Int{}
-	z.Mul(x, yBigInt)
-	z.Div(x, temp.SetUint64(10e17))
-	return z
+	return swapAndPoolTx
 }

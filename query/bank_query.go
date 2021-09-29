@@ -9,20 +9,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
-	"github.com/notional-labs/cookiemonster/transaction"
 )
 
 func QueryBalances(keyName string) (sdk.Coins, error) {
 	// build context
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, keyName)
+	addr, err := GetAddressFromKey(clientCtx, keyName)
 	if err != nil {
 		return nil, err
 	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 
-	addr := clientCtx.FromAddress
 	pageReq := &query.PageRequest{
 		Key:        []byte(""),
 		Offset:     uint64(0),
@@ -40,13 +38,12 @@ func QueryBalances(keyName string) (sdk.Coins, error) {
 func QueryUosmoBalance(keyName string) (*big.Int, error) {
 	// build context
 	clientCtx := osmosis.DefaultClientCtx
-	clientCtx, err := transaction.SetKeyNameToContext(clientCtx, keyName)
+	addr, err := GetAddressFromKey(clientCtx, keyName)
 	if err != nil {
 		return nil, err
 	}
 
 	queryClient := types.NewQueryClient(clientCtx)
-	addr := clientCtx.FromAddress
 	params := types.NewQueryBalanceRequest(addr, "uosmo")
 	res, err := queryClient.Balance(context.Background(), params)
 	if err != nil {
