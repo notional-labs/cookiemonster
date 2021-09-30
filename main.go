@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/notional-labs/cookiemonster/transaction"
 	// "github.com/notional-labs/cookiemonster/osmosis"
 	// "github.com/notional-labs/cookiemonster/transaction"
 )
@@ -18,11 +20,23 @@ func main() {
 	// if err != nil {
 	// 	fmt.Println(err, "fsasdfa")
 	// }
-	fmt.Println(10e2)
+	// fmt.Println(10e2)
+	// confirmation := ""
+	// fmt.Scanln(confirmation)
+	// fmt.Println(confirmation)
+	// reader := bufio.NewReader(os.Stdin)
+	// fmt.Print("Enter text: ")
+	// text, _ := reader.ReadString('\n')
+	// fmt.Println(text)
+	// fmt.Println("Enter text: ")
+	// text2 := ""
+	// fmt.Scanln(&text2)
+	// fmt.Println(text2)
 
-	err1 := fmt.Errorf("test").Error()
-	err2 := fmt.Errorf("test").Error()
-	fmt.Println(err1 == err2)
+	// ln := ""
+	// fmt.Scanf("%s", &ln)
+	a := transaction.BankSendTx{}
+	fmt.Println(a.Hash)
 	// txf := transaction.NewTxFactoryFromClientCtx(osmosis.DefaultClientCtx)
 	// fmt.Printf("%+v\n", txf)
 }

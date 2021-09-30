@@ -102,10 +102,10 @@ func (delegateTx DelegateTx) Report() {
 func (delegateTx DelegateTx) Prompt() {
 	delegateOpt := delegateTx.DelegateOpt
 	keyName := delegateTx.KeyName
-
+	fmt.Print(transactionSeperator)
 	fmt.Print("\nDelegate Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nDelegate Option\n\n")
 	fmt.Printf("%+v\n", delegateOpt)
-	fmt.Print(transactionSeperator)
+
 }

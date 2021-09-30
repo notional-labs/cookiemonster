@@ -142,10 +142,10 @@ func (swapTx SwapTx) Report() {
 func (swapTx SwapTx) Prompt() {
 	swapOpt := swapTx.SwapOpt
 	keyName := swapTx.KeyName
-
+	fmt.Print(transactionSeperator)
 	fmt.Print("\nSwap Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nSwap Option\n\n")
 	fmt.Printf("%+v\n", swapOpt)
-	fmt.Print(transactionSeperator)
+
 }

@@ -113,12 +113,12 @@ func (joinPoolTx JoinPoolTx) Report() {
 func (joinPoolTx JoinPoolTx) Prompt() {
 	joinPoolOpt := joinPoolTx.JoinPoolOpt
 	keyName := joinPoolTx.KeyName
-
+	fmt.Print(transactionSeperator)
 	fmt.Print("\nJoin Pool Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nJoin Pool Option\n\n")
 	fmt.Printf("%+v\n", joinPoolOpt)
-	fmt.Print(transactionSeperator)
+
 }
 
 type SwapAndPoolOption struct {
@@ -218,11 +218,10 @@ func (swapAndPoolTx SwapAndPoolTx) Report() {
 func (swapAndPoolTx SwapAndPoolTx) Prompt() {
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
 	keyName := swapAndPoolTx.KeyName
-
+	fmt.Print(transactionSeperator)
 	fmt.Print("\nSwap And Pool Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nSwap And Pool Option\n\n")
 	fmt.Printf("%+v\n", swapAndPoolOpt)
-	fmt.Print(transactionSeperator)
 
 }

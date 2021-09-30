@@ -57,6 +57,7 @@ func BankSend(keyName string, bankSendOpt BankSendOption, gas uint64) (string, e
 type BankSendTx struct {
 	BankSendOpt BankSendOption
 	KeyName     string
+	Hash        string
 }
 
 func (bankSendTx BankSendTx) Execute() (string, error) {
@@ -69,6 +70,7 @@ func (bankSendTx BankSendTx) Execute() (string, error) {
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
 		txHash, err = BankSend(keyName, bankSendOpt, uint64(gas))
+		bankSendTx.Hash = txHash
 		if err == nil {
 			return txHash, nil
 		}
@@ -84,6 +86,7 @@ func (bankSendTx BankSendTx) Report() {
 
 	bankSendOpt := bankSendTx.BankSendOpt
 	keyName := bankSendTx.KeyName
+	hash := bankSendTx.Hash
 
 	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
@@ -93,6 +96,7 @@ func (bankSendTx BankSendTx) Report() {
 
 	txData, _ := yaml.Marshal(bankSendOpt)
 	_, _ = f.Write(txData)
+	f.WriteString("\ntx hash: " + hash + "\n")
 	f.WriteString(transactionSeperator)
 
 	f.Close()
@@ -101,11 +105,11 @@ func (bankSendTx BankSendTx) Report() {
 func (bankSendTx BankSendTx) Prompt() {
 	bankSendOpt := bankSendTx.BankSendOpt
 	keyName := bankSendTx.KeyName
+	fmt.Print(transactionSeperator)
 
 	fmt.Print("\nBank Send Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nBank Send Option\n\n")
 	fmt.Printf("%+v\n", bankSendOpt)
-	fmt.Print(transactionSeperator)
 
 }

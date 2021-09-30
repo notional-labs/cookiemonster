@@ -9,6 +9,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 )
 
+var (
+	transactionSeperator = "\n\n==========================================\n"
+	DefaultGas           = 200000
+)
+
 // set fields in client context with keyname
 func SetKeyNameToContext(clientCtx client.Context, keyName string) (client.Context, error) {
 	from := keyName
@@ -55,3 +60,5 @@ func NewTxFactoryFromClientCtx(clientCtx client.Context) tx.Factory {
 
 	return transactionFactory
 }
+
+func TxComfirm()

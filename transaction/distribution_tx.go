@@ -108,10 +108,9 @@ func (claimTx ClaimTx) Report() {
 
 func (claimTx ClaimTx) Prompt() {
 	keyName := claimTx.KeyName
-
+	fmt.Print(transactionSeperator)
 	fmt.Print("\nClaim Reward Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nClaim Reward Option\n\n")
-	fmt.Print(transactionSeperator)
 
 }
