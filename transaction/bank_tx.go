@@ -111,5 +111,4 @@ func (bankSendTx BankSendTx) Prompt() {
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nBank Send Option\n\n")
 	fmt.Printf("%+v\n", bankSendOpt)
-
 }
