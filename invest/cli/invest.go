@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/notional-labs/cookiemonster/invest"
 	"github.com/spf13/cobra"
 )
@@ -16,6 +18,7 @@ func NewInvestCmd() *cobra.Command {
 				return err
 			}
 			for _, investment := range investments {
+				fmt.Printf("%+v\n", investment)
 				err := investment.Invest()
 				if err != nil {
 					return err

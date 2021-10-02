@@ -3,7 +3,11 @@ package cmd
 import (
 
 	// "github.com/osmosis-labs/osmosis/app/params"
+	"fmt"
+
+	"github.com/cosmos/cosmos-sdk/client/keys"
 	investcli "github.com/notional-labs/cookiemonster/invest/cli"
+	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/spf13/cobra"
 	// "github.com/spf13/viper"
 )
@@ -14,15 +18,20 @@ func NewRootCmd() *cobra.Command {
 		Use:   "auto-invest",
 		Short: "auto-invest tool for osmosis",
 	}
-	rootCmd.AddCommand(investcli.NewInvestCmd())
+	fmt.Println(osmosis.HomeDir)
+	rootCmd.AddCommand(
+		investcli.NewInvestCmd(),
+		keys.Commands(osmosis.HomeDir),
+	)
+
 	return rootCmd
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute(rootCmd *cobra.Command) {
-	cobra.CheckErr(rootCmd.Execute())
-}
+// func Execute(rootCmd *cobra.Command) {
+// 	rootCmd.Execute()
+// }
 
 // func initRootCmd() {
 // 	cobra.OnInitialize(initConfig)

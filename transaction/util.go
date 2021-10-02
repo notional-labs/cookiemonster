@@ -60,5 +60,3 @@ func NewTxFactoryFromClientCtx(clientCtx client.Context) tx.Factory {
 
 	return transactionFactory
 }
-
-func TxComfirm()

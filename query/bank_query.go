@@ -13,7 +13,7 @@ import (
 
 func QueryBalances(keyName string) (sdk.Coins, error) {
 	// build context
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 	addr, err := GetAddressFromKey(clientCtx, keyName)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func QueryBalances(keyName string) (sdk.Coins, error) {
 
 func QueryUosmoBalance(keyName string) (*big.Int, error) {
 	// build context
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 	addr, err := GetAddressFromKey(clientCtx, keyName)
 	if err != nil {
 		return nil, err

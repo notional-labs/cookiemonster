@@ -20,7 +20,7 @@ type Investment struct {
 	PoolPercentage  int
 	StakePercentage int
 	PoolStrategy    pool.PoolStrategy
-	StakeAddress    sdk.ValAddress
+	StakeAddress    string
 }
 
 type Investments []Investment
@@ -30,13 +30,13 @@ func (investment Investment) Invest() error {
 	keyName := investment.KeyName
 	poolStrategy := investment.PoolStrategy
 
-	// 1 claim reward
-	claimTx := transaction.ClaimTx{KeyName: keyName}
-	// execute claim tx right away
-	err := HandleTransaction(claimTx)
-	if err != nil {
-		return err
-	}
+	// // 1 claim reward
+	// claimTx := transaction.ClaimTx{KeyName: keyName}
+	// // execute claim tx right away
+	// err := HandleTransaction(claimTx)
+	// if err != nil {
+	// 	return err
+	// }
 
 	uosmoBalance, err := query.QueryUosmoBalance(keyName)
 	if err != nil {
@@ -46,28 +46,36 @@ func (investment Investment) Invest() error {
 	// 2 pool
 	// caculate pool amount = pool percentage of uosmoBalance
 	totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
+	fmt.Println(totalPoolAmount)
 
 	// create pooling transaction from strategy, keyname, totalpoolamount
 	poolingBatch := poolStrategy.MakeTransactions(keyName, totalPoolAmount)
 
 	for _, transaction := range poolingBatch {
-		err := HandleTransaction(transaction)
+		err := transaction.HandleTransaction(transaction)
 		if err != nil {
 			return err
 		}
 	}
 
-	// 3 stake
-	stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
-	delegateOpt := transaction.DelegateOption{
-		Amount:  sdk.NewIntFromBigInt(stakeAmount),
-		ValAddr: investment.StakeAddress,
-		Denom:   "uosmo",
-	}
-	delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
-	err = HandleTransaction(delegateTx)
-	if err != nil {
-		return err
+	if investment.StakeAddress != "" {
+		valAddress, err := sdk.ValAddressFromBech32(investment.StakeAddress)
+		if err != nil {
+			return err
+		}
+
+		// 3 stake
+		stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
+		delegateOpt := transaction.DelegateOption{
+			Amount:  sdk.NewIntFromBigInt(stakeAmount),
+			ValAddr: valAddress,
+			Denom:   "uosmo",
+		}
+		delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
+		err = transaction.HandleTransaction(delegateTx)
+		if err != nil {
+			return err
+		}
 	}
 
 	// 4 transfer
@@ -75,26 +83,13 @@ func (investment Investment) Invest() error {
 	return nil
 }
 
-func HandleTransaction(transaction transaction.Transaction) error {
-	transaction.Prompt()
-
-	transaction.Execute()
-
-	transactionHash, err := transaction.Execute()
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("tx hash: %s\n", transactionHash)
-	transaction.Report()
-	return nil
-}
-
 // Cal x percent of a
 func XPercentageOf(a *big.Int, x int) *big.Int {
 	out := &big.Int{}
 	out.Mul(a, big.NewInt(int64(x)))
-	out.Div(a, big.NewInt(100))
+
+	out.Div(out, big.NewInt(100))
+
 	return out
 }
 

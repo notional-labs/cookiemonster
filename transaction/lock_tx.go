@@ -3,35 +3,50 @@ package transaction
 import (
 	"fmt"
 	"os"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/notional-labs/cookiemonster/query"
+	"github.com/osmosis-labs/osmosis/x/lockup/types"
 	"gopkg.in/yaml.v3"
 )
 
-type BankSendOption struct {
-	ToAddr sdk.AccAddress
-	Denom  string
-	Amount sdk.Int
+type LockOption struct {
+	Duration string
+	Amount   sdk.Int
+	Denom    string
 }
 
-func BankSend(keyName string, bankSendOpt BankSendOption, gas uint64) (string, error) {
-	// build tx context
+func Lock(keyName string, lockOpt LockOption, gas uint64) (string, error) {
 	clientCtx := osmosis.GetDefaultClientContext()
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
 	}
 	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
+	var durationString string
 
-	// build msg for tx
-	toAddr := bankSendOpt.ToAddr
-	fromAddr := clientCtx.GetFromAddress()
-	coin := sdk.Coin{Denom: bankSendOpt.Denom, Amount: bankSendOpt.Amount}
-	coins := sdk.Coins([]sdk.Coin{coin})
-	msg := types.NewMsgSend(fromAddr, toAddr, coins)
+	if lockOpt.Duration == "14days" {
+		durationString = "1209600000002480"
+	} else if lockOpt.Duration == "7days" {
+		durationString = "604800000007913"
+	} else if lockOpt.Duration == "1day" {
+		durationString = "86400000001496"
+	} else {
+		return "", fmt.Errorf("unknown duration (bonding period)")
+	}
+
+	duration, err := time.ParseDuration(durationString)
+	if err != nil {
+		return "", err
+	}
+
+	msg := types.NewMsgLockTokens(
+		clientCtx.GetFromAddress(),
+		duration,
+		sdk.Coins{{Denom: lockOpt.Denom, Amount: lockOpt.Amount}},
+	)
 
 	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
 	if err != nil {
@@ -40,12 +55,10 @@ func BankSend(keyName string, bankSendOpt BankSendOption, gas uint64) (string, e
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-
 	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
-		return "", err
+		return txHash, err
 	}
-
 	if broadcastedTx.Code == 11 {
 		return txHash, fmt.Errorf("insufficient fee")
 
@@ -54,25 +67,26 @@ func BankSend(keyName string, bankSendOpt BankSendOption, gas uint64) (string, e
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
 	return txHash, nil
+
 }
 
-type BankSendTx struct {
-	BankSendOpt BankSendOption
-	KeyName     string
-	Hash        string
+type LockTx struct {
+	KeyName string
+	LockOpt LockOption
 }
 
-func (bankSendTx BankSendTx) Execute() (string, error) {
-	keyName := bankSendTx.KeyName
-	bankSendOpt := bankSendTx.BankSendOpt
+func (lockTx LockTx) Execute() (string, error) {
+
+	keyName := lockTx.KeyName
+	lockOpt := lockTx.LockOpt
 	gas := 200000
 	var err error
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
-		txHash, err = BankSend(keyName, bankSendOpt, uint64(gas))
-		bankSendTx.Hash = txHash
+		fmt.Println(i, "try")
+		txHash, err = Lock(keyName, lockOpt, uint64(gas))
 		if err == nil {
 			return txHash, nil
 		}
@@ -84,33 +98,31 @@ func (bankSendTx BankSendTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (bankSendTx BankSendTx) Report() {
+func (lockTx LockTx) Report() {
 
-	bankSendOpt := bankSendTx.BankSendOpt
-	keyName := bankSendTx.KeyName
-	hash := bankSendTx.Hash
+	lockOpt := lockTx.LockOpt
+	keyName := lockTx.KeyName
 
 	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
-	f.WriteString("\nBank Send Transaction\n")
+	f.WriteString("\nLock Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")
-	f.WriteString("\nBank Send Option\n\n")
+	f.WriteString("\nLock Option\n\n")
 
-	txData, _ := yaml.Marshal(bankSendOpt)
+	txData, _ := yaml.Marshal(lockOpt)
 	_, _ = f.Write(txData)
-	f.WriteString("\ntx hash: " + hash + "\n")
 	f.WriteString(transactionSeperator)
 
 	f.Close()
 }
 
-func (bankSendTx BankSendTx) Prompt() {
-	bankSendOpt := bankSendTx.BankSendOpt
-	keyName := bankSendTx.KeyName
+func (lockTx LockTx) Prompt() {
+	lockOpt := lockTx.LockOpt
+	keyName := lockTx.KeyName
 	fmt.Print(transactionSeperator)
-
-	fmt.Print("\nBank Send Transaction\n")
+	fmt.Print("\nLock Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
-	fmt.Print("\nBank Send Option\n\n")
-	fmt.Printf("%+v\n", bankSendOpt)
+	fmt.Print("\nLock Option\n\n")
+	fmt.Printf("%+v\n", lockOpt)
+
 }

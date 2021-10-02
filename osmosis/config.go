@@ -7,7 +7,7 @@ import (
 
 var (
 	ChainId = "osmosis-1"
-	Node    = "http://95.217.196.54:2001"
+	Node    = "https://osmosis-1.technofractal.com:443"
 	HomeDir = DefaultNodeHome()
 )
 
@@ -16,6 +16,6 @@ func DefaultNodeHome() string {
 	if err != nil {
 		panic(err)
 	}
-	DefaultNodeHome := filepath.Join(userHomeDir, ".osmosisd")
+	DefaultNodeHome := filepath.Join(userHomeDir, ".auto-invest")
 	return DefaultNodeHome
 }

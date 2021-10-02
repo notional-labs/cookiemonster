@@ -15,7 +15,7 @@ import (
 )
 
 func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 
 	queryClient := types.NewQueryClient(clientCtx)
 
@@ -34,7 +34,7 @@ func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (floa
 }
 
 func QueryPools() ([]types.Pool, error) {
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 
 	queryClient := types.NewQueryClient(clientCtx)
 
@@ -62,7 +62,7 @@ func QueryPools() ([]types.Pool, error) {
 }
 
 func QueryPoolId(poolId int) (*types.Pool, error) {
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 
 	queryClient := types.NewQueryClient(clientCtx)
 

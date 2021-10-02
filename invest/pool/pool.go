@@ -20,12 +20,13 @@ type PoolStrategy struct {
 type MapFromPoolToUosmoAmount map[int]*big.Int
 
 // create txs from a strategy
-func (poolStrategy PoolStrategy) MakeTransactions(keyName string, totalPoolAmount *big.Int) transaction.Transactions {
-	mapFromPoolToUosmoAmount, err := poolStrategy.MakeMapFromPoolToUosmoAmount(keyName, totalPoolAmount)
+func (poolStrategy PoolStrategy) MakeTransactions(keyName string, totalPoolAmount *big.Int) transaction.Txs {
+	mapFromPoolToUosmoAmount, err := poolStrategy.MakeMapFromPoolToUosmoAmount(totalPoolAmount)
+	fmt.Printf("%+v\n", mapFromPoolToUosmoAmount)
 	if err != nil {
 		return nil
 	}
-	transactionBatch := transaction.Transactions{}
+	transactionBatch := transaction.Txs{}
 	for poolId, poolUosmoAmount := range mapFromPoolToUosmoAmount {
 		swapAndPoolTx := NewSwapAndPoolTransaction(poolId, sdk.NewIntFromBigInt(poolUosmoAmount), keyName)
 		transactionBatch = append(transactionBatch, swapAndPoolTx)
@@ -33,11 +34,7 @@ func (poolStrategy PoolStrategy) MakeTransactions(keyName string, totalPoolAmoun
 	return transactionBatch
 }
 
-func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string, totalPoolAmount *big.Int) (MapFromPoolToUosmoAmount, error) {
-	if poolStrategy.Name == "greedy" {
-		fmt.Println("do something")
-	}
-
+func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(totalPoolAmount *big.Int) (MapFromPoolToUosmoAmount, error) {
 	if poolStrategy.ConfigDenom == "percentages" {
 		mapFromPoolToUosmoAmount := MapFromPoolToUosmoAmount{}
 		for poolIdString, percentage := range poolStrategy.Config {
@@ -70,7 +67,7 @@ func (poolStrategy PoolStrategy) MakeMapFromPoolToUosmoAmount(keyName string, to
 	}
 }
 
-func NewSwapAndPoolTransaction(poolId int, uosmoAmount sdk.Int, keyName string) transaction.Transaction {
+func NewSwapAndPoolTransaction(poolId int, uosmoAmount sdk.Int, keyName string) transaction.Tx {
 
 	swapAndPoolOpt := transaction.SwapAndPoolOption{
 		TokenInAmount:     uosmoAmount,

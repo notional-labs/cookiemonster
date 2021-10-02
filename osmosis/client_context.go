@@ -10,10 +10,6 @@ import (
 	osmosis "github.com/osmosis-labs/osmosis/app"
 )
 
-var (
-	DefaultClientCtx = GetDefaultClientContext()
-)
-
 func GetDefaultClientContext() client.Context {
 	// get osmosis codec
 	encodingConfig := osmosis.MakeEncodingConfig()

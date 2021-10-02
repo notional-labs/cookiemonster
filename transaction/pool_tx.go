@@ -29,7 +29,7 @@ func NewMsgJoinPool(fromAddr sdk.AccAddress, poolId uint64, shareOutAmount sdk.I
 
 func JoinPool(keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
@@ -50,7 +50,7 @@ func JoinPool(keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, e
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTx(txHash)
+	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -130,7 +130,7 @@ type SwapAndPoolOption struct {
 
 func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
@@ -153,10 +153,13 @@ func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64
 	if err != nil {
 		return txHash, err
 	}
+	if code == 11 {
+		return txHash, fmt.Errorf("insufficient fee")
+	}
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTx(txHash)
+	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -185,6 +188,7 @@ func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
+		fmt.Println(i, "try")
 		txHash, err = SwapAndPool(keyName, swapAndPoolOpt, uint64(gas))
 		if err == nil {
 			return txHash, nil
@@ -204,9 +208,9 @@ func (swapAndPoolTx SwapAndPoolTx) Report() {
 
 	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
-	f.WriteString("\nJoin Pool Transaction\n")
+	f.WriteString("\nSwap And Pool Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")
-	f.WriteString("\nJoin Pool Option\n\n")
+	f.WriteString("\nSwap And Pool Option\n\n")
 
 	txData, _ := yaml.Marshal(swapAndPoolOpt)
 	_, _ = f.Write(txData)

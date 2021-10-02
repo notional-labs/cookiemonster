@@ -19,7 +19,7 @@ type DelegateOption struct {
 
 func Delegate(keyName string, delegateOpt DelegateOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
@@ -40,7 +40,7 @@ func Delegate(keyName string, delegateOpt DelegateOption, gas uint64) (string, e
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTx(txHash)
+	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
 	}

@@ -58,7 +58,7 @@ func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.M
 
 func Swap(keyName string, swapOpt SwapOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
@@ -80,7 +80,7 @@ func Swap(keyName string, swapOpt SwapOption, gas uint64) (string, error) {
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTx(txHash)
+	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
 	}

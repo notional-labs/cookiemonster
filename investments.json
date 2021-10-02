@@ -1,19 +1,10 @@
 [
 {
-    "KeyName":"april",
-    "TransferTo":{"adam":0.4,"tung_bda_handsome_and_talented":0.6},
-    "PoolPercentage":0.5,
-    "StakePercentage":0.4,
-    "PoolStrategy":{"name":"greedy","config":{"1":70,"2":30}},
-    "StakeAddress":""
-},
-{
-    "KeyName": "pancreas",
-    "PoolPercentage":0.75,
-    "PoolPtrategy":{"name":"custom","config":{"1":100},"config_type":"percentages"},
-    "TransferTo":{"adam":"100000000000000uosmo"},
-    "StakePercentage":0.25,
+    "KeyName":"koule",
+    "TransferTo":{},
+    "PoolPercentage":10,
+    "StakePercentage":0,
+    "PoolStrategy":{"Name":"custom","Config":{"1":70,"2":30},"ConfigDenom":"percentages","Duration":"14days"},
     "StakeAddress":""
 }
 ]
-

@@ -2,6 +2,7 @@ package query
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/notional-labs/cookiemonster/osmosis"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func QueryTx(txHash string) (*types.TxResponse, error) {
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 
 	if txHash == "" {
 		return nil, fmt.Errorf("argument should be a tx hash")
@@ -26,4 +27,19 @@ func QueryTx(txHash string) (*types.TxResponse, error) {
 		return nil, fmt.Errorf("no transaction found with hash %s", txHash)
 	}
 	return output, nil
+}
+
+func QueryTxWithRetry(txHash string, trials int) (*types.TxResponse, error) {
+	var broadcastedTx *types.TxResponse
+	var err error
+
+	for i := 0; i < trials; i++ {
+		broadcastedTx, err = QueryTx(txHash)
+		if err == nil {
+			break
+		}
+		time.Sleep(3000)
+	}
+
+	return broadcastedTx, err
 }

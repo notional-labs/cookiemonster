@@ -5,6 +5,7 @@ import (
 
 	"github.com/notional-labs/cookiemonster/cmd/auto-farm/cmd"
 	"github.com/osmosis-labs/osmosis/app/params"
+	// "github.com/osmosis-labs/osmosis/app/params"
 )
 
 func main() {

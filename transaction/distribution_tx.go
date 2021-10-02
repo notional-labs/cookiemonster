@@ -12,25 +12,19 @@ import (
 )
 
 func ClaimReward(keyName string, gas uint64) (string, error) {
-	clientCtx := osmosis.DefaultClientCtx
+	clientCtx := osmosis.GetDefaultClientContext()
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
 	}
 	delAddr := clientCtx.GetFromAddress()
 
-	// The transaction cannot be generated offline since it requires a query
-	// to get all the validators.
-	if clientCtx.Offline {
-		return "", fmt.Errorf("cannot generate tx in offline mode")
-	}
-
 	queryClient := types.NewQueryClient(clientCtx)
 	delValsRes, err := queryClient.DelegatorValidators(context.Background(), &types.QueryDelegatorValidatorsRequest{DelegatorAddress: delAddr.String()})
+	fmt.Println(delValsRes)
 	if err != nil {
 		return "", err
 	}
-
 	validators := delValsRes.Validators
 	// build multi-message transaction
 	msgs := make([]sdk.Msg, 0, len(validators))
@@ -54,7 +48,7 @@ func ClaimReward(keyName string, gas uint64) (string, error) {
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTx(txHash)
+	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -85,10 +79,9 @@ func (claimTx ClaimTx) Execute() (string, error) {
 		if err == nil {
 			return txHash, nil
 		}
-		if err.Error() != "insufficient fee" {
-			return txHash, err
+		if err.Error() == "insufficient fee" {
+			gas += 300000
 		}
-		gas += 300000
 	}
 	return txHash, err
 }
@@ -108,6 +101,7 @@ func (claimTx ClaimTx) Report() {
 
 func (claimTx ClaimTx) Prompt() {
 	keyName := claimTx.KeyName
+	fmt.Print(transactionSeperator)
 	fmt.Print(transactionSeperator)
 	fmt.Print("\nClaim Reward Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
