@@ -4,7 +4,8 @@
     "TransferTo":{},
     "PoolPercentage":10,
     "StakePercentage":0,
-    "PoolStrategy":{"Name":"custom","Config":{"1":70,"2":30},"ConfigDenom":"percentages","Duration":"14days"},
+    "PoolStrategy":{"Name":"custom","Config":{"1":70,"2":30},"ConfigDenom":"percentages"},
+    "Duration":"14days",
     "StakeAddress":""
 }
 ]

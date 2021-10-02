@@ -11,7 +11,7 @@ type Tx interface {
 
 type Txs []Tx
 
-func HandleTransaction(tx Tx) error {
+func HandleTx(tx Tx) error {
 	tx.Prompt()
 
 	tx.Execute()
@@ -23,5 +23,15 @@ func HandleTransaction(tx Tx) error {
 
 	fmt.Printf("tx hash: %s\n", txHash)
 	tx.Report()
+	return nil
+}
+
+func HandleTxs(txs Txs) error {
+	for _, tx := range txs {
+		err := HandleTx(tx)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
