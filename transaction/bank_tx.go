@@ -65,21 +65,26 @@ type BankSendTx struct {
 func (bankSendTx BankSendTx) Execute() (string, error) {
 	keyName := bankSendTx.KeyName
 	bankSendOpt := bankSendTx.BankSendOpt
-	gas := 800000
+	gas := 2000000
 	var err error
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
+		fmt.Println("\n---------------")
+		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = BankSend(keyName, bankSendOpt, uint64(gas))
 		bankSendTx.Hash = txHash
+
 		if err == nil {
 			return txHash, nil
 		}
-		if err.Error() != "insufficient fee" {
-			return txHash, err
+		if err.Error() == "insufficient fee" {
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			gas += 300000
+		} else {
+			fmt.Println("\n" + err.Error() + " try again\n")
 		}
-		gas += 300000
 	}
 	return txHash, err
 }
@@ -99,7 +104,7 @@ func (bankSendTx BankSendTx) Report() {
 	txData, _ := yaml.Marshal(bankSendOpt)
 	_, _ = f.Write(txData)
 	f.WriteString("\ntx hash: " + hash + "\n")
-	f.WriteString(transactionSeperator)
+	f.WriteString(Seperator)
 
 	f.Close()
 }
@@ -107,7 +112,7 @@ func (bankSendTx BankSendTx) Report() {
 func (bankSendTx BankSendTx) Prompt() {
 	bankSendOpt := bankSendTx.BankSendOpt
 	keyName := bankSendTx.KeyName
-	fmt.Print(transactionSeperator)
+	fmt.Print(Seperator)
 
 	fmt.Print("\nBank Send Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")

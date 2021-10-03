@@ -3,7 +3,6 @@ package cmd
 import (
 
 	// "github.com/osmosis-labs/osmosis/app/params"
-	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
@@ -20,7 +19,6 @@ func NewRootCmd() *cobra.Command {
 		Use:   "auto-invest",
 		Short: "auto-invest tool for osmosis",
 	}
-	fmt.Println(osmosis.HomeDir)
 	rootCmd.AddCommand(
 		investcli.NewInvestCmd(),
 		keys.Commands(osmosis.HomeDir),

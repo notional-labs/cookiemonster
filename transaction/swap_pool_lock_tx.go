@@ -30,7 +30,7 @@ package transaction
 
 // 	txData, _ := yaml.Marshal(swapAndPoolAndLockOpt)
 // 	_, _ = f.Write(txData)
-// 	f.WriteString(transactionSeperator)
+// 	f.WriteString(Seperator)
 
 // 	f.Close()
 // }
@@ -38,7 +38,7 @@ package transaction
 // func (swapAndPoolAndLockTx SwapAndPoolAndLockTx) Prompt() {
 // 	swapAndPoolAndLockOpt := swapAndPoolAndLockTx.SwapAndPoolAndLockOpt
 // 	keyName := swapAndPoolAndLockTx.KeyName
-// 	fmt.Print(transactionSeperator)
+// 	fmt.Print(Seperator)
 // 	fmt.Print("\nSwapAndPoolAndLock Transaction\n")
 // 	fmt.Print("\nKeyname: " + keyName + "\n")
 // 	fmt.Print("\nSwapAndPoolAndLock Option\n\n")

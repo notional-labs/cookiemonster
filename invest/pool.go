@@ -22,7 +22,7 @@ type MapFromPoolToUosmoAmount map[int]*big.Int
 // create txs from a strategy
 func MakeSwapAndPoolTxs(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy) transaction.Txs {
 	mapFromPoolToUosmoAmount, err := MakeMapFromPoolToUosmoAmount(totalPoolAmount, poolStrategy)
-	fmt.Printf("%+v\n", mapFromPoolToUosmoAmount)
+
 	if err != nil {
 		return nil
 	}

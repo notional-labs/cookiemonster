@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	transactionSeperator = "\n\n==========================================\n"
-	DefaultGas           = 200000
+	Seperator  = "\n\n==========================================\n"
+	DefaultGas = 200000
 )
 
 // set fields in client context with keyname

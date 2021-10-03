@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,7 +29,6 @@ type Investments []Investment
 func (investment Investment) Invest() error {
 
 	keyName := investment.KeyName
-	poolStrategy := investment.PoolStrategy
 
 	// 1 claim reward
 	claimTx := transaction.ClaimTx{KeyName: keyName}
@@ -43,44 +43,19 @@ func (investment Investment) Invest() error {
 		return err
 	}
 
-	// 2 pool
-	// caculate pool amount = pool percentage of uosmoBalance
+	// poling
+	poolStrategy := investment.PoolStrategy
 	totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
-	fmt.Println(totalPoolAmount)
-
-	// create pooling transaction from strategy, keyname, totalpoolamount
-	swapAndPoolTxs := MakeSwapAndPoolTxs(keyName, totalPoolAmount, poolStrategy)
-
-	err = transaction.HandleTxs(swapAndPoolTxs)
-	if err != nil {
-		return err
-	}
-	lockTxs, err := MakeLockTxs(keyName, investment.Duration)
-	if err != nil {
-		return err
-	}
-	err = transaction.HandleTxs(lockTxs)
+	err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration)
 	if err != nil {
 		return err
 	}
 
-	if investment.StakeAddress != "" {
-		valAddress, err := sdk.ValAddressFromBech32(investment.StakeAddress)
-		if err != nil {
-			return err
-		}
-		// 3 stake
-		stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
-		delegateOpt := transaction.DelegateOption{
-			Amount:  sdk.NewIntFromBigInt(stakeAmount),
-			ValAddr: valAddress,
-			Denom:   "uosmo",
-		}
-		delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
-		err = transaction.HandleTx(delegateTx)
-		if err != nil {
-			return err
-		}
+	// staking
+	stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
+	err = Stake(keyName, stakeAmount, investment.StakeAddress)
+	if err != nil {
+		return err
 	}
 
 	// 4 transfer
@@ -104,4 +79,52 @@ func LoadInvestmentsFromFile(fileLocation string) ([]Investment, error) {
 		return nil, jsonErr
 	}
 	return investments, nil
+}
+
+func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string) error {
+	// fmt.Println(transaction.Seperator)
+	// fmt.Println("\nPooling:")
+	// 2 pool
+	// caculate pool amount = pool percentage of uosmoBalance
+
+	// fmt.Println("\nTotal Pool Amount: " + totalPoolAmount.String() + "uosmo\n")
+	// create pooling transaction from strategy, keyname, totalpoolamount
+	swapAndPoolTxs := MakeSwapAndPoolTxs(keyName, totalPoolAmount, poolStrategy)
+
+	err := transaction.HandleTxs(swapAndPoolTxs)
+	if err != nil {
+		return err
+	}
+	lockTxs, err := MakeLockTxs(keyName, duration)
+
+	if err != nil {
+		return err
+	}
+	err = transaction.HandleTxs(lockTxs)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Stake(keyName string, stakeAmount *big.Int, stakeAddress string) error {
+	if stakeAddress != "" {
+		valAddress, err := sdk.ValAddressFromBech32(stakeAddress)
+		if err != nil {
+			return err
+		}
+		// 3 stake
+
+		delegateOpt := transaction.DelegateOption{
+			Amount:  sdk.NewIntFromBigInt(stakeAmount),
+			ValAddr: valAddress,
+			Denom:   "uosmo",
+		}
+		delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
+		err = transaction.HandleTx(delegateTx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

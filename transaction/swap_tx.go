@@ -103,20 +103,24 @@ func (swapTx SwapTx) Execute() (string, error) {
 
 	keyName := swapTx.KeyName
 	swapOpt := swapTx.SwapOpt
-	gas := 800000
+	gas := 2000000
 	var err error
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
+		fmt.Println("\n---------------")
+		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = Swap(keyName, swapOpt, uint64(gas))
 		if err == nil {
 			return txHash, nil
 		}
-		if err.Error() != "insufficient fee" {
-			return txHash, err
+		if err.Error() == "insufficient fee" {
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			gas += 300000
+		} else {
+			fmt.Println("\n" + err.Error() + " try again\n")
 		}
-		gas += 300000
 	}
 	return txHash, err
 }
@@ -134,7 +138,7 @@ func (swapTx SwapTx) Report() {
 
 	txData, _ := yaml.Marshal(swapOpt)
 	_, _ = f.Write(txData)
-	f.WriteString(transactionSeperator)
+	f.WriteString(Seperator)
 
 	f.Close()
 }
@@ -142,7 +146,7 @@ func (swapTx SwapTx) Report() {
 func (swapTx SwapTx) Prompt() {
 	swapOpt := swapTx.SwapOpt
 	keyName := swapTx.KeyName
-	fmt.Print(transactionSeperator)
+	fmt.Print(Seperator)
 	fmt.Print("\nSwap Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nSwap Option\n\n")

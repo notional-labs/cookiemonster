@@ -1,7 +1,6 @@
 package osmosis
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -43,8 +42,5 @@ func GetDefaultClientContext() client.Context {
 	defaultClientCtx = defaultClientCtx.WithKeyring(kr).
 		WithClient(client).
 		WithViper("OSMOSIS")
-
-	fmt.Println("get default clienCtx")
-
 	return defaultClientCtx
 }

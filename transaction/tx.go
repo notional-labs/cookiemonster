@@ -13,15 +13,16 @@ type Txs []Tx
 
 func HandleTx(tx Tx) error {
 	tx.Prompt()
-
-	tx.Execute()
-
+	yesOrNo := Confirmation()
+	if yesOrNo == false {
+		return nil
+	}
 	txHash, err := tx.Execute()
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("tx hash: %s\n", txHash)
+	fmt.Printf("\nTransaction sucessful, Tx hash: %s\n", txHash)
 	tx.Report()
 	return nil
 }
@@ -34,4 +35,15 @@ func HandleTxs(txs Txs) error {
 		}
 	}
 	return nil
+}
+
+func Confirmation() bool {
+	fmt.Println("\nContinue [y/n] ?\n")
+	var yesOrNo string
+	fmt.Scanf("%s", &yesOrNo)
+	if yesOrNo == "y" || yesOrNo == "yes" {
+		return true
+	}
+	fmt.Println("Skip this transaction\n")
+	return false
 }

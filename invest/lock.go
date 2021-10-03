@@ -14,7 +14,7 @@ func MakeLockTxs(keyName string, duration string) (transaction.Txs, error) {
 
 	gammCoins := sdk.Coins{}
 	for _, coin := range balances {
-		if coin.Denom[:4] == "gamm" {
+		if coin.Denom[:4] == "gamm" && coin.Amount != sdk.NewInt(0) {
 			gammCoins = append(gammCoins, coin)
 		}
 	}

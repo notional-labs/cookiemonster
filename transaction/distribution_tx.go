@@ -21,7 +21,7 @@ func ClaimReward(keyName string, gas uint64) (string, error) {
 
 	queryClient := types.NewQueryClient(clientCtx)
 	delValsRes, err := queryClient.DelegatorValidators(context.Background(), &types.QueryDelegatorValidatorsRequest{DelegatorAddress: delAddr.String()})
-	fmt.Println(delValsRes)
+	// fmt.Println(delValsRes)
 	if err != nil {
 		return "", err
 	}
@@ -69,18 +69,24 @@ type ClaimTx struct {
 
 func (claimTx ClaimTx) Execute() (string, error) {
 	keyName := claimTx.KeyName
-	gas := 800000
+	gas := 2000000
 	var err error
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
+		fmt.Println("\n---------------")
+		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = ClaimReward(keyName, uint64(gas))
+
 		if err == nil {
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
 			gas += 300000
+		} else {
+			fmt.Println("\n" + err.Error() + " try again\n")
 		}
 	}
 	return txHash, err
@@ -94,15 +100,14 @@ func (claimTx ClaimTx) Report() {
 
 	f.WriteString("\nClaim Reward Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")
-	f.WriteString(transactionSeperator)
+	f.WriteString(Seperator)
 
 	f.Close()
 }
 
 func (claimTx ClaimTx) Prompt() {
 	keyName := claimTx.KeyName
-	fmt.Print(transactionSeperator)
-	fmt.Print(transactionSeperator)
+	fmt.Print(Seperator)
 	fmt.Print("\nClaim Reward Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nClaim Reward Option\n\n")

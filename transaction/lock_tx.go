@@ -28,11 +28,11 @@ func Lock(keyName string, lockOpt LockOption, gas uint64) (string, error) {
 	var durationString string
 
 	if lockOpt.Duration == "14days" {
-		durationString = "1209600000002480"
+		durationString = "1209600s"
 	} else if lockOpt.Duration == "7days" {
-		durationString = "604800000007913"
+		durationString = "604800s"
 	} else if lockOpt.Duration == "1day" {
-		durationString = "86400000001496"
+		durationString = "86400s"
 	} else {
 		return "", fmt.Errorf("unknown duration (bonding period)")
 	}
@@ -79,21 +79,25 @@ func (lockTx LockTx) Execute() (string, error) {
 
 	keyName := lockTx.KeyName
 	lockOpt := lockTx.LockOpt
-	gas := 800000
+	gas := 2000000
 	var err error
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
-		fmt.Println(i, "try")
+		fmt.Println("\n---------------")
+		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = Lock(keyName, lockOpt, uint64(gas))
+
 		if err == nil {
 			return txHash, nil
 		}
-		if err.Error() != "insufficient fee" {
-			return txHash, err
+		if err.Error() == "insufficient fee" {
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			gas += 300000
+		} else {
+			fmt.Println("\n" + err.Error() + " try again\n")
 		}
-		gas += 300000
 	}
 	return txHash, err
 }
@@ -111,7 +115,7 @@ func (lockTx LockTx) Report() {
 
 	txData, _ := yaml.Marshal(lockOpt)
 	_, _ = f.Write(txData)
-	f.WriteString(transactionSeperator)
+	f.WriteString(Seperator)
 
 	f.Close()
 }
@@ -119,7 +123,7 @@ func (lockTx LockTx) Report() {
 func (lockTx LockTx) Prompt() {
 	lockOpt := lockTx.LockOpt
 	keyName := lockTx.KeyName
-	fmt.Print(transactionSeperator)
+	fmt.Print(Seperator)
 	fmt.Print("\nLock Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nLock Option\n\n")

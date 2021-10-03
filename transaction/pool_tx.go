@@ -80,14 +80,18 @@ func (joinPoolTx JoinPoolTx) Execute() (string, error) {
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
+		fmt.Println("\n---------------")
+		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = JoinPool(keyName, joinPoolOpt, uint64(gas))
 		if err == nil {
 			return txHash, nil
 		}
-		if err.Error() != "insufficient fee" {
-			return txHash, err
+		if err.Error() == "insufficient fee" {
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			gas += 300000
+		} else {
+			fmt.Println("\n" + err.Error() + " try again\n")
 		}
-		gas += 300000
 	}
 	return txHash, err
 }
@@ -105,7 +109,7 @@ func (joinPoolTx JoinPoolTx) Report() {
 
 	txData, _ := yaml.Marshal(joinPoolOpt)
 	_, _ = f.Write(txData)
-	f.WriteString(transactionSeperator)
+	f.WriteString(Seperator)
 
 	f.Close()
 }
@@ -113,7 +117,7 @@ func (joinPoolTx JoinPoolTx) Report() {
 func (joinPoolTx JoinPoolTx) Prompt() {
 	joinPoolOpt := joinPoolTx.JoinPoolOpt
 	keyName := joinPoolTx.KeyName
-	fmt.Print(transactionSeperator)
+	fmt.Print(Seperator)
 	fmt.Print("\nJoin Pool Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nJoin Pool Option\n\n")
@@ -182,21 +186,24 @@ func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
 
 	keyName := swapAndPoolTx.KeyName
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
-	gas := 800000
+	gas := 1000000
 	var err error
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
-		fmt.Println(i, "try")
+		fmt.Println("\n---------------")
+		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = SwapAndPool(keyName, swapAndPoolOpt, uint64(gas))
 		if err == nil {
 			return txHash, nil
 		}
-		if err.Error() != "insufficient fee" {
-			return txHash, err
+		if err.Error() == "insufficient fee" {
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			gas += 300000
+		} else {
+			fmt.Println("\n" + err.Error() + " try again\n")
 		}
-		gas += 300000
 	}
 	return txHash, err
 }
@@ -214,7 +221,7 @@ func (swapAndPoolTx SwapAndPoolTx) Report() {
 
 	txData, _ := yaml.Marshal(swapAndPoolOpt)
 	_, _ = f.Write(txData)
-	f.WriteString(transactionSeperator)
+	f.WriteString(Seperator)
 
 	f.Close()
 }
@@ -222,7 +229,7 @@ func (swapAndPoolTx SwapAndPoolTx) Report() {
 func (swapAndPoolTx SwapAndPoolTx) Prompt() {
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
 	keyName := swapAndPoolTx.KeyName
-	fmt.Print(transactionSeperator)
+	fmt.Print(Seperator)
 	fmt.Print("\nSwap And Pool Transaction\n")
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nSwap And Pool Option\n\n")

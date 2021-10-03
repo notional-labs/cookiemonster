@@ -63,20 +63,24 @@ func (delegateTx DelegateTx) Execute() (string, error) {
 
 	keyName := delegateTx.KeyName
 	delegateOpt := delegateTx.DelegateOpt
-	gas := 800000
+	gas := 2000000
 	var err error
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
 	for i := 0; i < 4; i++ {
+		fmt.Println("\n---------------")
+		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = Delegate(keyName, delegateOpt, uint64(gas))
 		if err == nil {
 			return txHash, nil
 		}
-		if err.Error() != "insufficient fee" {
-			return txHash, err
+		if err.Error() == "insufficient fee" {
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			gas += 300000
+		} else {
+			fmt.Println("\n" + err.Error() + " try again\n")
 		}
-		gas += 300000
 	}
 	return txHash, err
 }
@@ -94,7 +98,7 @@ func (delegateTx DelegateTx) Report() {
 
 	txData, _ := yaml.Marshal(delegateOpt)
 	_, _ = f.Write(txData)
-	f.WriteString(transactionSeperator)
+	f.WriteString(Seperator)
 
 	f.Close()
 }
@@ -107,5 +111,5 @@ func (delegateTx DelegateTx) Prompt() {
 	fmt.Print("\nKeyname: " + keyName + "\n")
 	fmt.Print("\nDelegate Option\n\n")
 	fmt.Printf("%+v\n", delegateOpt)
-	fmt.Print(transactionSeperator)
+	fmt.Print(Seperator)
 }

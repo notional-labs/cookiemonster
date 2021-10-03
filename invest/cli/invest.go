@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/client/flags"
 
 	"github.com/notional-labs/cookiemonster/invest"
@@ -21,7 +19,6 @@ func NewInvestCmd() *cobra.Command {
 				return err
 			}
 			for _, investment := range investments {
-				fmt.Printf("%+v\n", investment)
 				err := investment.Invest()
 				if err != nil {
 					return err
