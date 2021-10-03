@@ -44,7 +44,7 @@ func main() {
 	// 	fmt.Println(err.Error())
 	// }
 	userHomeDir, _ := os.UserHomeDir()
-	investments, _ := invest.LoadInvestmentsFromFile(userHomeDir + "/cookiemonster/investments.json")
+	investments, _ := invest.LoadInvestmentsFromFile(userHomeDir + "/auto-farm/investments.json")
 	investment := investments[0]
 	strategy := investment.PoolStrategy
 

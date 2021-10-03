@@ -19,8 +19,8 @@ type Investment struct {
 	PoolPercentage  int
 	StakePercentage int
 	PoolStrategy    PoolStrategy
-	StakeAddress    string
 	Duration        string
+	StakeAddress    string
 }
 
 type Investments []Investment
