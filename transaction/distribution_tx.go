@@ -94,11 +94,11 @@ func (claimTx ClaimTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (claimTx ClaimTx) Report() {
+func (claimTx ClaimTx) Report(reportPath string) {
 
 	keyName := claimTx.KeyName
 
-	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	f.WriteString("\nClaim Reward Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")

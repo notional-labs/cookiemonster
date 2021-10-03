@@ -4,12 +4,10 @@ import (
 
 	// "github.com/osmosis-labs/osmosis/app/params"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	investcli "github.com/notional-labs/cookiemonster/invest/cli"
 	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/spf13/cobra"
-	libscli "github.com/tendermint/tendermint/libs/cli"
 	// "github.com/spf13/viper"
 )
 
@@ -24,8 +22,6 @@ func NewRootCmd() *cobra.Command {
 		keys.Commands(osmosis.HomeDir),
 	)
 
-	rootCmd.Flags().String(libscli.HomeFlag, osmosis.HomeDir, "node's home directory")
-	rootCmd.Flags().String(flags.FlagChainID, osmosis.ChainId, "genesis file chain-id, if left blank will be randomly created")
 	return rootCmd
 }
 

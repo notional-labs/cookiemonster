@@ -89,13 +89,13 @@ func (bankSendTx BankSendTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (bankSendTx BankSendTx) Report() {
+func (bankSendTx BankSendTx) Report(reportPath string) {
 
 	bankSendOpt := bankSendTx.BankSendOpt
 	keyName := bankSendTx.KeyName
 	hash := bankSendTx.Hash
 
-	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	f.WriteString("\nBank Send Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")

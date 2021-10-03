@@ -104,12 +104,12 @@ func (lockTx LockTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (lockTx LockTx) Report() {
+func (lockTx LockTx) Report(reportPath string) {
 
 	lockOpt := lockTx.LockOpt
 	keyName := lockTx.KeyName
 
-	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	f.WriteString("\nLock Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")

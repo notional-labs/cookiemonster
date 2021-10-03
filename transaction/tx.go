@@ -4,14 +4,14 @@ import "fmt"
 
 type Tx interface {
 	Execute() (string, error)
-	Report()
+	Report(string)
 	Prompt()
 	// Type() string
 }
 
 type Txs []Tx
 
-func HandleTx(tx Tx) error {
+func HandleTx(tx Tx, reportPath string) error {
 	tx.Prompt()
 	yesOrNo := Confirmation()
 	if yesOrNo == false {
@@ -23,13 +23,15 @@ func HandleTx(tx Tx) error {
 	}
 
 	fmt.Printf("\nTransaction sucessful, Tx hash: %s\n", txHash)
-	tx.Report()
+	if reportPath != "" {
+		tx.Report(reportPath)
+	}
 	return nil
 }
 
-func HandleTxs(txs Txs) error {
+func HandleTxs(txs Txs, reportPath string) error {
 	for _, tx := range txs {
-		err := HandleTx(tx)
+		err := HandleTx(tx, reportPath)
 		if err != nil {
 			return err
 		}

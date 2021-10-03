@@ -87,12 +87,12 @@ func (delegateTx DelegateTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (delegateTx DelegateTx) Report() {
+func (delegateTx DelegateTx) Report(reportPath string) {
 
 	delegateOpt := delegateTx.DelegateOpt
 	keyName := delegateTx.KeyName
 
-	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	f.WriteString("\nDelegate Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")

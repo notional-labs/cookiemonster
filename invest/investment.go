@@ -26,14 +26,14 @@ type Investment struct {
 
 type Investments []Investment
 
-func (investment Investment) Invest() error {
+func (investment Investment) Invest(reportPath string) error {
 
 	keyName := investment.KeyName
 
 	// 1 claim reward
 	claimTx := transaction.ClaimTx{KeyName: keyName}
 	// execute claim tx right away
-	err := transaction.HandleTx(claimTx)
+	err := transaction.HandleTx(claimTx, reportPath)
 	if err != nil {
 		return err
 	}
@@ -46,14 +46,14 @@ func (investment Investment) Invest() error {
 	// poling
 	poolStrategy := investment.PoolStrategy
 	totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
-	err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration)
+	err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration, reportPath)
 	if err != nil {
 		return err
 	}
 
 	// staking
 	stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
-	err = Stake(keyName, stakeAmount, investment.StakeAddress)
+	err = Stake(keyName, stakeAmount, investment.StakeAddress, reportPath)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func LoadInvestmentsFromFile(fileLocation string) ([]Investment, error) {
 	return investments, nil
 }
 
-func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string) error {
+func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string, reportPath string) error {
 	// fmt.Println(transaction.Seperator)
 	// fmt.Println("\nPooling:")
 	// 2 pool
@@ -91,7 +91,7 @@ func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrate
 	// create pooling transaction from strategy, keyname, totalpoolamount
 	swapAndPoolTxs := MakeSwapAndPoolTxs(keyName, totalPoolAmount, poolStrategy)
 
-	err := transaction.HandleTxs(swapAndPoolTxs)
+	err := transaction.HandleTxs(swapAndPoolTxs, reportPath)
 	if err != nil {
 		return err
 	}
@@ -100,14 +100,14 @@ func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrate
 	if err != nil {
 		return err
 	}
-	err = transaction.HandleTxs(lockTxs)
+	err = transaction.HandleTxs(lockTxs, reportPath)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func Stake(keyName string, stakeAmount *big.Int, stakeAddress string) error {
+func Stake(keyName string, stakeAmount *big.Int, stakeAddress string, reportPath string) error {
 	if stakeAddress != "" {
 		valAddress, err := sdk.ValAddressFromBech32(stakeAddress)
 		if err != nil {
@@ -121,7 +121,7 @@ func Stake(keyName string, stakeAmount *big.Int, stakeAddress string) error {
 			Denom:   "uosmo",
 		}
 		delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
-		err = transaction.HandleTx(delegateTx)
+		err = transaction.HandleTx(delegateTx, reportPath)
 		if err != nil {
 			return err
 		}

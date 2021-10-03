@@ -127,12 +127,12 @@ func (swapTx SwapTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (swapTx SwapTx) Report() {
+func (swapTx SwapTx) Report(reportPath string) {
 
 	swapOpt := swapTx.SwapOpt
 	keyName := swapTx.KeyName
 
-	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	f.WriteString("\nSwap Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")

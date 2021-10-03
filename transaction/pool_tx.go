@@ -98,12 +98,12 @@ func (joinPoolTx JoinPoolTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (joinPoolTx JoinPoolTx) Report() {
+func (joinPoolTx JoinPoolTx) Report(reportPath string) {
 
 	joinPoolOpt := joinPoolTx.JoinPoolOpt
 	keyName := joinPoolTx.KeyName
 
-	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	f.WriteString("\nJoin Pool Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")
@@ -213,12 +213,12 @@ func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
 	return txHash, err
 }
 
-func (swapAndPoolTx SwapAndPoolTx) Report() {
+func (swapAndPoolTx SwapAndPoolTx) Report(reportPath string) {
 
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
 	keyName := swapAndPoolTx.KeyName
 
-	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	f.WriteString("\nSwap And Pool Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")

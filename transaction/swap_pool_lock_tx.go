@@ -17,12 +17,12 @@ package transaction
 // 	swapAndPoolAndLockTx.Lock.Execute()
 // }
 
-// func (swapAndPoolAndLockTx SwapAndPoolAndLockTx) Report() {
+// func (swapAndPoolAndLockTx SwapAndPoolAndLockTx) Report(reportPath string) {
 
 // 	swapAndPoolAndLockOpt := swapAndPoolAndLockTx.SwapAndPoolAndLockOpt
 // 	keyName := swapAndPoolAndLockTx.KeyName
 
-// 	f, _ := os.OpenFile("report", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+// 	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 // 	f.WriteString("\nSwapAndPoolAndLock Transaction\n")
 // 	f.WriteString("\nKeyname: " + keyName + "\n")
