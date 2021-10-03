@@ -57,6 +57,7 @@ func Delegate(keyName string, delegateOpt DelegateOption, gas uint64) (string, e
 type DelegateTx struct {
 	KeyName     string
 	DelegateOpt DelegateOption
+	Hash        string
 }
 
 func (delegateTx DelegateTx) Execute() (string, error) {
@@ -73,6 +74,7 @@ func (delegateTx DelegateTx) Execute() (string, error) {
 		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = Delegate(keyName, delegateOpt, uint64(gas))
 		if err == nil {
+			delegateTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
@@ -98,6 +100,7 @@ func (delegateTx DelegateTx) Report() {
 
 	txData, _ := yaml.Marshal(delegateOpt)
 	_, _ = f.Write(txData)
+	f.WriteString("\ntx hash: " + delegateTx.Hash + "\n")
 	f.WriteString(Seperator)
 
 	f.Close()

@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	FlagReport = "report"
+)
+
 func NewInvestCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "invest [path_to_investments_json]",
@@ -28,6 +32,6 @@ func NewInvestCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().String(flags.FlagNode, osmosis.Node, "<host>:<port> to Tendermint RPC interface for this chain")
-
+	cmd.Flags().String(FlagReport, "", "path to transaction report")
 	return cmd
 }

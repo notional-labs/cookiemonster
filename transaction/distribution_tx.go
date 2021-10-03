@@ -65,6 +65,7 @@ func ClaimReward(keyName string, gas uint64) (string, error) {
 
 type ClaimTx struct {
 	KeyName string
+	Hash    string
 }
 
 func (claimTx ClaimTx) Execute() (string, error) {
@@ -80,6 +81,7 @@ func (claimTx ClaimTx) Execute() (string, error) {
 		txHash, err = ClaimReward(keyName, uint64(gas))
 
 		if err == nil {
+			claimTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
@@ -100,6 +102,7 @@ func (claimTx ClaimTx) Report() {
 
 	f.WriteString("\nClaim Reward Transaction\n")
 	f.WriteString("\nKeyname: " + keyName + "\n")
+	f.WriteString("\ntx hash: " + claimTx.Hash + "\n")
 	f.WriteString(Seperator)
 
 	f.Close()

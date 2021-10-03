@@ -73,6 +73,7 @@ func Lock(keyName string, lockOpt LockOption, gas uint64) (string, error) {
 type LockTx struct {
 	KeyName string
 	LockOpt LockOption
+	Hash    string
 }
 
 func (lockTx LockTx) Execute() (string, error) {
@@ -90,6 +91,7 @@ func (lockTx LockTx) Execute() (string, error) {
 		txHash, err = Lock(keyName, lockOpt, uint64(gas))
 
 		if err == nil {
+			lockTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
@@ -115,6 +117,7 @@ func (lockTx LockTx) Report() {
 
 	txData, _ := yaml.Marshal(lockOpt)
 	_, _ = f.Write(txData)
+	f.WriteString("\ntx hash: " + lockTx.Hash + "\n")
 	f.WriteString(Seperator)
 
 	f.Close()

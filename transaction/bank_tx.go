@@ -74,9 +74,9 @@ func (bankSendTx BankSendTx) Execute() (string, error) {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = BankSend(keyName, bankSendOpt, uint64(gas))
-		bankSendTx.Hash = txHash
 
 		if err == nil {
+			bankSendTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {

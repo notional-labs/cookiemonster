@@ -67,6 +67,7 @@ func JoinPool(keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, e
 type JoinPoolTx struct {
 	KeyName     string
 	JoinPoolOpt JoinPoolOption
+	Hash        string
 }
 
 func (joinPoolTx JoinPoolTx) Execute() (string, error) {
@@ -84,6 +85,7 @@ func (joinPoolTx JoinPoolTx) Execute() (string, error) {
 		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = JoinPool(keyName, joinPoolOpt, uint64(gas))
 		if err == nil {
+			joinPoolTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
@@ -109,6 +111,7 @@ func (joinPoolTx JoinPoolTx) Report() {
 
 	txData, _ := yaml.Marshal(joinPoolOpt)
 	_, _ = f.Write(txData)
+	f.WriteString("\ntx hash: " + joinPoolTx.Hash + "\n")
 	f.WriteString(Seperator)
 
 	f.Close()
@@ -180,6 +183,7 @@ func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64
 type SwapAndPoolTx struct {
 	KeyName        string
 	SwapAndPoolOpt SwapAndPoolOption
+	Hash           string
 }
 
 func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
@@ -196,6 +200,7 @@ func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
 		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = SwapAndPool(keyName, swapAndPoolOpt, uint64(gas))
 		if err == nil {
+			swapAndPoolTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
@@ -221,6 +226,7 @@ func (swapAndPoolTx SwapAndPoolTx) Report() {
 
 	txData, _ := yaml.Marshal(swapAndPoolOpt)
 	_, _ = f.Write(txData)
+	f.WriteString("\ntx hash: " + swapAndPoolTx.Hash + "\n")
 	f.WriteString(Seperator)
 
 	f.Close()

@@ -97,6 +97,7 @@ func Swap(keyName string, swapOpt SwapOption, gas uint64) (string, error) {
 type SwapTx struct {
 	KeyName string
 	SwapOpt SwapOption
+	Hash    string
 }
 
 func (swapTx SwapTx) Execute() (string, error) {
@@ -113,6 +114,7 @@ func (swapTx SwapTx) Execute() (string, error) {
 		fmt.Printf("\n Try %d times\n\n", i+1)
 		txHash, err = Swap(keyName, swapOpt, uint64(gas))
 		if err == nil {
+			swapTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
@@ -138,6 +140,7 @@ func (swapTx SwapTx) Report() {
 
 	txData, _ := yaml.Marshal(swapOpt)
 	_, _ = f.Write(txData)
+	f.WriteString("\ntx hash: " + swapTx.Hash + "\n")
 	f.WriteString(Seperator)
 
 	f.Close()
