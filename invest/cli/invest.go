@@ -3,7 +3,10 @@ package cli
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
+
 	"github.com/notional-labs/cookiemonster/invest"
+	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +30,7 @@ func NewInvestCmd() *cobra.Command {
 			return nil
 		},
 	}
+	cmd.Flags().String(flags.FlagNode, osmosis.Node, "<host>:<port> to Tendermint RPC interface for this chain")
 
 	return cmd
 }

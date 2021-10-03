@@ -182,7 +182,7 @@ func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
 
 	keyName := swapAndPoolTx.KeyName
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
-	gas := 200000
+	gas := 800000
 	var err error
 	var txHash string
 

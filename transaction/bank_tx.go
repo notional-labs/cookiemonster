@@ -65,7 +65,7 @@ type BankSendTx struct {
 func (bankSendTx BankSendTx) Execute() (string, error) {
 	keyName := bankSendTx.KeyName
 	bankSendOpt := bankSendTx.BankSendOpt
-	gas := 200000
+	gas := 800000
 	var err error
 	var txHash string
 

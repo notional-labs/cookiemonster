@@ -79,7 +79,7 @@ func (lockTx LockTx) Execute() (string, error) {
 
 	keyName := lockTx.KeyName
 	lockOpt := lockTx.LockOpt
-	gas := 200000
+	gas := 800000
 	var err error
 	var txHash string
 

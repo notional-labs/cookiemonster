@@ -63,7 +63,7 @@ func (delegateTx DelegateTx) Execute() (string, error) {
 
 	keyName := delegateTx.KeyName
 	delegateOpt := delegateTx.DelegateOpt
-	gas := 200000
+	gas := 800000
 	var err error
 	var txHash string
 
