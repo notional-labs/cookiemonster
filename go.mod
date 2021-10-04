@@ -98,6 +98,24 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+require (
+	github.com/Workiva/go-datastructures v1.0.52 // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
+	github.com/gogo/gateway v1.1.0 // indirect
+	github.com/google/orderedcode v0.0.1 // indirect
+	github.com/gorilla/handlers v1.5.1 // indirect
+	github.com/minio/highwayhash v1.0.1 // indirect
+	github.com/rakyll/statik v0.1.7 // indirect
+	github.com/rs/cors v1.7.0 // indirect
+	github.com/rs/zerolog v1.21.0 // indirect
+)
+
+replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
+
+replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
+
+replace github.com/tendermint/tendermint => github.com/tendermint/tendermint v0.34.12
 
 replace github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.42.10-0.20210915013958-01114e89a579
+
+replace github.com/tendermint/tm-db => github.com/osmosis-labs/tm-db v0.6.5-0.20210911033928-ba9154613417

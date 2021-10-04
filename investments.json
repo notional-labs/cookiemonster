@@ -1,0 +1,11 @@
+[
+{
+    "KeyName":"koule",
+    "TransferTo":{},
+    "PoolPercentage":5,
+    "StakePercentage":0,
+    "PoolStrategy":{"Name":"custom","Config":{"1":100},"ConfigDenom":"percentages"},
+    "Duration":"14days",
+    "StakeAddress":""
+}
+]

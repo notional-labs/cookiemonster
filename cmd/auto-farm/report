@@ -1,0 +1,152 @@
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "470188"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "385554"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "218909"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "188262"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "150572"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "77417"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "69676"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "62708"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Swap And Pool Transaction
+
+Keyname: koule
+
+Swap And Pool Option
+
+poolid: 1
+tokeninamount: "59573"
+tokenindenom: uosmo
+shareoutminamount: "1"
+
+
+==========================================
+
+Lock Transaction
+
+Keyname: koule
+
+Lock Option
+
+duration: 14days
+amount: "640361450876364891"
+denom: gamm/pool/1
+
+
+==========================================
+
+Lock Transaction
+
+Keyname: koule
+
+Lock Option
+
+duration: 14days
+amount: "228447829239519447"
+denom: gamm/pool/2
+
+
+==========================================
