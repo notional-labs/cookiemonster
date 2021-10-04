@@ -1,6 +1,8 @@
 package invest
 
 import (
+	"math/big"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/notional-labs/cookiemonster/query"
 	"github.com/notional-labs/cookiemonster/transaction"
@@ -14,7 +16,7 @@ func MakeLockTxs(keyName string, duration string) (transaction.Txs, error) {
 
 	gammCoins := sdk.Coins{}
 	for _, coin := range balances {
-		if coin.Denom[:4] == "gamm" && coin.Amount != sdk.NewInt(0) {
+		if coin.Denom[:4] == "gamm" && coin.Amount.BigInt().Cmp(big.NewInt(0)) != 0 {
 			gammCoins = append(gammCoins, coin)
 		}
 	}
