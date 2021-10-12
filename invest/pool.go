@@ -35,6 +35,7 @@ func MakeSwapAndPoolTxs(keyName string, totalPoolAmount *big.Int, poolStrategy P
 	return txBatch
 }
 
+// Make Map to decide which pool to pool and how much to pool in each pool
 func MakeMapFromPoolToUosmoAmount(totalPoolAmount *big.Int, poolStrategy PoolStrategy) (MapFromPoolToUosmoAmount, error) {
 	if poolStrategy.ConfigDenom == "percentages" {
 		mapFromPoolToUosmoAmount := MapFromPoolToUosmoAmount{}
@@ -64,7 +65,6 @@ func MakeMapFromPoolToUosmoAmount(totalPoolAmount *big.Int, poolStrategy PoolStr
 		return mapFromPoolToUosmoAmount, nil
 	} else {
 		return nil, fmt.Errorf("unknown config denom")
-
 	}
 }
 

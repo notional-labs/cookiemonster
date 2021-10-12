@@ -9,6 +9,7 @@ import (
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cobra"
 
 	"github.com/notional-labs/cookiemonster/query"
 	"github.com/notional-labs/cookiemonster/transaction"
@@ -26,14 +27,14 @@ type Investment struct {
 
 type Investments []Investment
 
-func (investment Investment) Invest(reportPath string) error {
+func (investment Investment) Invest(cmd *cobra.Command, reportPath string) error {
 
 	keyName := investment.KeyName
 
 	// 1 claim reward
 	claimTx := transaction.ClaimTx{KeyName: keyName}
 	// execute claim tx right away
-	err := transaction.HandleTx(claimTx, reportPath)
+	err := transaction.HandleTx(claimTx, reportPath, cmd)
 	if err != nil {
 		return err
 	}
@@ -82,12 +83,6 @@ func LoadInvestmentsFromFile(fileLocation string) ([]Investment, error) {
 }
 
 func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string, reportPath string) error {
-	// fmt.Println(transaction.Seperator)
-	// fmt.Println("\nPooling:")
-	// 2 pool
-	// caculate pool amount = pool percentage of uosmoBalance
-
-	// fmt.Println("\nTotal Pool Amount: " + totalPoolAmount.String() + "uosmo\n")
 	// create pooling transaction from strategy, keyname, totalpoolamount
 	swapAndPoolTxs := MakeSwapAndPoolTxs(keyName, totalPoolAmount, poolStrategy)
 
@@ -113,8 +108,6 @@ func Stake(keyName string, stakeAmount *big.Int, stakeAddress string, reportPath
 		if err != nil {
 			return err
 		}
-		// 3 stake
-
 		delegateOpt := transaction.DelegateOption{
 			Amount:  sdk.NewIntFromBigInt(stakeAmount),
 			ValAddr: valAddress,

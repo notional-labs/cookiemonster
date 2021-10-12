@@ -1,23 +1,28 @@
 package transaction
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
 
 type Tx interface {
-	Execute() (string, error)
+	Execute(*cobra.Command) (string, error)
 	Report(string)
 	Prompt()
-	// Type() string
 }
 
 type Txs []Tx
 
-func HandleTx(tx Tx, reportPath string) error {
+// HandleTx print out the info of transaction, ask for permission, execute transaction
+// and log to a file in reportPath
+func HandleTx(tx Tx, cmd *cobra.Command, reportPath string) error {
 	tx.Prompt()
-	yesOrNo := Confirmation()
-	if yesOrNo == false {
+	yes := Confirmation()
+	if !yes {
 		return nil
 	}
-	txHash, err := tx.Execute()
+	txHash, err := tx.Execute(cmd)
 	if err != nil {
 		return err
 	}
@@ -29,9 +34,9 @@ func HandleTx(tx Tx, reportPath string) error {
 	return nil
 }
 
-func HandleTxs(txs Txs, reportPath string) error {
+func HandleTxs(txs Txs, cmd *cobra.Command, reportPath string) error {
 	for _, tx := range txs {
-		err := HandleTx(tx, reportPath)
+		err := HandleTx(tx, cmd, reportPath)
 		if err != nil {
 			return err
 		}
@@ -40,12 +45,12 @@ func HandleTxs(txs Txs, reportPath string) error {
 }
 
 func Confirmation() bool {
-	fmt.Println("\nContinue [y/n] ?\n")
+	fmt.Print("\nContinue [y/n] ?\n\n")
 	var yesOrNo string
 	fmt.Scanf("%s", &yesOrNo)
 	if yesOrNo == "y" || yesOrNo == "yes" {
 		return true
 	}
-	fmt.Println("Skip this transaction\n")
+	fmt.Print("Skip this transaction\n\n")
 	return false
 }

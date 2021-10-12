@@ -5,15 +5,20 @@ import (
 
 	"math/big"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
+	"github.com/spf13/cobra"
 )
 
-func QueryBalances(keyName string) (sdk.Coins, error) {
+func QueryBalances(cmd *cobra.Command, keyName string) (sdk.Coins, error) {
 	// build context
-	clientCtx := osmosis.GetDefaultClientContext()
+	clientCtx, err := client.GetClientQueryContext(cmd)
+	if err != nil {
+		return nil, err
+	}
 	addr, err := GetAddressFromKey(clientCtx, keyName)
 	if err != nil {
 		return nil, err
@@ -28,7 +33,7 @@ func QueryBalances(keyName string) (sdk.Coins, error) {
 		CountTotal: false,
 	}
 	params := types.NewQueryAllBalancesRequest(addr, pageReq)
-	res, err := queryClient.AllBalances(context.Background(), params)
+	res, err := queryClient.AllBalances(cmd.Context(), params)
 	if err != nil {
 		return nil, err
 	}

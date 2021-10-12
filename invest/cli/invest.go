@@ -4,9 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 
 	"github.com/notional-labs/cookiemonster/invest"
-	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 const (
@@ -26,7 +24,7 @@ func NewInvestCmd() *cobra.Command {
 
 			// report path is the path to tranasaction report file
 			reportPath, _ := cmd.Flags().GetString(FlagReport)
-			SetNode(cmd.Flags())
+
 			for _, investment := range investments {
 				err := investment.Invest(reportPath)
 				if err != nil {
@@ -36,13 +34,7 @@ func NewInvestCmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().String(flags.FlagNode, osmosis.Node, "<host>:<port> to Tendermint RPC interface for this chain")
 	cmd.Flags().String(FlagReport, "", "path to transaction report")
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
-}
-
-func SetNode(flagSet *pflag.FlagSet) {
-	if flagSet.Changed(flags.FlagNode) {
-		osmosis.Node, _ = flagSet.GetString(flags.FlagNode)
-	}
 }

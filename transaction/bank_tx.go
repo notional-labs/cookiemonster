@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/notional-labs/cookiemonster/query"
+
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -17,14 +21,15 @@ type BankSendOption struct {
 	Amount sdk.Int
 }
 
-func BankSend(keyName string, bankSendOpt BankSendOption, gas uint64) (string, error) {
+func BankSend(cmd *cobra.Command, keyName string, bankSendOpt BankSendOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.GetDefaultClientContext()
-	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+
+	cmd.Flags().Set(flags.FlagFrom, keyName)
+	clientCtx, err := client.GetClientTxContext(cmd)
 	if err != nil {
-		return "", err
+		return "", nil
 	}
-	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
+	txf := tx.NewFactoryCLI(clientCtx, cmd.Flags())
 
 	// build msg for tx
 	toAddr := bankSendOpt.ToAddr
@@ -62,7 +67,7 @@ type BankSendTx struct {
 	Hash        string
 }
 
-func (bankSendTx BankSendTx) Execute() (string, error) {
+func (bankSendTx BankSendTx) Execute(cmd *cobra.Command) (string, error) {
 	keyName := bankSendTx.KeyName
 	bankSendOpt := bankSendTx.BankSendOpt
 	gas := 2000000
@@ -73,14 +78,14 @@ func (bankSendTx BankSendTx) Execute() (string, error) {
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
-		txHash, err = BankSend(keyName, bankSendOpt, uint64(gas))
+		txHash, err = BankSend(cmd, keyName, bankSendOpt, uint64(gas))
 
 		if err == nil {
 			bankSendTx.Hash = txHash
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
-			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			fmt.Print("\nTx failed because of insufficient fee, try again with higher gas\n\n")
 			gas += 300000
 		} else {
 			fmt.Println("\n" + err.Error() + " try again\n")
