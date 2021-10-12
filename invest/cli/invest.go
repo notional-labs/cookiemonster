@@ -16,6 +16,7 @@ func NewInvestCmd() *cobra.Command {
 		Use:   "invest [path_to_investments_json]",
 		Short: "pool and stake on osmosis using instruction from a json file",
 		RunE: func(cmd *cobra.Command, args []string) error {
+
 			pathToInvestmentJson := args[0]
 			investments, err := invest.LoadInvestmentsFromFile(pathToInvestmentJson)
 			if err != nil {
@@ -26,7 +27,7 @@ func NewInvestCmd() *cobra.Command {
 			reportPath, _ := cmd.Flags().GetString(FlagReport)
 
 			for _, investment := range investments {
-				err := investment.Invest(reportPath)
+				err := investment.Invest(cmd, reportPath)
 				if err != nil {
 					return err
 				}

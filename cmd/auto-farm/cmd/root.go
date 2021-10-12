@@ -35,7 +35,8 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastBlock).
 		WithHomeDir(DefaultNodeHome()).
-		WithViper("OSMOSIS")
+		WithViper("OSMOSIS").
+		WithChainID("osmosis-1")
 
 	rootCmd := &cobra.Command{
 		Use:   "cookiemonster",
