@@ -2,16 +2,19 @@ package query
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/spf13/cobra"
 	"time"
-
-	"github.com/notional-labs/cookiemonster/osmosis"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
 )
 
-func QueryTx(txHash string) (*types.TxResponse, error) {
-	clientCtx := osmosis.GetDefaultClientContext()
+func QueryTx(cmd *cobra.Command, txHash string) (*types.TxResponse, error) {
+	clientCtx, err := client.GetClientQueryContext(cmd)
+	if err != nil {
+		return nil, err
+	}
 
 	if txHash == "" {
 		return nil, fmt.Errorf("argument should be a tx hash")
@@ -29,12 +32,12 @@ func QueryTx(txHash string) (*types.TxResponse, error) {
 	return output, nil
 }
 
-func QueryTxWithRetry(txHash string, trials int) (*types.TxResponse, error) {
+func QueryTxWithRetry(cmd *cobra.Command, txHash string, trials int) (*types.TxResponse, error) {
 	var broadcastedTx *types.TxResponse
 	var err error
 
 	for i := 0; i < trials; i++ {
-		broadcastedTx, err = QueryTx(txHash)
+		broadcastedTx, err = QueryTx(cmd, txHash)
 		if err == nil {
 			break
 		}

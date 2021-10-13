@@ -1,6 +1,7 @@
 package invest
 
 import (
+	"github.com/spf13/cobra"
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -8,8 +9,8 @@ import (
 	"github.com/notional-labs/cookiemonster/transaction"
 )
 
-func MakeLockTxs(keyName string, duration string) (transaction.Txs, error) {
-	balances, err := query.QueryBalances(keyName)
+func MakeLockTxs(cmd *cobra.Command, keyName string, duration string) (transaction.Txs, error) {
+	balances, err := query.QueryBalances(cmd, keyName)
 	if err != nil {
 		return nil, err
 	}

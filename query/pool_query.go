@@ -3,19 +3,24 @@ package query
 import (
 	"context"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/spf13/cobra"
 	"math"
 	"strconv"
 	"time"
 
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/notional-labs/cookiemonster/osmosis"
+
 	epoch "github.com/osmosis-labs/osmosis/x/epochs/types"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 )
 
-func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
-	clientCtx := osmosis.GetDefaultClientContext()
+func QuerySpotPrice(cmd *cobra.Command, poolId int, tokenInDenom string, tokenOutDenom string) (float64, error) {
+	clientCtx, err := client.GetClientTxContext(cmd)
+	if err != nil {
+		return -1, err
+	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 
@@ -33,8 +38,11 @@ func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (floa
 	return spotPrice, nil
 }
 
-func QueryPools() ([]types.Pool, error) {
-	clientCtx := osmosis.GetDefaultClientContext()
+func QueryPools(cmd *cobra.Command) ([]types.Pool, error) {
+	clientCtx, err := client.GetClientTxContext(cmd)
+	if err != nil {
+		return nil, err
+	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 
@@ -61,8 +69,11 @@ func QueryPools() ([]types.Pool, error) {
 	return pools, nil
 }
 
-func QueryPoolId(poolId int) (*types.Pool, error) {
-	clientCtx := osmosis.GetDefaultClientContext()
+func QueryPoolId(cmd *cobra.Command, poolId int) (*types.Pool, error) {
+	clientCtx, err := client.GetClientQueryContext(cmd)
+	if err != nil {
+		return nil, err
+	}
 
 	queryClient := types.NewQueryClient(clientCtx)
 

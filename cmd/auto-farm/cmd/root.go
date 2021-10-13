@@ -1,70 +1,101 @@
 package cmd
 
 import (
+	"context"
+	"os"
+	"path/filepath"
 
-	// "github.com/osmosis-labs/osmosis/app/params"
+	"github.com/osmosis-labs/osmosis/app/params"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/config"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/server"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	investcli "github.com/notional-labs/cookiemonster/invest/cli"
-	"github.com/notional-labs/cookiemonster/osmosis"
+	osmosisapp "github.com/osmosis-labs/osmosis/app"
 	"github.com/spf13/cobra"
+	tmcli "github.com/tendermint/tendermint/libs/cli"
 	// "github.com/spf13/viper"
 )
 
-// rootCmd represents the base command when called without any subcommands
-func NewRootCmd() *cobra.Command {
-	rootCmd := &cobra.Command{
-		Use:   "auto-invest",
-		Short: "auto-invest tool for osmosis",
-	}
-	rootCmd.AddCommand(
-		investcli.NewInvestCmd(),
-		keys.Commands(osmosis.HomeDir),
-	)
+// NewRootCmd creates a new root command for simd. It is called once in the
+// main function.
+func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
+	encodingConfig := osmosisapp.MakeEncodingConfig()
+	initClientCtx := client.Context{}.
+		WithJSONMarshaler(encodingConfig.Marshaler).
+		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
+		WithTxConfig(encodingConfig.TxConfig).
+		WithLegacyAmino(encodingConfig.Amino).
+		WithInput(os.Stdin).
+		WithAccountRetriever(types.AccountRetriever{}).
+		WithBroadcastMode(flags.BroadcastBlock).
+		WithHomeDir(DefaultNodeHome()).
+		WithViper("OSMOSIS").
+		WithChainID("osmosis-1")
 
-	return rootCmd
+	rootCmd := &cobra.Command{
+		Use:   "cookiemonster",
+		Short: "tool for auto pooling and staking to osmosis",
+		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+			initClientCtx = client.ReadHomeFlag(initClientCtx, cmd)
+
+			initClientCtx, err := config.ReadFromClientConfig(initClientCtx)
+			if err != nil {
+				return err
+			}
+
+			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
+				return err
+			}
+
+			return server.InterceptConfigsPreRunHandler(cmd)
+		},
+	}
+
+	initRootCmd(rootCmd, encodingConfig)
+
+	return rootCmd, encodingConfig
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-// func Execute(rootCmd *cobra.Command) {
-// 	rootCmd.Execute()
-// }
+func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
+	authclient.Codec = encodingConfig.Marshaler
 
-// func initRootCmd() {
-// 	cobra.OnInitialize(initConfig)
+	cfg := sdk.GetConfig()
+	cfg.Seal()
 
-// 	// Here you will define your flags and configuration settings.
-// 	// Cobra supports persistent flags, which, if defined here,
-// 	// will be global for your application.
+	// add keybase
+	rootCmd.AddCommand(
+		investcli.NewInvestCmd(),
+		keys.Commands(DefaultNodeHome()),
+	)
+}
 
-// 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.getrewards.yaml)")
+// Execute executes the root command.
+func Execute(rootCmd *cobra.Command) error {
+	// Create and set a client.Context on the command's Context. During the pre-run
+	// of the root command, a default initialized client.Context is provided to
+	// seed child command execution with values such as AccountRetriver, Keyring,
+	// and a Tendermint RPC. This requires the use of a pointer reference when
+	// getting and setting the client.Context. Ideally, we utilize
+	// https://github.com/spf13/cobra/pull/1118.
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, client.ClientContextKey, &client.Context{})
+	ctx = context.WithValue(ctx, server.ServerContextKey, server.NewDefaultContext())
 
-// 	// Cobra also supports local flags, which will only run
-// 	// when this action is called directly.
-// 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-// }
+	executor := tmcli.PrepareBaseCmd(rootCmd, "", osmosisapp.DefaultNodeHome)
+	return executor.ExecuteContext(ctx)
+}
 
-// // initConfig reads in config file and ENV variables if set.
-// func initConfig() {
-// 	if cfgFile != "" {
-// 		// Use config file from the flag.
-// 		viper.SetConfigFile(cfgFile)
-// 	} else {
-// 		// Find home directory.
-// 		home, err := os.UserHomeDir()
-// 		cobra.CheckErr(err)
-
-// 		// Search config in home directory with name ".getrewards" (without extension).
-// 		viper.AddConfigPath(home)
-// 		viper.SetConfigType("yaml")
-// 		viper.SetConfigName(".getrewards")
-// 	}
-
-// 	viper.AutomaticEnv() // read in environment variables that match
-
-// 	// If a config file is found, read it in.
-// 	if err := viper.ReadInConfig(); err == nil {
-// 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-// 	}
-// }
+func DefaultNodeHome() string {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	DefaultNodeHome := filepath.Join(userHomeDir, ".auto-invest")
+	return DefaultNodeHome
+}

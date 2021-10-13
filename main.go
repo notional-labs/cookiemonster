@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/notional-labs/cookiemonster/invest"
-	// "github.com/notional-labs/cookiemonster/osmosis"
+	//
 	// "github.com/notional-labs/cookiemonster/transaction"
 )
 

@@ -2,12 +2,15 @@ package transaction
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/notional-labs/cookiemonster/osmosis"
+
 	"github.com/notional-labs/cookiemonster/query"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -17,10 +20,11 @@ type DelegateOption struct {
 	Amount  sdk.Int
 }
 
-func Delegate(keyName string, delegateOpt DelegateOption, gas uint64) (string, error) {
+func Delegate(cmd *cobra.Command, keyName string, delegateOpt DelegateOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.GetDefaultClientContext()
-	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	cmd.Flags().Set(flags.FlagFrom, keyName)
+	clientCtx, err := client.GetClientTxContext(cmd)
+
 	if err != nil {
 		return "", err
 	}
@@ -40,7 +44,7 @@ func Delegate(keyName string, delegateOpt DelegateOption, gas uint64) (string, e
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -60,7 +64,7 @@ type DelegateTx struct {
 	Hash        string
 }
 
-func (delegateTx DelegateTx) Execute() (string, error) {
+func (delegateTx DelegateTx) Execute(cmd *cobra.Command) (string, error) {
 
 	keyName := delegateTx.KeyName
 	delegateOpt := delegateTx.DelegateOpt
@@ -72,7 +76,7 @@ func (delegateTx DelegateTx) Execute() (string, error) {
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
-		txHash, err = Delegate(keyName, delegateOpt, uint64(gas))
+		txHash, err = Delegate(cmd, keyName, delegateOpt, uint64(gas))
 		if err == nil {
 			delegateTx.Hash = txHash
 			return txHash, nil

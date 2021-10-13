@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/notional-labs/cookiemonster/osmosis"
+
 	"github.com/notional-labs/cookiemonster/query"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -56,10 +59,12 @@ func NewMsgSwapExactAmountIn(fromAddr sdk.AccAddress, swapOpt SwapOption) (sdk.M
 	return msg, nil
 }
 
-func Swap(keyName string, swapOpt SwapOption, gas uint64) (string, error) {
+func Swap(cmd *cobra.Command, keyName string, swapOpt SwapOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.GetDefaultClientContext()
-	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	cmd.Flags().Set(flags.FlagFrom, keyName)
+	clientCtx, err := client.GetClientTxContext(cmd)
+
+	clientCtx, err = SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
 	}
@@ -80,7 +85,7 @@ func Swap(keyName string, swapOpt SwapOption, gas uint64) (string, error) {
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -100,7 +105,7 @@ type SwapTx struct {
 	Hash    string
 }
 
-func (swapTx SwapTx) Execute() (string, error) {
+func (swapTx SwapTx) Execute(cmd *cobra.Command) (string, error) {
 
 	keyName := swapTx.KeyName
 	swapOpt := swapTx.SwapOpt
@@ -112,7 +117,7 @@ func (swapTx SwapTx) Execute() (string, error) {
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
-		txHash, err = Swap(keyName, swapOpt, uint64(gas))
+		txHash, err = Swap(cmd, keyName, swapOpt, uint64(gas))
 		if err == nil {
 			swapTx.Hash = txHash
 			return txHash, nil
