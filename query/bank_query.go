@@ -2,14 +2,12 @@ package query
 
 import (
 	"context"
-
 	"math/big"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/notional-labs/cookiemonster/osmosis"
 
 	"github.com/spf13/cobra"
 )
@@ -20,6 +18,7 @@ func QueryBalances(cmd *cobra.Command, keyName string) (sdk.Coins, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	addr, err := GetAddressFromKey(clientCtx, keyName)
 	if err != nil {
 		return nil, err
@@ -41,9 +40,13 @@ func QueryBalances(cmd *cobra.Command, keyName string) (sdk.Coins, error) {
 	return res.Balances, nil
 }
 
-func QueryUosmoBalance(keyName string) (*big.Int, error) {
+func QueryUosmoBalance(cmd *cobra.Command, keyName string) (*big.Int, error) {
 	// build context
-	clientCtx := osmosis.GetDefaultClientContext()
+	clientCtx, err := client.GetClientTxContext(cmd)
+	if err != nil {
+		return nil, err
+	}
+
 	addr, err := GetAddressFromKey(clientCtx, keyName)
 	if err != nil {
 		return nil, err

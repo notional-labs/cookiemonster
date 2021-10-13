@@ -24,7 +24,11 @@ type BankSendOption struct {
 func BankSend(cmd *cobra.Command, keyName string, bankSendOpt BankSendOption, gas uint64) (string, error) {
 	// build tx context
 
-	cmd.Flags().Set(flags.FlagFrom, keyName)
+	err := cmd.Flags().Set(flags.FlagFrom, keyName)
+	if err != nil {
+		return "", err
+	}
+
 	clientCtx, err := client.GetClientTxContext(cmd)
 	if err != nil {
 		return "", nil
@@ -46,7 +50,7 @@ func BankSend(cmd *cobra.Command, keyName string, bankSendOpt BankSendOption, ga
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
 
-	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
 	if err != nil {
 		return "", err
 	}

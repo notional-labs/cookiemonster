@@ -34,12 +34,12 @@ func (investment Investment) Invest(cmd *cobra.Command, reportPath string) error
 	// 1 claim reward
 	claimTx := transaction.ClaimTx{KeyName: keyName}
 	// execute claim tx right away
-	err := transaction.HandleTx(claimTx, reportPath, cmd)
+	err := transaction.HandleTx(claimTx, cmd, reportPath)
 	if err != nil {
 		return err
 	}
 
-	uosmoBalance, err := query.QueryUosmoBalance(keyName)
+	uosmoBalance, err := query.QueryUosmoBalance(cmd, keyName)
 	if err != nil {
 		return err
 	}
@@ -47,14 +47,14 @@ func (investment Investment) Invest(cmd *cobra.Command, reportPath string) error
 	// poling
 	poolStrategy := investment.PoolStrategy
 	totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
-	err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration, reportPath)
+	err = BatchPool(cmd, keyName, totalPoolAmount, poolStrategy, investment.Duration, reportPath)
 	if err != nil {
 		return err
 	}
 
 	// staking
 	stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
-	err = Stake(keyName, stakeAmount, investment.StakeAddress, reportPath)
+	err = Stake(cmd, keyName, stakeAmount, investment.StakeAddress, reportPath)
 	if err != nil {
 		return err
 	}
@@ -82,27 +82,27 @@ func LoadInvestmentsFromFile(fileLocation string) ([]Investment, error) {
 	return investments, nil
 }
 
-func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string, reportPath string) error {
+func BatchPool(cmd *cobra.Command, keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string, reportPath string) error {
 	// create pooling transaction from strategy, keyname, totalpoolamount
 	swapAndPoolTxs := MakeSwapAndPoolTxs(keyName, totalPoolAmount, poolStrategy)
 
-	err := transaction.HandleTxs(swapAndPoolTxs, reportPath)
+	err := transaction.HandleTxs(swapAndPoolTxs, cmd, reportPath)
 	if err != nil {
 		return err
 	}
-	lockTxs, err := MakeLockTxs(keyName, duration)
+	lockTxs, err := MakeLockTxs(cmd, keyName, duration)
 
 	if err != nil {
 		return err
 	}
-	err = transaction.HandleTxs(lockTxs, reportPath)
+	err = transaction.HandleTxs(lockTxs, cmd, reportPath)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func Stake(keyName string, stakeAmount *big.Int, stakeAddress string, reportPath string) error {
+func Stake(cmd *cobra.Command, keyName string, stakeAmount *big.Int, stakeAddress string, reportPath string) error {
 	if stakeAddress != "" {
 		valAddress, err := sdk.ValAddressFromBech32(stakeAddress)
 		if err != nil {
@@ -114,7 +114,7 @@ func Stake(keyName string, stakeAmount *big.Int, stakeAddress string, reportPath
 			Denom:   "uosmo",
 		}
 		delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
-		err = transaction.HandleTx(delegateTx, reportPath)
+		err = transaction.HandleTx(delegateTx, cmd, reportPath)
 		if err != nil {
 			return err
 		}

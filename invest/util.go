@@ -2,7 +2,7 @@ package invest
 
 import "math/big"
 
-// Cal x percent of a
+//cal x percent of a
 func XPercentageOf(a *big.Int, x int) *big.Int {
 	out := &big.Int{}
 	out.Mul(a, big.NewInt(int64(x)))

@@ -2,13 +2,15 @@ package transaction
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/notional-labs/cookiemonster/query"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,10 +30,11 @@ func NewMsgJoinPool(fromAddr sdk.AccAddress, poolId uint64, shareOutAmount sdk.I
 	return msg
 }
 
-func JoinPool(keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, error) {
+func JoinPool(cmd *cobra.Command, keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.GetDefaultClientContext()
-	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	cmd.Flags().Set(flags.FlagFrom, keyName)
+	clientCtx, err := client.GetClientTxContext(cmd)
+
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +54,7 @@ func JoinPool(keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, e
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -71,7 +74,7 @@ type JoinPoolTx struct {
 	Hash        string
 }
 
-func (joinPoolTx JoinPoolTx) Execute() (string, error) {
+func (joinPoolTx JoinPoolTx) Execute(cmd *cobra.Command) (string, error) {
 
 	keyName := joinPoolTx.KeyName
 	joinPoolOpt := joinPoolTx.JoinPoolOpt
@@ -84,7 +87,7 @@ func (joinPoolTx JoinPoolTx) Execute() (string, error) {
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
-		txHash, err = JoinPool(keyName, joinPoolOpt, uint64(gas))
+		txHash, err = JoinPool(cmd, keyName, joinPoolOpt, uint64(gas))
 		if err == nil {
 			joinPoolTx.Hash = txHash
 			return txHash, nil
@@ -136,10 +139,11 @@ type SwapAndPoolOption struct {
 	ShareOutMinAmount sdk.Int
 }
 
-func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64) (string, error) {
+func SwapAndPool(cmd *cobra.Command, keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64) (string, error) {
 	// build tx context
-	clientCtx := osmosis.GetDefaultClientContext()
-	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
+	cmd.Flags().Set(flags.FlagFrom, keyName)
+	clientCtx, err := client.GetClientTxContext(cmd)
+
 	if err != nil {
 		return "", err
 	}
@@ -167,7 +171,7 @@ func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -187,7 +191,7 @@ type SwapAndPoolTx struct {
 	Hash           string
 }
 
-func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
+func (swapAndPoolTx SwapAndPoolTx) Execute(cmd *cobra.Command) (string, error) {
 
 	keyName := swapAndPoolTx.KeyName
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
@@ -199,7 +203,7 @@ func (swapAndPoolTx SwapAndPoolTx) Execute() (string, error) {
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
-		txHash, err = SwapAndPool(keyName, swapAndPoolOpt, uint64(gas))
+		txHash, err = SwapAndPool(cmd, keyName, swapAndPoolOpt, uint64(gas))
 		if err == nil {
 			swapAndPoolTx.Hash = txHash
 			return txHash, nil
