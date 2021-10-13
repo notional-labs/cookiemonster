@@ -36,6 +36,7 @@ func NewInvestCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().String(FlagReport, "", "path to transaction report")
+	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
