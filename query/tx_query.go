@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/notional-labs/cookiemonster/osmosis"
-
 	"github.com/cosmos/cosmos-sdk/types"
 	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
 func QueryTx(txHash string) (*types.TxResponse, error) {
