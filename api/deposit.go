@@ -1,17 +1,18 @@
 package api_gateway
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/notional-labs/cookiemonster/cmd/auto-farm/cmd"
 	"github.com/notional-labs/cookiemonster/command/query"
 )
 
 func InitAPI() {
 	router := mux.NewRouter().StrictSlash(true)
 
+	router.HandleFunc("/deposit/register-account", RegisterAccount).Methods("POST")
 	router.HandleFunc("/deposit/", Deposit).Methods("POST")
 	router.HandleFunc("/deposit/get-address", GetAddress)
 
@@ -28,12 +29,19 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	txHash := r.Header.Get("tx-hash")
-	cmd := cmd.NewRootCmd()
-	txQueryRespond, err := query.QueryTxWithRetry(,txHash)
+
+	txQueryRespond, err := query.QueryTxWithRetry(txHash)
+	code := txQueryRespond.Code
+
+	if code != 0 {
+		panic(fmt.Errorf("deposit failed"))
+	}
+
+	tx := txQueryRespond.GetTx()
+	sender := tx.GetMsgs()[0].GetSigners()
 	
 	
 	w.Header().Set("deposit-address", "")
-	w.
 
 
 	
