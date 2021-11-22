@@ -11,8 +11,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/notional-labs/cookiemonster/query"
-	"github.com/notional-labs/cookiemonster/transaction"
+	"github.com/notional-labs/cookiemonster/command/query"
+	"github.com/notional-labs/cookiemonster/command/transaction"
 )
 
 type Investment struct {

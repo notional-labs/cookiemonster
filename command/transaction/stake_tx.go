@@ -2,14 +2,15 @@ package transaction
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"github.com/notional-labs/cookiemonster/query"
+	"github.com/notional-labs/cookiemonster/command/query"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

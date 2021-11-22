@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/notional-labs/cookiemonster/query"
+	"github.com/notional-labs/cookiemonster/command/query"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"

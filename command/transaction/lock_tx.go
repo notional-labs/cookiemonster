@@ -2,14 +2,15 @@ package transaction
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/spf13/cobra"
 	"os"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/spf13/cobra"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/notional-labs/cookiemonster/query"
+	"github.com/notional-labs/cookiemonster/command/query"
 	"github.com/osmosis-labs/osmosis/x/lockup/types"
 	"gopkg.in/yaml.v3"
 )

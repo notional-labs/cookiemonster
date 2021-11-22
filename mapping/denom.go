@@ -3,7 +3,7 @@ package mapping
 import (
 	"math/big"
 
-	query "github.com/notional-labs/cookiemonster/query"
+	query "github.com/notional-labs/cookiemonster/command/query"
 )
 
 var (

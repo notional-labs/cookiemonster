@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/notional-labs/cookiemonster/transaction"
+	"github.com/notional-labs/cookiemonster/command/transaction"
 )
 
 type PoolStrategy struct {

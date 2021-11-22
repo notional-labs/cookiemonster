@@ -7,7 +7,7 @@ import (
 
 	"github.com/notional-labs/cookiemonster/invest"
 	//
-	// "github.com/notional-labs/cookiemonster/transaction"
+	// "github.com/notional-labs/cookiemonster/command/transaction"
 )
 
 func main() {

@@ -1,12 +1,13 @@
 package invest
 
 import (
-	"github.com/spf13/cobra"
 	"math/big"
 
+	"github.com/spf13/cobra"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/notional-labs/cookiemonster/query"
-	"github.com/notional-labs/cookiemonster/transaction"
+	"github.com/notional-labs/cookiemonster/command/query"
+	"github.com/notional-labs/cookiemonster/command/transaction"
 )
 
 func MakeLockTxs(cmd *cobra.Command, keyName string, duration string) (transaction.Txs, error) {

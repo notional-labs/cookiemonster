@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/notional-labs/cookiemonster/query"
+	"github.com/notional-labs/cookiemonster/command/query"
 	"github.com/osmosis-labs/osmosis/x/gamm/types"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
