@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"golang.org/x/sync/errgroup"
-
+	"github.com/notional-labs/cookiemonster/api"
+	cmdquery "github.com/notional-labs/cookiemonster/command/query"
 	"github.com/notional-labs/cookiemonster/invest"
-	"github.com/notional-labs/cookiemonster/command/query"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +51,9 @@ func NewAutoInvestCmd() *cobra.Command {
 		Use:   "auto-invest [path_to_investments_json]",
 		Short: "pool and stake on osmosis using instruction from a json file, do so every epoch time",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			api.InitAPI()
 			for {
+
 				pathToInvestmentJson := args[0]
 				investments, err := invest.LoadInvestmentsFromFile(pathToInvestmentJson)
 				if err != nil {
@@ -59,34 +62,25 @@ func NewAutoInvestCmd() *cobra.Command {
 
 				// report path is the path to tranasaction report file
 				reportPath, _ := cmd.Flags().GetString(FlagReport)
-				eg := new(errgroup.Group)
 
-				eg.Go(func() error {
-					for _, investment := range investments {
-						if err := retry.Do(func() error {
-							keyName := investment.KeyName
-							uosmoBalance, err := query.QueryUosmoBalance(cmd, keyName)
+				for _, investment := range investments {
+					go func(investment *invest.Investment) error {
+						keyName := investment.KeyName
+						uosmoBalance, err := cmdquery.QueryUosmoBalance(cmd, keyName)
+						if err != nil {
+							return err
+						}
+						if uosmoBalance.Cmp(big.NewInt(1000000)) > 0 {
+							err = investment.Invest(cmd, reportPath)
 							if err != nil {
 								return err
 							}
-							if uosmoBalance.Cmp(big.NewInt(1000000)) == 1 {
-								err := investment.Invest(cmd, reportPath)
-								if err != nil {
-									return err
-								}
-							return nil
-							}}, retry.Attempts(5), retry.Delay(time.Millisecond*500), retry.LastErrorOnly(true)); err != nil {
-								return err
-							}
-							time.Sle
-						})
-					}
-				})
-				
-
-				
-
+						}
+						return nil
+					}(&investment)
 				}
+				fmt.Println(1)
+				time.Sleep(5 * time.Minute)
 			}
 		},
 	}

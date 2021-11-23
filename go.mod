@@ -108,6 +108,7 @@ require (
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/rs/zerolog v1.21.0 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.33.2

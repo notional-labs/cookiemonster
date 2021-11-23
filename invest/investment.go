@@ -31,13 +31,13 @@ func (investment Investment) Invest(cmd *cobra.Command, reportPath string) error
 
 	keyName := investment.KeyName
 
-	// 1 claim reward
-	claimTx := transaction.ClaimTx{KeyName: keyName}
-	// execute claim tx right away
-	err := transaction.HandleTx(claimTx, cmd, reportPath)
-	if err != nil {
-		return err
-	}
+	// // 1 claim reward
+	// claimTx := transaction.ClaimTx{KeyName: keyName}
+	// // execute claim tx right away
+	// err := transaction.HandleTx(claimTx, cmd, reportPath)
+	// if err != nil {
+	// 	return err
+	// }
 
 	uosmoBalance, err := query.QueryUosmoBalance(cmd, keyName)
 	if err != nil {
@@ -62,6 +62,17 @@ func (investment Investment) Invest(cmd *cobra.Command, reportPath string) error
 	// 4 transfer
 
 	return nil
+}
+
+func DumpInvestmentsToFile(fileLocation string, investments Investments) error {
+	bz, _ := json.MarshalIndent(investments, "", " ")
+
+	err := ioutil.WriteFile(fileLocation, bz, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func LoadInvestmentsFromFile(fileLocation string) ([]Investment, error) {

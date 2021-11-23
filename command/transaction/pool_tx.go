@@ -172,7 +172,7 @@ func SwapAndPool(cmd *cobra.Command, keyName string, swapAndPoolOption SwapAndPo
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 8)
 	if err != nil {
 		return txHash, err
 	}
@@ -196,7 +196,7 @@ func (swapAndPoolTx SwapAndPoolTx) Execute(cmd *cobra.Command) (string, error) {
 
 	keyName := swapAndPoolTx.KeyName
 	swapAndPoolOpt := swapAndPoolTx.SwapAndPoolOpt
-	gas := 1000000
+	gas := 5000000
 	var err error
 	var txHash string
 

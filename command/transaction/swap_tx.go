@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -85,11 +86,12 @@ func Swap(cmd *cobra.Command, keyName string, swapOpt SwapOption, gas uint64) (s
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
+	time.Sleep(30 * time.Second)
 	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
-	if broadcastedTx.Code == 11 {
+	if broadcastedTx.Code == 11 || broadcastedTx.Code == 13 {
 		return txHash, fmt.Errorf("insufficient fee")
 
 	}
@@ -109,7 +111,7 @@ func (swapTx SwapTx) Execute(cmd *cobra.Command) (string, error) {
 
 	keyName := swapTx.KeyName
 	swapOpt := swapTx.SwapOpt
-	gas := 2000000
+	gas := 20000000
 	var err error
 	var txHash string
 

@@ -83,7 +83,7 @@ func (lockTx LockTx) Execute(cmd *cobra.Command) (string, error) {
 
 	keyName := lockTx.KeyName
 	lockOpt := lockTx.LockOpt
-	gas := 2000000
+	gas := 200000000
 	var err error
 	var txHash string
 

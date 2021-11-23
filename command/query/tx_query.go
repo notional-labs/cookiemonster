@@ -2,9 +2,10 @@ package query
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
-	"time"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
@@ -37,11 +38,13 @@ func QueryTxWithRetry(cmd *cobra.Command, txHash string, trials int) (*types.TxR
 	var err error
 
 	for i := 0; i < trials; i++ {
+		fmt.Println(i)
+		time.Sleep(10 * time.Second)
 		broadcastedTx, err = QueryTx(cmd, txHash)
 		if err == nil {
 			break
 		}
-		time.Sleep(3000)
+
 	}
 
 	return broadcastedTx, err
