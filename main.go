@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"math/big"
-	"os"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/notional-labs/cookiemonster/invest"
+	"github.com/notional-labs/cookiemonster/query"
+	"github.com/notional-labs/cookiemonster/transaction"
 	//
 	// "github.com/notional-labs/cookiemonster/command/transaction"
 )
@@ -43,32 +44,69 @@ func main() {
 	// if err != nil {
 	// 	fmt.Println(err.Error())
 	// }
-	userHomeDir, _ := os.UserHomeDir()
-	investments, _ := invest.LoadInvestmentsFromFile(userHomeDir + "/auto-farm/investments.json")
-	investment := investments[0]
-	strategy := investment.PoolStrategy
+	/*
+		userHomeDir, _ := os.UserHomeDir()
+		investments, _ := invest.LoadInvestmentsFromFile(userHomeDir + "/auto-farm/investments.json")
+		investment := investments[0]
+		strategy := investment.PoolStrategy
 
-	// uosmoBalance, _ := query.QueryUosmoBalance("koule")
-	// if err != nil {
-	// 	return err
-	// }
+		// uosmoBalance, _ := query.QueryUosmoBalance("koule")
+		// if err != nil {
+		// 	return err
+		// }
 
-	// 2 pool
-	// caculate pool amount = pool percentage of uosmoBalance
-	totalPoolAmount := invest.XPercentageOf(big.NewInt(15372), investment.PoolPercentage)
-	fmt.Println(totalPoolAmount)
+		// 2 pool
+		// caculate pool amount = pool percentage of uosmoBalance
+		totalPoolAmount := invest.XPercentageOf(big.NewInt(15372), investment.PoolPercentage)
+		fmt.Println(totalPoolAmount)
 
-	M := invest.MakeSwapAndPoolTxs("koule", totalPoolAmount, strategy)
-	for _, i := range M {
-		_, err := i.Execute()
-		if err != nil {
-			fmt.Println(err)
+		M := invest.MakeSwapAndPoolTxs("koule", totalPoolAmount, strategy)
+		for _, i := range M {
+			_, err := i.Execute()
+			if err != nil {
+				fmt.Println(err)
+			}
+			i.Prompt()
+			// i.Report()
 		}
-		i.Prompt()
-		// i.Report()
+	*/
+
+	//============ Staking ===============
+	// Input
+	stakeAddress := ""
+	keyName := ""
+	stakePercentage := 95
+
+	investment := invest.Investment{
+		StakePercentage: stakePercentage,
+	}
+	uosmoBalance, err := query.QueryUosmoBalance(keyName)
+	if err != nil {
+		fmt.Errorf(err.Error())
 	}
 
-	fmt.Printf("%+v\n", investment)
+	stakeAmount := invest.XPercentageOf(uosmoBalance, investment.StakePercentage)
+
+	valAddress, err := sdk.ValAddressFromBech32(stakeAddress)
+	if err != nil {
+		fmt.Errorf(err.Error())
+	}
+
+	delegateOpt := transaction.DelegateOption{
+		Amount:  sdk.NewIntFromBigInt(stakeAmount),
+		ValAddr: valAddress,
+		Denom:   "uosmo",
+	}
+
+	delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
+	res, err := delegateTx.Execute()
+	if err != nil {
+		fmt.Errorf(err.Error())
+	}
+
+	fmt.Println((res))
+
+	//fmt.Printf("%+v\n", investment)
 	// err := investment[0].Invest()
 	// if err != nil {
 	// 	fmt.Println(err.Error())
