@@ -128,3 +128,14 @@ func Stake(keyName string, stakeAmount *big.Int, stakeAddress string, reportPath
 	}
 	return nil
 }
+
+func DumpInvestmentsToFile(fileLocation string, investments Investments) error {
+	bz, _ := json.MarshalIndent(investments, "", " ")
+
+	err := ioutil.WriteFile(fileLocation, bz, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}

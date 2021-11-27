@@ -5,6 +5,7 @@ import (
 	// "github.com/osmosis-labs/osmosis/app/params"
 
 	"github.com/cosmos/cosmos-sdk/client/keys"
+	apicli "github.com/notional-labs/cookiemonster/api/cli"
 	investcli "github.com/notional-labs/cookiemonster/invest/cli"
 	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/spf13/cobra"
@@ -18,7 +19,9 @@ func NewRootCmd() *cobra.Command {
 		Short: "auto-invest tool for osmosis",
 	}
 	rootCmd.AddCommand(
+		apicli.NewInitApi(),
 		investcli.NewInvestCmd(),
+		investcli.NewAutoInvestCmd(),
 		keys.Commands(osmosis.HomeDir),
 	)
 
