@@ -43,8 +43,8 @@ func main() {
 	// if err != nil {
 	// 	fmt.Println(err.Error())
 	// }
-	// userHomeDir, _ := os.UserHomeDir()
-	// investments, _ := invest.LoadInvestmentsFromFile(userHomeDir + "/auto-farm/investments.json")
+	// workingDir, _ := os.UserHomeDir()
+	// investments, _ := invest.LoadInvestmentsFromFile(workingDir + "/auto-farm/investments.json")
 	// investment := investments[0]
 	// strategy := investment.PoolStrategy
 
@@ -74,8 +74,8 @@ func main() {
 	// 	fmt.Println(err.Error())
 	// }
 	// txf := transaction.NewTxFactoryFromClientCtx(osmosis.DefaultClientCtx)
-	userHomeDir, _ := os.UserHomeDir()
-	am, err := accountmanager.LoadAccountManagerFromFile(userHomeDir + "/accountmanager.json")
+	workingDir, _ :=  os.Getwd()
+	am, err := accountmanager.LoadAccountManagerFromFile(workingDir + "/accountmanager.json")
 	if err != nil {
 		panic(err)
 	}
@@ -83,9 +83,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	accountmanager.DumpAccountManagerToFile(am, userHomeDir+"/accountmanager.json")
+	accountmanager.DumpAccountManagerToFile(am, workingDir+"/accountmanager.json")
 	investments := am.GetDefaultInvestments()
-	invest.DumpInvestmentsToFile(userHomeDir+"/cookiemonster/investments.json", investments)
+	invest.DumpInvestmentsToFile(workingDir+"/investments.json", investments)
 	fmt.Println(addr)
 
 }
