@@ -2,55 +2,62 @@ package accountmanager
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/codec/legacy"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/notional-labs/cookiemonster/invest"
 	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
 type AccountManager struct {
-	Name string
-	Seed string
-	Num  int
+	MasterKey        []byte
+	NumOfAccount     int
+	Passphrase       string
+	HashedPassphrase string
 }
 
-func (am *AccountManager) CreateNewAccount() string {
+func (am *AccountManager) CreateNewPrivKeyForAddress(Address string) (cryptotypes.PrivKey, error) {
+	// ctx := osmosis.GetDefaultClientContext()
+	// kb := ctx.Keyring
+
+	masterKey := am.MasterKey
+	toBeHashed := append(masterKey, []byte(Address)...)
+	privKeyBz32ForAddress := sha256.Sum256(toBeHashed)
+
+	privKeyBzForAddress := privKeyBz32ForAddress[:]
+
+	// accountIdString := am.HashedPassphrase + "_" + strconv.Itoa(am.NumOfAccount)
+	privKeyForAddress, err := legacy.PrivKeyFromBytes(privKeyBzForAddress)
+
+	// uid := "acc" + "-" + accountIdString
+
+	return privKeyForAddress, err
+	// kb.WriteLocalKey(uid, privKeyForAddress, hd.PubKeyType("secp256k1"))
+
+}
+
+// import
+func (am *AccountManager) RegisterAccountForAddress(Address string) error {
 	ctx := osmosis.GetDefaultClientContext()
 	kb := ctx.Keyring
-	seed := am.Seed
-	hdPath := "m/44'/118'/0'/0/"
 
-	//  m / purpose' / coin_type' / account' / change / address_index
-	// key name will be the same as address_index
-	// create new account with address_index = number of keys derived from seed
-
-	newAccountIndex := strconv.Itoa(am.Num)
-
-	hdPath += newAccountIndex
-
-	keyringAlgos, _ := kb.SupportedAlgorithms()
-	algoStr := "secp256k1"
-	algo, err := keyring.NewSigningAlgoFromString(algoStr, keyringAlgos)
+	privKeyForAddress, err := am.CreateNewPrivKeyForAddress(Address)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	k, err := kb.NewAccount(am.Name+newAccountIndex, seed, "", hdPath, algo)
-	fmt.Println(hdPath)
-	if err != nil {
-		panic(err)
-	}
+	accountIdString := am.HashedPassphrase + "_" + strconv.Itoa(am.NumOfAccount)
+	uid := "acc" + "-" + accountIdString
+	_, err = kb.WriteLocalKey(uid, privKeyForAddress, hd.PubKeyType("secp256k1"))
 
-	am.Num = am.Num + 1
-
-	addrBz := k.GetAddress()
-
-	return addrBz.String()
+	return err
 }
 
 func (AccountManager) CreateDefautInvestmentsFromAccount() {
@@ -74,6 +81,8 @@ func LoadAccountManagerFromFile(fileLocation string) (*AccountManager, error) {
 	}
 	return am, nil
 }
+
+func CreateAccount(am AccountManager)
 
 func DumpAccountManagerToFile(am *AccountManager, fileLocation string) error {
 
