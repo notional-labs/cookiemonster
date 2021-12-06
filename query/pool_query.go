@@ -191,6 +191,21 @@ func CalculatePoolAPY(pool Pool, duration time.Duration) Pool {
 	return pool
 }
 
+func QueryEpoch() (int64, error) {
+	clientCtx := osmosis.GetDefaultClientContext()
+
+	queryClient := epoch.NewQueryClient(clientCtx)
+
+	res, err := queryClient.CurrentEpoch(context.Background(), &epoch.QueryCurrentEpochRequest{
+		Identifier: "day",
+	})
+	if err != nil {
+		return -1, err
+	}
+	currentEpoch := res.CurrentEpoch
+	return currentEpoch, nil
+}
+
 //const poolTVL = pool.computeTotalValueLocked(priceStore, fiatCurrency);
 //if (totalWeight.gt(new Int(0)) && potWeight.gt(new Int(0)) && mintPrice && poolTVL.toDec().gt(new Dec(0))) {
 //// 에포치마다 발행되는 민팅 코인의 수.

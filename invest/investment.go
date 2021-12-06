@@ -63,6 +63,69 @@ func (investment Investment) Invest(reportPath string) error {
 	return nil
 }
 
+func getEpochIdx() int64 {
+	epoch, err := query.QueryEpoch()
+	if err != nil {
+		fmt.Println("Err Epoch", err)
+		return -1
+	}
+	fmt.Println("Farming in epoch ", epoch)
+	return epoch
+}
+
+func (investment Investment) InvestToDie(reportPath string) error {
+	keyName := investment.KeyName
+	currentEpoch := getEpochIdx()
+	// 1 claim reward
+	claimTx := transaction.ClaimTx{KeyName: keyName}
+	// execute claim tx right away
+	err := transaction.HandleTx(claimTx, reportPath)
+	if err != nil {
+		return err
+	}
+	for {
+		osmosisEpoch := getEpochIdx()
+		if currentEpoch < osmosisEpoch {
+			keyName := investment.KeyName
+			currentEpoch := getEpochIdx()
+			// 1 claim reward
+			claimTx := transaction.ClaimTx{KeyName: keyName}
+			// execute claim tx right away
+			err := transaction.HandleTx(claimTx, reportPath)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("Get Reward in Epoch ", currentEpoch)
+			fmt.Println("Farming Continue ")
+
+			break
+		}
+		uosmoBalance, err := query.QueryUosmoBalance(keyName)
+		if err != nil {
+			return err
+		}
+
+		// poling
+		poolStrategy := investment.PoolStrategy
+		totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
+		err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration, reportPath)
+		if err != nil {
+			return err
+		}
+
+		// staking
+		stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
+		err = Stake(keyName, stakeAmount, investment.StakeAddress, reportPath)
+		if err != nil {
+			return err
+		}
+
+		// 4 transfer
+	}
+	return nil
+}
+
 func LoadInvestmentsFromFile(fileLocation string) ([]Investment, error) {
 	file, err := os.Open(fileLocation)
 	if err != nil {
