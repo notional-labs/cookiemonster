@@ -1,0 +1,26 @@
+{
+    "Osmosis": {
+        "chain_id": "osmosis-1",
+        "coingecko": "osmosis",
+        "apiUrl": "https://lcd-osmosis.keplr.app",
+        "logo": "https://dl.airtable.com/.attachments/4ef30ec4008bc86cc3c0f74a6bb84050/0eeb4d64/aQ5W3zaT_400x400.jpg",
+        "denom": "uosmo",
+        "chain_name": "osmosis"
+    },
+    "Cosmos Hub": {
+        "chain_id": "cosmoshub-4",
+        "coingecko": "cosmos",
+        "apiUrl": "https://cosmos.api.ping.pub",
+        "logo": "https://dl.airtable.com/.attachments/e54f814bba8c0f9af8a3056020210de0/2d1155fb/cosmos-hub.svg",
+        "denom": "uatom",
+        "chain_name": "atom"
+    },
+    "Juno": {
+        "chain_id": "juno-1",
+        "chain_name": "juno",
+        "coingecko": "juno-network",
+        "apiUrl": "https://juno.api.ping.pub",
+        "logo": "https://dl.airtable.com/.attachments/0f66137c6fb2868000d5a1e214c9ae3d/75a9c5bc/S3c2V3Xd_400x400.jpg",
+        "denom": "ujuno"
+    }
+}

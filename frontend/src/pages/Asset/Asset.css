@@ -1,0 +1,10 @@
+.ant-table-thead > tr >th{
+    color: #ffffff;
+    background: #edeff5!important;
+ 
+}
+
+.ant-table-tbody > tr >th{
+    color: white;
+    background: #a799c7 !important;
+    }

@@ -1,13 +1,8 @@
-import { Typography } from 'antd';
+import { Typography, message } from 'antd';
 import { useState } from 'react'
 import { WalletOutlined } from '@ant-design/icons'
-import {
-    SigningCosmosClient,
-    coins,
-} from "@cosmjs/launchpad";
-
-const CHAIN_ID = "osmosis-1";
-const URL = "https://lcd-osmosis.keplr.app"
+import { getKeplr, getCosmosClient, } from '../helpers/getKeplr';
+import { transaction } from '../helpers/transaction';
 
 const { Title, Paragraph } = Typography;
 
@@ -17,13 +12,11 @@ const style = {
         flexDirection: 'column',
         justifyContent: 'center space-between',
         alignContent: 'center',
-        marginTop: '2em',
-        marginBottom: '2em',
         backgroundColor: '#ffc369',
         borderStyle: 'solid',
         borderWidth: '20px',
         borderColor: '#ffb459',
-        height: '54.5em',
+        height: '35em',
         width: '30%',
         borderRadius: '10px',
         marginLeft: '50em',
@@ -75,20 +68,7 @@ const style = {
 
 }
 
-const transaction = (address, cosmJS) => {
-    (async () => {
-        // define memo (not required)
-        const memo = "Deposit";
-        // sign and broadcast Tx
-        // THIS IS A TEST ADDRESS 
-        const recipient = "osmo1cptdzpwjc5zh6nm00dvetlg24rv9j3tjh7wnnz";
-        const ret = await cosmJS.sendTokens(recipient, coins(1000000, "uosmo"), memo);
-        console.log(ret)
-    })();
-}
-
-const Main = () => {
-    const [loading, setLoading] = useState(false);
+const Register = () => {
     const [address, setAddress] = useState("hello")
 
     const handleEnter = (e) => {
@@ -98,31 +78,23 @@ const Main = () => {
     const handleLeave = (e) => {
         e.target.style.transform = 'scale(1)'
     }
-    const handleClick = async () => {
-        let val = !loading
-        setLoading(val)
-        if (!window.getOfflineSigner || !window.keplr) {
-            alert("Keplr Wallet not detected, please install extension");
-        } else {
-            await window.keplr.enable(CHAIN_ID);
-            const offlineSigner = window.getOfflineSigner(CHAIN_ID);
-            const accounts = await offlineSigner.getAccounts();
+    const handleClickRegister = async () => {
+        const { accounts, offlineSigner } = await getKeplr();
+        const cosmJS = getCosmosClient(accounts, offlineSigner);
+        if (cosmJS != null) {
+            transaction(cosmJS).then(res => {
 
-            const cosmJS = new SigningCosmosClient(
-                URL,
-                accounts[0].address,
-                offlineSigner,
-            );
+            }).catch(err => {
+                
+            })
 
-            transaction(accounts[0].address, cosmJS)
         }
     }
-
     return (
-        <div style={style.div}>
+        <div claasName="container-fluid" style={style.div}>
             <div style={style.buttonDiv}>
                 <button
-                    onClick={async () => await handleClick()}
+                    onClick={async () => await handleClickRegister()}
                     size='large'
                     style={style.button}
                     onMouseEnter={handleEnter}
@@ -154,4 +126,4 @@ const Main = () => {
 }
 
 
-export default Main;
+export default Register;
