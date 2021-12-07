@@ -22,7 +22,7 @@ func HandleTx(tx Tx, cmd *cobra.Command, reportPath string) error {
 	// if yesOrNo == false {
 	// 	return nil
 	// }
-	txHash, err := tx.Execute()
+	txHash, err := tx.Execute(cmd)
 	if err != nil {
 		return err
 	}

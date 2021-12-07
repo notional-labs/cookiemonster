@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	query "github.com/notional-labs/cookiemonster/query"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -11,6 +12,7 @@ var (
 )
 
 func GetMapFromDenomsToPoolId() map[string]int {
+	cmd := *cobra.Command
 	mapFromDenomToPoolId := map[string]int{}
 	mapFromPoolIdToAmount := map[int]*big.Int{}
 	pools, err := query.QueryPools(cmd)
