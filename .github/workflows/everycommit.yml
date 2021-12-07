@@ -46,7 +46,10 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: '17'
-    - run: npm install
+    - run: |
+        cd frontend
+        npm install
+        npm run build
     - run: npm test
 
     
