@@ -8,6 +8,7 @@ import (
 
 var (
 	defaultRegisteredAccountDBDir = "/.cookiemonster"
+	DefaultRegisteredAccountDB    = MustOpenRegisteredAccountDB(defaultRegisteredAccountDBDir)
 )
 
 // db to store user osmo address and their respective cookimonster address
@@ -15,6 +16,14 @@ func OpenRegisteredAccountDB(dbDir string) (*leveldb.DB, error) {
 
 	db, err := leveldb.OpenFile(dbDir, nil)
 	return db, err
+}
+
+func MustOpenRegisteredAccountDB(dbDir string) *leveldb.DB {
+	db, err := leveldb.OpenFile(dbDir, nil)
+	if err != nil {
+		panic(err)
+	}
+	return db
 }
 
 func GetRegisterAddressForAddress(db *leveldb.DB, address string) (string, error) {

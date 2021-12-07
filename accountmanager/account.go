@@ -12,8 +12,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"github.com/notional-labs/cookiemonster/invest"
 	"github.com/notional-labs/cookiemonster/osmosis"
+)
+
+var (
+	defaultAccountManagerFile = "accountmanager"
+	DefaultAccountManager     = MustLoadAccountManagerFromFile(defaultAccountManagerFile)
 )
 
 type AccountManager struct {
@@ -60,8 +64,26 @@ func (am *AccountManager) RegisterAccountForAddress(Address string) error {
 	return err
 }
 
-func (AccountManager) CreateDefautInvestmentsFromAccount() {
+// func (AccountManager) CreateDefautInvestmentsFromAccount() {
 
+// }
+
+func MustLoadAccountManagerFromFile(fileDir string) *AccountManager {
+	file, err := os.Open(fileDir)
+	if err != nil {
+		fmt.Println("Unable to open json at " + fileDir)
+		panic(err)
+	}
+	reader := bufio.NewReader(file)
+	jsonData, _ := ioutil.ReadAll(reader)
+
+	var am *AccountManager
+	jsonErr := json.Unmarshal(jsonData, &am)
+	if jsonErr != nil {
+		fmt.Println("Unable to map JSON at " + fileDir + " to Investments")
+		panic(err)
+	}
+	return am
 }
 
 func LoadAccountManagerFromFile(fileLocation string) (*AccountManager, error) {
@@ -95,20 +117,20 @@ func DumpAccountManagerToFile(am *AccountManager, fileLocation string) error {
 	return nil
 }
 
-func (am AccountManager) GetDefaultInvestments() invest.Investments {
+// func (am AccountManager) GetDefaultInvestments() invest.Investments {
 
-	investments := invest.Investments{}
-	for i := 0; i < am.Num; i++ {
-		investment := invest.Investment{
-			KeyName:         am.Name + strconv.Itoa(i),
-			TransferTo:      nil,
-			PoolPercentage:  50,
-			StakePercentage: 50,
-			PoolStrategy:    invest.PoolStrategy{Name: "custom", Config: map[string]int{"1": 100}, ConfigDenom: "percentages"},
-			Duration:        "14days",
-			StakeAddress:    "",
-		}
-		investments = append(investments, investment)
-	}
-	return investments
-}
+// 	investments := invest.Investments{}
+// 	for i := 0; i < am.Num; i++ {
+// 		investment := invest.Investment{
+// 			KeyName:         am.Name + strconv.Itoa(i),
+// 			TransferTo:      nil,
+// 			PoolPercentage:  50,
+// 			StakePercentage: 50,
+// 			PoolStrategy:    invest.PoolStrategy{Name: "custom", Config: map[string]int{"1": 100}, ConfigDenom: "percentages"},
+// 			Duration:        "14days",
+// 			StakeAddress:    "",
+// 		}
+// 		investments = append(investments, investment)
+// 	}
+// 	return investments
+// }
