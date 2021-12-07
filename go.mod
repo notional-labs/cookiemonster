@@ -2,7 +2,7 @@ module github.com/notional-labs/cookiemonster
 
 go 1.17
 
-require github.com/cosmos/cosmos-sdk v0.44.0
+require github.com/cosmos/cosmos-sdk v0.44.5
 
 require (
 	github.com/99designs/keyring v1.1.6 // indirect
