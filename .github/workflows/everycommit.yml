@@ -48,8 +48,8 @@ jobs:
         node-version: '17'
     - run: |
         cd frontend
-        npm install
-        npm run build
-    - run: npm test
+        yarn install
+        yarn run build
+    - run: yarn run test
 
     
