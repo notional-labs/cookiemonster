@@ -18,11 +18,11 @@ type Txs []Tx
 // and log to a file in reportPath
 func HandleTx(tx Tx, cmd *cobra.Command, reportPath string) error {
 	tx.Prompt()
-	yes := Confirmation()
-	if !yes {
-		return nil
-	}
-	txHash, err := tx.Execute(cmd)
+	// yesOrNo := Confirmation()
+	// if yesOrNo == false {
+	// 	return nil
+	// }
+	txHash, err := tx.Execute()
 	if err != nil {
 		return err
 	}
@@ -44,13 +44,13 @@ func HandleTxs(txs Txs, cmd *cobra.Command, reportPath string) error {
 	return nil
 }
 
-func Confirmation() bool {
-	fmt.Print("\nContinue [y/n] ?\n\n")
-	var yesOrNo string
-	fmt.Scanf("%s", &yesOrNo)
-	if yesOrNo == "y" || yesOrNo == "yes" {
-		return true
-	}
-	fmt.Print("Skip this transaction\n\n")
-	return false
-}
+// func Confirmation() bool {
+// 	fmt.Println("\nContinue [y/n] ?\n")
+// 	var yesOrNo string
+// 	fmt.Scanf("%s", &yesOrNo)
+// 	if yesOrNo == "y" || yesOrNo == "yes" {
+// 		return true
+// 	}
+// 	fmt.Println("Skip this transaction\n")
+// 	return false
+// }

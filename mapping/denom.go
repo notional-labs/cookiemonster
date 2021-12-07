@@ -13,7 +13,7 @@ var (
 func GetMapFromDenomsToPoolId() map[string]int {
 	mapFromDenomToPoolId := map[string]int{}
 	mapFromPoolIdToAmount := map[int]*big.Int{}
-	pools, err := query.QueryPools()
+	pools, err := query.QueryPools(cmd)
 	if err != nil {
 		return nil
 	}

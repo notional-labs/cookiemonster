@@ -1,11 +1,182 @@
 [
-{
-    "KeyName":"vuong",
-    "TransferTo":{},
-    "PoolPercentage":5,
-    "StakePercentage":0,
-    "PoolStrategy":{"Name":"custom","Config":{"1":100},"ConfigDenom":"percentages"},
-    "Duration":"14days",
-    "StakeAddress":""
-}
+ {
+  "KeyName": "test0",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test1",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test2",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test3",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test4",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test5",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test6",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test7",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test8",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test9",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test10",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ },
+ {
+  "KeyName": "test11",
+  "TransferTo": null,
+  "PoolPercentage": 50,
+  "StakePercentage": 50,
+  "PoolStrategy": {
+   "Name": "custom",
+   "Config": {
+    "1": 100
+   },
+   "ConfigDenom": "percentages"
+  },
+  "Duration": "14days",
+  "StakeAddress": ""
+ }
 ]

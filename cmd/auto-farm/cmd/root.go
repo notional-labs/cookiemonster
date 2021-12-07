@@ -11,10 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/server"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	apicli "github.com/notional-labs/cookiemonster/api/cli"
 	investcli "github.com/notional-labs/cookiemonster/invest/cli"
 	osmosisapp "github.com/osmosis-labs/osmosis/app"
 	"github.com/spf13/cobra"
@@ -70,8 +67,14 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 
 	// add keybase
 	rootCmd.AddCommand(
+		apicli.NewInitApi(),
 		investcli.NewInvestCmd(),
+<<<<<<< HEAD
 		keys.Commands(DefaultNodeHome()),
+=======
+		investcli.NewAutoInvestCmd(),
+		keys.Commands(osmosis.HomeDir),
+>>>>>>> origin/cookiemonster-intergrate
 	)
 }
 

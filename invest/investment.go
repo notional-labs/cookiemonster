@@ -121,3 +121,14 @@ func Stake(cmd *cobra.Command, keyName string, stakeAmount *big.Int, stakeAddres
 	}
 	return nil
 }
+
+func DumpInvestmentsToFile(fileLocation string, investments Investments) error {
+	bz, _ := json.MarshalIndent(investments, "", " ")
+
+	err := ioutil.WriteFile(fileLocation, bz, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
