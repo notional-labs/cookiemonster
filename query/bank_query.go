@@ -11,6 +11,8 @@ import (
 	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
+// func QueryBalancesWithAddress(key)
+
 func QueryBalances(keyName string) (sdk.Coins, error) {
 	// build context
 	clientCtx := osmosis.GetDefaultClientContext()

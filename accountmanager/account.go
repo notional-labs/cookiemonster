@@ -12,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
@@ -48,20 +49,23 @@ func (am *AccountManager) CreateNewPrivKeyForAddress(Address string) (cryptotype
 }
 
 // import
-func (am *AccountManager) RegisterAccountForAddress(Address string) error {
+func (am *AccountManager) RegisterAccountForAddress(Address string) (sdk.AccAddress, error) {
 	ctx := osmosis.GetDefaultClientContext()
 	kb := ctx.Keyring
 
 	privKeyForAddress, err := am.CreateNewPrivKeyForAddress(Address)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	accountIdString := am.HashedPassphrase + "_" + strconv.Itoa(am.NumOfAccount)
 	uid := "acc" + "-" + accountIdString
 	_, err = kb.WriteLocalKey(uid, privKeyForAddress, hd.PubKeyType("secp256k1"))
-
-	return err
+	if err != nil {
+		return nil, err
+	}
+	generatedAddress := sdk.AccAddress(privKeyForAddress.PubKey().Address().Bytes())
+	return generatedAddress, nil
 }
 
 // func (AccountManager) CreateDefautInvestmentsFromAccount() {
