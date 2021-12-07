@@ -2,7 +2,6 @@
 package invest
 
 import (
-	"fmt"
 	"math/big"
 	"strconv"
 
@@ -11,9 +10,7 @@ import (
 )
 
 type PoolStrategy struct {
-	Name        string
-	Config      map[string]int
-	ConfigDenom string
+	Distribution map[string]int
 }
 
 // map from pool id to uosmo amount to be pooled
@@ -36,36 +33,18 @@ func MakeSwapAndPoolTxs(keyName string, totalPoolAmount *big.Int, poolStrategy P
 }
 
 func MakeMapFromPoolToUosmoAmount(totalPoolAmount *big.Int, poolStrategy PoolStrategy) (MapFromPoolToUosmoAmount, error) {
-	if poolStrategy.ConfigDenom == "percentages" {
-		mapFromPoolToUosmoAmount := MapFromPoolToUosmoAmount{}
-		for poolIdString, percentage := range poolStrategy.Config {
-			poolId, err := strconv.Atoi(poolIdString)
-			if err != nil {
-				return nil, err
-			}
-			poolAmountUosmo := &big.Int{}
-			poolAmountUosmo.Mul(big.NewInt(int64(percentage)), totalPoolAmount)
-			poolAmountUosmo.Div(poolAmountUosmo, big.NewInt(100))
-			mapFromPoolToUosmoAmount[poolId] = poolAmountUosmo
+	mapFromPoolToUosmoAmount := MapFromPoolToUosmoAmount{}
+	for poolIdString, percentage := range poolStrategy.Distribution {
+		poolId, err := strconv.Atoi(poolIdString)
+		if err != nil {
+			return nil, err
 		}
-		return mapFromPoolToUosmoAmount, nil
-	} else if poolStrategy.ConfigDenom == "osmo" {
-		mapFromPoolToUosmoAmount := MapFromPoolToUosmoAmount{}
-		for poolIdString, poolAmountOsmo := range poolStrategy.Config {
-			poolId, err := strconv.Atoi(poolIdString)
-			if err != nil {
-				return nil, err
-			}
-			poolAmountUosmo := &big.Int{}
-			temp := &big.Int{}
-			poolAmountUosmo.Mul(big.NewInt(int64(poolAmountOsmo)), temp.SetUint64(1e18))
-			mapFromPoolToUosmoAmount[poolId] = poolAmountUosmo
-		}
-		return mapFromPoolToUosmoAmount, nil
-	} else {
-		return nil, fmt.Errorf("unknown config denom")
-
+		poolAmountUosmo := &big.Int{}
+		poolAmountUosmo.Mul(big.NewInt(int64(percentage)), totalPoolAmount)
+		poolAmountUosmo.Div(poolAmountUosmo, big.NewInt(100))
+		mapFromPoolToUosmoAmount[poolId] = poolAmountUosmo
 	}
+	return mapFromPoolToUosmoAmount, nil
 }
 
 func NewSwapAndPooltx(poolId int, uosmoAmount sdk.Int, keyName string) transaction.Tx {

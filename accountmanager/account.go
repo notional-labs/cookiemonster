@@ -13,11 +13,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/notional-labs/cookiemonster/db"
 	"github.com/notional-labs/cookiemonster/osmosis"
 )
 
 var (
-	defaultAccountManagerFile = "accountmanager"
+	defaultAccountManagerFile = "/.cookiemonster/accountmanager"
 	DefaultAccountManager     = MustLoadAccountManagerFromFile(defaultAccountManagerFile)
 )
 
@@ -64,8 +65,23 @@ func (am *AccountManager) RegisterAccountForAddress(Address string) (sdk.AccAddr
 	if err != nil {
 		return nil, err
 	}
-	generatedAddress := sdk.AccAddress(privKeyForAddress.PubKey().Address().Bytes())
-	return generatedAddress, nil
+
+	cmAddress := sdk.AccAddress(privKeyForAddress.PubKey().Address().Bytes())
+
+	addressToCMKeyDB := db.DefaultAddressToCMKeyNameDB
+	addressToCMAddressDB := db.DefaultAddressToCMAddressDB
+
+	err = addressToCMAddressDB.SetCMAddressForAddress(Address, cmAddress.String())
+	if err != nil {
+		panic(err)
+	}
+
+	err = addressToCMKeyDB.SetCMKeyNameForAddress(Address, uid)
+	if err != nil {
+		panic(err)
+	}
+
+	return cmAddress, nil
 }
 
 // func (AccountManager) CreateDefautInvestmentsFromAccount() {
@@ -73,7 +89,14 @@ func (am *AccountManager) RegisterAccountForAddress(Address string) (sdk.AccAddr
 // }
 
 func MustLoadAccountManagerFromFile(fileDir string) *AccountManager {
-	file, err := os.Open(fileDir)
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+
+	fullDir := homeDir + fileDir
+
+	file, err := os.Open(fullDir)
 	if err != nil {
 		fmt.Println("Unable to open json at " + fileDir)
 		panic(err)
@@ -91,6 +114,7 @@ func MustLoadAccountManagerFromFile(fileDir string) *AccountManager {
 }
 
 func LoadAccountManagerFromFile(fileLocation string) (*AccountManager, error) {
+
 	file, err := os.Open(fileLocation)
 	if err != nil {
 		fmt.Println("Unable to open json at " + fileLocation)

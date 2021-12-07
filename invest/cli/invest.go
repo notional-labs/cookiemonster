@@ -31,10 +31,9 @@ func NewInvestCmd() *cobra.Command {
 			}
 
 			// report path is the path to tranasaction report file
-			reportPath, _ := cmd.Flags().GetString(FlagReport)
 			SetNode(cmd.Flags())
 			for _, investment := range investments {
-				err := investment.Invest(reportPath)
+				err := investment.Invest()
 				if err != nil {
 					return err
 				}
@@ -43,7 +42,7 @@ func NewInvestCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().String(flags.FlagNode, osmosis.Node, "<host>:<port> to Tendermint RPC interface for this chain")
-	cmd.Flags().String(FlagReport, "", "path to transaction report")
+	// cmd.Flags().String(FlagReport, "", "path to transaction report")
 	return cmd
 }
 
@@ -60,7 +59,6 @@ func NewAutoInvestCmd() *cobra.Command {
 				}
 
 				// report path is the path to tranasaction report file
-				reportPath, _ := cmd.Flags().GetString(FlagReport)
 				SetNode(cmd.Flags())
 				for id := range investments {
 					go func(investment *invest.Investment) error {
@@ -72,7 +70,7 @@ func NewAutoInvestCmd() *cobra.Command {
 						}
 
 						if uosmoBalance.Cmp(big.NewInt(1000000)) > 0 {
-							err = investment.Invest(reportPath)
+							err = investment.Invest()
 							if err != nil {
 								return err
 							}
@@ -84,7 +82,7 @@ func NewAutoInvestCmd() *cobra.Command {
 			}
 		},
 	}
-	cmd.Flags().String(FlagReport, "", "path to transaction report")
+	// cmd.Flags().String(FlagReport, "", "path to transaction report")
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd

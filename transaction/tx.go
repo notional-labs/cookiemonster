@@ -11,27 +11,21 @@ type Tx interface {
 
 type Txs []Tx
 
-func HandleTx(tx Tx, reportPath string) error {
-	tx.Prompt()
-	// yesOrNo := Confirmation()
-	// if yesOrNo == false {
-	// 	return nil
-	// }
+func HandleTx(tx Tx) error {
+
 	txHash, err := tx.Execute()
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("\nTransaction sucessful, Tx hash: %s\n", txHash)
-	if reportPath != "" {
-		tx.Report(reportPath)
-	}
+
 	return nil
 }
 
-func HandleTxs(txs Txs, reportPath string) error {
+func HandleTxs(txs Txs) error {
 	for _, tx := range txs {
-		err := HandleTx(tx, reportPath)
+		err := HandleTx(tx)
 		if err != nil {
 			return err
 		}
