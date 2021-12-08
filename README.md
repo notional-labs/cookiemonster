@@ -15,6 +15,17 @@ The ideal way to run Cookie Monster is on a locked-down raspberry Pi that has ac
 
 For the time being, Cookie Monster has hot keys in the filesystem, like a relayer, so secure the machine running Cookie Monster as though it **is** your private keys.  Once agian, note that we've explicitly chosen not to secure Cookie Monster, so that he could be built quickly.  There are ways to secure cookie monster, and they're left to the users, for now. 
 
+```bash
+git clone https://github.com/notional-labs/cookiemonster
+cd frontend
+yarn install
+yarn build
+cd ..
+go install ./...
+```
+
+One-liner coming Soon(TM)
+
 
 ## Run it
 1. Create an an accountmanager.json file at ~/.cookiemonster/accountmanager.json, as seen below
