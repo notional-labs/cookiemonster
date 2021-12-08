@@ -52,5 +52,8 @@ jobs:
         cd frontend
         yarn install
         yarn run build
+        
+        
+
 
     
