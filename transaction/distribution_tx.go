@@ -3,33 +3,20 @@ package transaction
 import (
 	"context"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/spf13/cobra"
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-
+	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/notional-labs/cookiemonster/query"
 )
 
-func ClaimReward(cmd *cobra.Command, keyName string, gas uint64) (string, error) {
-	err := cmd.Flags().Set(flags.FlagFrom, keyName)
+func ClaimReward(keyName string, gas uint64) (string, error) {
+	clientCtx := osmosis.GetDefaultClientContext()
+	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
 	}
-
-	clientCtx, err := client.GetClientTxContext(cmd)
-	if err != nil {
-		return "", err
-	}
-
-	clientCtx, err = SetKeyNameToContext(clientCtx, keyName)
-	if err != nil {
-		return "", err
-	}
-
 	delAddr := clientCtx.GetFromAddress()
 
 	queryClient := types.NewQueryClient(clientCtx)
@@ -39,6 +26,9 @@ func ClaimReward(cmd *cobra.Command, keyName string, gas uint64) (string, error)
 		return "", err
 	}
 	validators := delValsRes.Validators
+	if len(validators) == 0 {
+		return "", nil
+	}
 	// build multi-message transaction
 	msgs := make([]sdk.Msg, 0, len(validators))
 	for _, valAddr := range validators {
@@ -61,7 +51,7 @@ func ClaimReward(cmd *cobra.Command, keyName string, gas uint64) (string, error)
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -81,7 +71,7 @@ type ClaimTx struct {
 	Hash    string
 }
 
-func (claimTx ClaimTx) Execute(cmd *cobra.Command) (string, error) {
+func (claimTx ClaimTx) Execute() (string, error) {
 	keyName := claimTx.KeyName
 	gas := 2000000
 	var err error
@@ -91,7 +81,7 @@ func (claimTx ClaimTx) Execute(cmd *cobra.Command) (string, error) {
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
-		txHash, err = ClaimReward(cmd, keyName, uint64(gas))
+		txHash, err = ClaimReward(keyName, uint64(gas))
 
 		if err == nil {
 			claimTx.Hash = txHash

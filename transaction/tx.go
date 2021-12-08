@@ -1,42 +1,31 @@
 package transaction
 
-import (
-	"fmt"
-
-	"github.com/spf13/cobra"
-)
+import "fmt"
 
 type Tx interface {
-	Execute(*cobra.Command) (string, error)
+	Execute() (string, error)
 	Report(string)
 	Prompt()
+	// Type() string
 }
 
 type Txs []Tx
 
-// HandleTx print out the info of transaction, ask for permission, execute transaction
-// and log to a file in reportPath
-func HandleTx(tx Tx, cmd *cobra.Command, reportPath string) error {
-	tx.Prompt()
-	// yesOrNo := Confirmation()
-	// if yesOrNo == false {
-	// 	return nil
-	// }
-	txHash, err := tx.Execute(cmd)
+func HandleTx(tx Tx) error {
+
+	txHash, err := tx.Execute()
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("\nTransaction sucessful, Tx hash: %s\n", txHash)
-	if reportPath != "" {
-		tx.Report(reportPath)
-	}
+
 	return nil
 }
 
-func HandleTxs(txs Txs, cmd *cobra.Command, reportPath string) error {
+func HandleTxs(txs Txs) error {
 	for _, tx := range txs {
-		err := HandleTx(tx, cmd, reportPath)
+		err := HandleTx(tx)
 		if err != nil {
 			return err
 		}

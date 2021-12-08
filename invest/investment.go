@@ -9,7 +9,6 @@ import (
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/spf13/cobra"
 
 	"github.com/notional-labs/cookiemonster/query"
 	"github.com/notional-labs/cookiemonster/transaction"
@@ -17,7 +16,6 @@ import (
 
 type Investment struct {
 	KeyName         string
-	TransferTo      map[string]float32
 	PoolPercentage  int
 	StakePercentage int
 	PoolStrategy    PoolStrategy
@@ -27,19 +25,11 @@ type Investment struct {
 
 type Investments []Investment
 
-func (investment Investment) Invest(cmd *cobra.Command, reportPath string) error {
+var ()
 
+func (investment Investment) InvestWithOutClaim() error {
 	keyName := investment.KeyName
-
-	// 1 claim reward
-	claimTx := transaction.ClaimTx{KeyName: keyName}
-	// execute claim tx right away
-	err := transaction.HandleTx(claimTx, cmd, reportPath)
-	if err != nil {
-		return err
-	}
-
-	uosmoBalance, err := query.QueryUosmoBalance(cmd, keyName)
+	uosmoBalance, err := query.QueryUosmoBalance(keyName)
 	if err != nil {
 		return err
 	}
@@ -47,14 +37,48 @@ func (investment Investment) Invest(cmd *cobra.Command, reportPath string) error
 	// poling
 	poolStrategy := investment.PoolStrategy
 	totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
-	err = BatchPool(cmd, keyName, totalPoolAmount, poolStrategy, investment.Duration, reportPath)
+	err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration)
 	if err != nil {
 		return err
 	}
 
 	// staking
 	stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
-	err = Stake(cmd, keyName, stakeAmount, investment.StakeAddress, reportPath)
+	err = Stake(keyName, stakeAmount, investment.StakeAddress)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (investment Investment) Invest() error {
+
+	keyName := investment.KeyName
+
+	// 1 claim reward
+	claimTx := transaction.ClaimTx{KeyName: keyName}
+	// execute claim tx right away
+	err := transaction.HandleTx(claimTx)
+	if err != nil {
+		return err
+	}
+
+	uosmoBalance, err := query.QueryUosmoBalance(keyName)
+	if err != nil {
+		return err
+	}
+
+	// poling
+	poolStrategy := investment.PoolStrategy
+	totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
+	err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration)
+	if err != nil {
+		return err
+	}
+
+	// staking
+	stakeAmount := XPercentageOf(uosmoBalance, investment.StakePercentage)
+	err = Stake(keyName, stakeAmount, investment.StakeAddress)
 	if err != nil {
 		return err
 	}
@@ -82,39 +106,47 @@ func LoadInvestmentsFromFile(fileLocation string) ([]Investment, error) {
 	return investments, nil
 }
 
-func BatchPool(cmd *cobra.Command, keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string, reportPath string) error {
+func BatchPool(keyName string, totalPoolAmount *big.Int, poolStrategy PoolStrategy, duration string) error {
+	// fmt.Println(transaction.Seperator)
+	// fmt.Println("\nPooling:")
+	// 2 pool
+	// caculate pool amount = pool percentage of uosmoBalance
+
+	// fmt.Println("\nTotal Pool Amount: " + totalPoolAmount.String() + "uosmo\n")
 	// create pooling transaction from strategy, keyname, totalpoolamount
 	swapAndPoolTxs := MakeSwapAndPoolTxs(keyName, totalPoolAmount, poolStrategy)
 
-	err := transaction.HandleTxs(swapAndPoolTxs, cmd, reportPath)
+	err := transaction.HandleTxs(swapAndPoolTxs)
 	if err != nil {
 		return err
 	}
-	lockTxs, err := MakeLockTxs(cmd, keyName, duration)
+	lockTxs, err := MakeLockTxs(keyName, duration)
 
 	if err != nil {
 		return err
 	}
-	err = transaction.HandleTxs(lockTxs, cmd, reportPath)
+	err = transaction.HandleTxs(lockTxs)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func Stake(cmd *cobra.Command, keyName string, stakeAmount *big.Int, stakeAddress string, reportPath string) error {
+func Stake(keyName string, stakeAmount *big.Int, stakeAddress string) error {
 	if stakeAddress != "" {
 		valAddress, err := sdk.ValAddressFromBech32(stakeAddress)
 		if err != nil {
 			return err
 		}
+		// 3 stake
+
 		delegateOpt := transaction.DelegateOption{
 			Amount:  sdk.NewIntFromBigInt(stakeAmount),
 			ValAddr: valAddress,
 			Denom:   "uosmo",
 		}
 		delegateTx := transaction.DelegateTx{KeyName: keyName, DelegateOpt: delegateOpt}
-		err = transaction.HandleTx(delegateTx, cmd, reportPath)
+		err = transaction.HandleTx(delegateTx)
 		if err != nil {
 			return err
 		}

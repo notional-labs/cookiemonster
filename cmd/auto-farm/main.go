@@ -10,8 +10,8 @@ import (
 
 func main() {
 	params.SetAddressPrefixes()
-	rootCmd, _ := cmd.NewRootCmd()
-	if err := cmd.Execute(rootCmd); err != nil {
+	rootCmd := cmd.NewRootCmd()
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }

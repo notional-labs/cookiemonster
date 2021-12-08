@@ -2,13 +2,11 @@ package transaction
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/spf13/cobra"
 	"os"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	"github.com/notional-labs/cookiemonster/osmosis"
 	"github.com/notional-labs/cookiemonster/query"
 	"github.com/osmosis-labs/osmosis/x/lockup/types"
 	"gopkg.in/yaml.v3"
@@ -20,8 +18,8 @@ type LockOption struct {
 	Denom    string
 }
 
-func Lock(cmd *cobra.Command, keyName string, lockOpt LockOption, gas uint64) (string, error) {
-	clientCtx := client.GetClientContextFromCmd(cmd)
+func Lock(keyName string, lockOpt LockOption, gas uint64) (string, error) {
+	clientCtx := osmosis.GetDefaultClientContext()
 	clientCtx, err := SetKeyNameToContext(clientCtx, keyName)
 	if err != nil {
 		return "", err
@@ -57,7 +55,7 @@ func Lock(cmd *cobra.Command, keyName string, lockOpt LockOption, gas uint64) (s
 	if code != 0 {
 		return txHash, fmt.Errorf("tx failed with code %d", code)
 	}
-	broadcastedTx, err := query.QueryTxWithRetry(cmd, txHash, 4)
+	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
 	}
@@ -78,7 +76,7 @@ type LockTx struct {
 	Hash    string
 }
 
-func (lockTx LockTx) Execute(cmd *cobra.Command) (string, error) {
+func (lockTx LockTx) Execute() (string, error) {
 
 	keyName := lockTx.KeyName
 	lockOpt := lockTx.LockOpt
@@ -90,7 +88,7 @@ func (lockTx LockTx) Execute(cmd *cobra.Command) (string, error) {
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)
-		txHash, err = Lock(cmd, keyName, lockOpt, uint64(gas))
+		txHash, err = Lock(keyName, lockOpt, uint64(gas))
 
 		if err == nil {
 			lockTx.Hash = txHash
