@@ -7,9 +7,14 @@ Cookiemonster is an open source tool for the automatic managment of liquidity pr
 * Staking claims at optimal intervals
 
 
+## Compile it
+The ideal way to run Cookie Monster is on a locked-down raspberry Pi that has access to ONLY the API endpoints that cookiemonster needs to consume.  You can use [SOS](https://github.com/notional-labs/sos) and configure its security policies to your liking.  
 
 
-## How to run server
+For the time being, Cookie Monster has hot keys in the filesystem, like a relayer, so secure the machine running Cookie Monster as though it **is** your private keys.  Once agian, note that we've explicitly chosen not to secure Cookie Monster, so that he could be built quickly.  There are ways to secure cookie monster, and they're left to the users, for now. 
+
+
+## Run it
 1. Create an an accountmanager.json file at ~/.cookiemonster/accountmanager.json, as seen below
 
 
