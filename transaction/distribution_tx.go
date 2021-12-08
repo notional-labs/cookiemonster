@@ -103,10 +103,22 @@ func (claimTx ClaimTx) Report(reportPath string) {
 
 	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
-	f.WriteString("\nClaim Reward Transaction\n")
-	f.WriteString("\nKeyname: " + keyName + "\n")
-	f.WriteString("\ntx hash: " + claimTx.Hash + "\n")
-	f.WriteString(Seperator)
+	n, err := f.WriteString("\nClaim Reward Transaction\n")
+	if err != nil {
+		fmt.Println(n, err)
+	}
+	n, err = f.WriteString("\nKeyname: " + keyName + "\n")
+	if err != nil {
+		fmt.Println(n, err)
+	}
+	n, err = f.WriteString("\ntx hash: " + claimTx.Hash + "\n")
+	if err != nil {
+		fmt.Println(n, err)
+	}
+	n, err = f.WriteString(Seperator)
+	if err != nil {
+		fmt.Println(n, err)
+	}
 
 	f.Close()
 }

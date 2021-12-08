@@ -96,14 +96,29 @@ func (delegateTx DelegateTx) Report(reportPath string) {
 
 	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
-	f.WriteString("\nDelegate Transaction\n")
-	f.WriteString("\nKeyname: " + keyName + "\n")
-	f.WriteString("\nDelegate Option\n\n")
+	n, err := f.WriteString("\nDelegate Transaction\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
+	n, err = f.WriteString("\nKeyname: " + keyName + "\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
+	n, err = f.WriteString("\nDelegate Option\n\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
 
 	txData, _ := yaml.Marshal(delegateOpt)
 	_, _ = f.Write(txData)
-	f.WriteString("\ntx hash: " + delegateTx.Hash + "\n")
-	f.WriteString(Seperator)
+	n, err = f.WriteString("\ntx hash: " + delegateTx.Hash + "\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
+	n, err = f.WriteString(Seperator)
+	if err != nil {
+		fmt.Println(err, n)
+	}
 
 	f.Close()
 }

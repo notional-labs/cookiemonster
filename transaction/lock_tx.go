@@ -111,14 +111,29 @@ func (lockTx LockTx) Report(reportPath string) {
 
 	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
-	f.WriteString("\nLock Transaction\n")
-	f.WriteString("\nKeyname: " + keyName + "\n")
-	f.WriteString("\nLock Option\n\n")
+	n, err := f.WriteString("\nLock Transaction\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
+	n, err = f.WriteString("\nKeyname: " + keyName + "\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
+	n, err = f.WriteString("\nLock Option\n\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
 
 	txData, _ := yaml.Marshal(lockOpt)
 	_, _ = f.Write(txData)
-	f.WriteString("\ntx hash: " + lockTx.Hash + "\n")
-	f.WriteString(Seperator)
+	n, err = f.WriteString("\ntx hash: " + lockTx.Hash + "\n")
+	if err != nil {
+		fmt.Println(err, n)
+	}
+	n, err = f.WriteString(Seperator)
+	if err != nil {
+		fmt.Println(err, n)
+	}
 
 	f.Close()
 }
@@ -127,9 +142,9 @@ func (lockTx LockTx) Prompt() {
 	lockOpt := lockTx.LockOpt
 	keyName := lockTx.KeyName
 	fmt.Print(Seperator)
-	fmt.Print("\nLock Transaction\n")
-	fmt.Print("\nKeyname: " + keyName + "\n")
-	fmt.Print("\nLock Option\n\n")
+	fmt.Println("\nLock Transaction")
+	fmt.Println("\nKeyname: " + keyName)
+	fmt.Println("\nLock Option")
 	fmt.Printf("%+v\n", lockOpt)
 
 }

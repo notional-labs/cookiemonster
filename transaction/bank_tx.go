@@ -119,7 +119,10 @@ func (bankSendTx BankSendTx) Report(reportPath string) {
 	if err != nil {
 		fmt.Println(num, err)
 	}
-	f.WriteString(Seperator)
+	num, err = f.WriteString(Seperator)
+	if err != nil {
+		fmt.Println(num, err)
+	}
 
 	f.Close()
 }

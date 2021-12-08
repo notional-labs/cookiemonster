@@ -156,7 +156,10 @@ func CheckAccount(w http.ResponseWriter, r *http.Request) {
 		Address: cmAddress,
 	}
 
-	json.NewEncoder(w).Encode(addr)
+	err = json.NewEncoder(w).Encode(addr)
+	if err != nil {
+		fmt.Println(err)
+	}
 	w.WriteHeader(200)
 }
 
@@ -167,7 +170,10 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	m := &map[string]string{}
-	json.Unmarshal(body, m)
+	err = json.Unmarshal(body, m)
+	if err != nil {
+		fmt.Println(err)
+	}
 	// desiredValue := m["tx-hash"]
 	fmt.Println((*m)["tx-hash"])
 	res, err := query.QueryTxWithRetry((*m)["tx-hash"], 5)
