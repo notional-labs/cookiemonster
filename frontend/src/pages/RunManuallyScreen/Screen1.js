@@ -6,6 +6,7 @@ const Screen1 = ({ current, wrapSetter }) => {
     useEffect(() => {
         if (current === 1) {
             setState('running')
+            fetchReward()
         }
         else if( current === 0){
             setState('pending')
@@ -15,11 +16,7 @@ const Screen1 = ({ current, wrapSetter }) => {
     const fetchReward = () => {
         setTimeout(() => {
             wrapSetter(2)
-        }, 2000)
-    }
-
-    if(state === 'running'){
-        fetchReward()
+        }, 3000)
     }
 
     return (

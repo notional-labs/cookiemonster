@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getBalance } from '../../helpers/getBalance';
-import { Image, Table, Typography } from 'antd';
+import { Image, Table, Typography, message, } from 'antd';
 import './Asset.css'
 
 const { Title, } = Typography;
@@ -21,21 +21,43 @@ const style = {
 const Asset = ({ address }) => {
     const [listAsset, setListAsset] = useState([]);
 
+    const success = () => {
+        message.success('Fetching success', 1);
+    };
+
+    const error = () => {
+        message.error('Fetching failed', 1);
+    };
+
+    const warning = () => {
+        message.warning('No Assets Yet', 1);
+    };
+
     useEffect(() => {
+        console.log(address)
         if (address !== '') {
-            (async () => {
-                const balances = await getBalance(undefined, address)
-                if (balances.length > 0) {
-                    setListAsset([...balances])
-                }
+            (() => {
+                getBalance(undefined, address).then(balances => {
+                    if (balances.length > 0) {
+                        setListAsset([...balances])
+                        success()
+                    }
+                    warning()
+                }).catch(() => {
+                    error()
+                })
             })()
         }
         else {
-            (async () => {
-                const balances = await getBalance(undefined, 'osmo1cy2fkq04yh7zm6v52dm525pvx0fph7ed75lnz7')
-                if (balances.length > 0) {
-                    setListAsset([...balances])
-                }
+            (() => {
+                getBalance(undefined, 'osmo1cy2fkq04yh7zm6v52dm525pvx0fph7ed75lnz7').then(balances => {
+                    if (balances.length > 0) {
+                        setListAsset([...balances])
+                        success()
+                    }
+                }).catch(() => {
+                    error()
+                })
             })()
         }
     }, [])
@@ -69,13 +91,13 @@ const Asset = ({ address }) => {
     return (
         <div style={style.div}>
             <div style={style.divTitle}>
-                <Title>Asset List</Title>
+                <Title>Osmosis Assets</Title>
             </div>
             <hr />
             <Table
                 dataSource={listAsset}
                 columns={columns}
-                style={{marginTop: '3rem',  borderRadius: '5px'}}
+                style={{ marginTop: '3rem', borderRadius: '5px' }}
             />
         </div>
     )

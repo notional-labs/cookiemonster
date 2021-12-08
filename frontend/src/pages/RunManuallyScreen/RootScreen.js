@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Typography } from 'antd';
+import { Typography, notification } from 'antd';
 import { CaretRightFilled, RightOutlined } from '@ant-design/icons'
 import Screen1 from './Screen1';
 import Screen2 from './Screen2';
@@ -49,7 +49,7 @@ const style = {
 const RootScreen = () => {
     const [current, setCurrent] = useState(0)
 
-    const wrapSetter = useCallback((value) => {
+    const wrapSetter = useCallback(value => {
         setCurrent(value)
     }, [setCurrent])
 
@@ -72,21 +72,21 @@ const RootScreen = () => {
             </div>
             <hr />
             <div style={{ ...style.flexDiv, marginTop: '2rem' }}>
-                <Screen1 current={current} wrapSetter={wrapSetter}/>
+                <Screen1 current={current} wrapSetter={wrapSetter} />
                 <CaretRightFilled style={{ fontSize: '10rem', color: '#7a7a7a' }} />
-                <Screen2 current={current} wrapSetter={wrapSetter}/>
+                <Screen2 current={current} wrapSetter={wrapSetter} />
                 <CaretRightFilled style={{ fontSize: '10rem', color: '#7a7a7a' }} />
-                <Screen3 current={current} wrapSetter={wrapSetter}/>
+                <Screen3 current={current} wrapSetter={wrapSetter} />
                 <CaretRightFilled style={{ fontSize: '10rem', color: '#7a7a7a' }} />
-                <Screen4 current={current} wrapSetter={wrapSetter}/>
+                <Screen4 current={current} wrapSetter={wrapSetter} />
             </div>
             <div>
-                <button style={style.button} 
-                        onClick={startManual}
-                        onMouseEnter={handleEnter}
-                        onMouseLeave={handleLeave}>
+                <button style={style.button}
+                    onClick={startManual}
+                    onMouseEnter={handleEnter}
+                    onMouseLeave={handleLeave}>
                     <div style={style.buttonText}>
-                        <p>Run Manually</p> <RightOutlined style={{marginTop: '0.6rem'}} />
+                        <p>Run Manually</p> <RightOutlined style={{ marginTop: '0.6rem' }} />
                     </div>
                 </button>
             </div>

@@ -30,3 +30,7 @@
 .ant-menu-horizontal > .ant-menu-item:hover {
   color: #fafafa;
 }
+
+.modal-backdrop {
+  background-color: rgb(217, 255, 217);
+}

@@ -1,4 +1,5 @@
-import { useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
+import { message, notification } from 'antd'
 
 const Screen2 = ({ current, wrapSetter }) => {
     const [state, setState] = useState('pending')
@@ -6,22 +7,28 @@ const Screen2 = ({ current, wrapSetter }) => {
     useEffect(() => {
         if (current === 2) {
             setState('running')
+            identifiedBestReturns()
         }
-        else if( current === 0){
+        else if (current === 0) {
             setState('pending')
         }
     }, [current])
 
+    const openNotification = (title, mess) => {
+        notification.open({
+            message: title,
+            description: mess
+        });
+    };
+
     const identifiedBestReturns = () => {
         setTimeout(() => {
+            openNotification('Pool found', 'Pick Pool #1')
             wrapSetter(3)
         }, 2000)
     }
 
-    if(state === 'running'){
-        identifiedBestReturns()
-    }
-    
+
     return (
         <div style={{
             height: '10rem',
@@ -32,7 +39,7 @@ const Screen2 = ({ current, wrapSetter }) => {
             paddingTop: '4.2rem',
             boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.5), 0 6px 20px 0 rgba(0, 0, 0, 0.5)',
         }}>
-            Identify Best Returns 
+            Identify Best Returns
         </div>
     )
 }
