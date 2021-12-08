@@ -82,11 +82,21 @@ func (am *AccountManager) LoadMasterKey() {
 
 	am.MasterAddress = masterAddress
 
-	kb.Delete("master")
+	err := kb.Delete("master")
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	kb.WriteLocalKey(MasterKey, privKeyForMaster, hd.PubKeyType("secp256k1"))
+	// in regular usage this should never print a private key to the consiole.
+	keyring, err := kb.WriteLocalKey(MasterKey, privKeyForMaster, hd.PubKeyType("secp256k1"))
+	if err != nil {
+		fmt.Println(err, keyring)
+	}
 
-	AddMasterKey(am.MasterKey)
+	err = AddMasterKey(am.MasterKey)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // import

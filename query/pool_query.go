@@ -3,7 +3,6 @@ package query
 import (
 	"context"
 	"fmt"
-	"math"
 	"strconv"
 	"time"
 
@@ -117,6 +116,7 @@ type Pool struct {
 var samplePoolIncentive = 0.45
 
 //Need different pool for each duration or to change this model. I think it makes sense for every time to have it's own pool.
+/*
 var pool = Pool{
 	TotalValueLocked: cosmostypes.NewDec(1004366),
 	DistributionProportions: DistributionProportions{
@@ -131,6 +131,7 @@ var pool = Pool{
 	PoolIncentives:  cosmostypes.NewDec(int64(float64(samplePoolIncentive) * float64(math.Pow(10, 18)))),
 	APY:             0,
 }
+/*
 
 /**
  osmosisd q mint params --node http://95.217.196.54:2001

@@ -76,7 +76,7 @@ func NewAutoInvestCmd() *cobra.Command {
 							}
 						}
 						return nil
-					}(&investments[id])
+					}(&investments[id]) //nolint:errcheck
 				}
 				time.Sleep(5 * time.Minute)
 			}

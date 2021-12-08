@@ -100,9 +100,18 @@ func (bankSendTx BankSendTx) Report(reportPath string) {
 
 	f, _ := os.OpenFile(reportPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
-	f.WriteString("\nBank Send Transaction\n")
-	f.WriteString("\nKeyname: " + keyName + "\n")
-	f.WriteString("\nBank Send Option\n\n")
+	num, err := f.WriteString("\nBank Send Transaction\n")
+	if err != nil {
+		fmt.Println(err, "something this number is here", num)
+	}
+	num, err = f.WriteString("\nKeyname: " + keyName + "\n")
+	if err != nil {
+		fmt.Println(err, "something this number is here", num)
+	}
+	num, err = f.WriteString("\nBank Send Option\n\n")
+	if err != nil {
+		fmt.Println(err, "something this number is here", num)
+	}
 
 	txData, _ := yaml.Marshal(bankSendOpt)
 	_, _ = f.Write(txData)
