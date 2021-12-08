@@ -115,7 +115,10 @@ func (bankSendTx BankSendTx) Report(reportPath string) {
 
 	txData, _ := yaml.Marshal(bankSendOpt)
 	_, _ = f.Write(txData)
-	f.WriteString("\ntx hash: " + hash + "\n")
+	num, err = f.WriteString("\ntx hash: " + hash + "\n")
+	if err != nil {
+		fmt.Println(num, err)
+	}
 	f.WriteString(Seperator)
 
 	f.Close()

@@ -54,7 +54,10 @@ func QueryPools() ([]types.Pool, error) {
 	var pools []types.Pool
 	for _, any := range poolsAny {
 		var pool types.Pool
-		pool.XXX_Unmarshal(any.Value)
+		err = pool.XXX_Unmarshal(any.Value)
+		if err != nil {
+			fmt.Println(err)
+		}
 		pools = append(pools, pool)
 	}
 	return pools, nil
@@ -68,10 +71,13 @@ func QueryPoolId(poolId int) (*types.Pool, error) {
 	res, err := queryClient.Pool(context.Background(), &types.QueryPoolRequest{
 		PoolId: uint64(poolId),
 	})
-	var pool types.Pool
-	pool.XXX_Unmarshal(res.GetPool().Value)
 	if err != nil {
 		return nil, err
+	}
+	var pool types.Pool
+	err = pool.XXX_Unmarshal(res.GetPool().Value)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	return &pool, nil
@@ -113,7 +119,7 @@ type Pool struct {
 	APY                     float64
 }
 
-var samplePoolIncentive = 0.45
+// var samplePoolIncentive = 0.45
 
 //Need different pool for each duration or to change this model. I think it makes sense for every time to have it's own pool.
 /*

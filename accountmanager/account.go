@@ -129,7 +129,10 @@ func (am *AccountManager) RegisterAccountForAddress(Address string) (sdk.AccAddr
 	if err != nil {
 		panic(err)
 	}
-	DumpAccountManagerToFile(am, DefaultAccountManagerFile)
+	err = DumpAccountManagerToFile(am, DefaultAccountManagerFile)
+	if err != nil {
+		panic(err)
+	}
 	return cmAddress, nil
 }
 
