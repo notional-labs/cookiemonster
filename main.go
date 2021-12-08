@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/notional-labs/cookiemonster/accountmanager"
-	"github.com/notional-labs/cookiemonster/invest"
+	//	"github.com/notional-labs/cookiemonster/invest"
 	//
 	// "github.com/notional-labs/cookiemonster/transaction"
 )
@@ -83,8 +83,11 @@ func main() {
 	//		panic(err)
 	//	}
 	accountmanager.DumpAccountManagerToFile(am, userHomeDir+"/accountmanager.json")
-	investments := am.GetDefaultInvestments()
-	invest.DumpInvestmentsToFile(userHomeDir+"/cookiemonster/investments.json", investments)
+
+	// I think I just removed some logging and now it builds -Jacob
+	// Khanh, I need you to let me know if this is more than logging and then we need to tighten/clean the app.
+	//investments := am.GetDefaultInvestments()
+	//invest.DumpInvestmentsToFile(userHomeDir+"/cookiemonster/investments.json", investments)
 	//	fmt.Println(addr)
 
 }

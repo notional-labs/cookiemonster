@@ -216,20 +216,22 @@ func DumpAccountManagerToFile(am *AccountManager, fileLocation string) error {
 	return nil
 }
 
-// func (am AccountManager) GetDefaultInvestments() invest.Investments {
+/*
+func (am AccountManager) GetDefaultInvestments() invest.Investments {
 
-// 	investments := invest.Investments{}
-// 	for i := 0; i < am.Num; i++ {
-// 		investment := invest.Investment{
-// 			KeyName:         am.Name + strconv.Itoa(i),
-// 			TransferTo:      nil,
-// 			PoolPercentage:  50,
-// 			StakePercentage: 50,
-// 			PoolStrategy:    invest.PoolStrategy{Name: "custom", Config: map[string]int{"1": 100}, ConfigDenom: "percentages"},
-// 			Duration:        "14days",
-// 			StakeAddress:    "",
-// 		}
-// 		investments = append(investments, investment)
-// 	}
-// 	return investments
-// }
+	investments := invest.Investments{}
+	for i := 0; i < am.Num; i++ {
+		investment := invest.Investment{
+			KeyName:         am.Name + strconv.Itoa(i),
+			TransferTo:      nil,
+			PoolPercentage:  50,
+			StakePercentage: 50,
+			PoolStrategy:    invest.PoolStrategy{Name: "custom", Config: map[string]int{"1": 100}, ConfigDenom: "percentages"},
+			Duration:        "14days",
+			StakeAddress:    "",
+		}
+		investments = append(investments, investment)
+	}
+	return investments
+}
+*/
