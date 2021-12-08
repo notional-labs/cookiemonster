@@ -43,12 +43,12 @@ func JoinPool(keyName string, joinPoolOpt JoinPoolOption, gas uint64) (string, e
 	maxAmountsIn := joinPoolOpt.MaxAmountsIn
 
 	msg := NewMsgJoinPool(fromAddr, poolId, shareOutAmount, maxAmountsIn)
-	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+	code, log, txHash, err := BroadcastTx(clientCtx, txf, msg)
 	if err != nil {
 		return txHash, err
 	}
 	if code != 0 {
-		return txHash, fmt.Errorf("tx failed with code %d", code)
+		return txHash, fmt.Errorf("tx failed with code %d with log = %s", code, log)
 	}
 	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
@@ -156,7 +156,8 @@ func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64
 		TokenIn:           tokenIn,
 		ShareOutMinAmount: shareOutMinAmount,
 	}
-	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+
+	code, log, txHash, err := BroadcastTx(clientCtx, txf, msg)
 	if err != nil {
 		return txHash, err
 	}
@@ -164,8 +165,11 @@ func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64
 		return txHash, fmt.Errorf("insufficient fee")
 	}
 	if code != 0 {
-		return txHash, fmt.Errorf("tx failed with code %d", code)
+		return txHash, fmt.Errorf("tx failed with code %d with log = %s", code, log)
 	}
+
+	fmt.Println("hello1")
+
 	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err

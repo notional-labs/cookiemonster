@@ -14,16 +14,16 @@ import (
 // BroadcastTx attempts to generate, sign and broadcast a transaction with the
 // given set of messages. It will also simulate gas requirements if necessary.
 // It will return an error upon failure.
-func BroadcastTx(clientCtx client.Context, txf clienttx.Factory, msgs ...sdk.Msg) (uint32, string, error) {
+func BroadcastTx(clientCtx client.Context, txf clienttx.Factory, msgs ...sdk.Msg) (uint32, string, string, error) {
 	txf, err := clienttx.PrepareFactory(clientCtx, txf)
 	if err != nil {
-		return 3, "", err
+		return 3, "", "", err
 	}
 
 	if txf.SimulateAndExecute() || clientCtx.Simulate {
 		_, adjusted, err := clienttx.CalculateGas(clientCtx.QueryWithData, txf, msgs...)
 		if err != nil {
-			return 3, "", err
+			return 3, "", "", err
 		}
 
 		txf = txf.WithGas(adjusted)
@@ -31,18 +31,18 @@ func BroadcastTx(clientCtx client.Context, txf clienttx.Factory, msgs ...sdk.Msg
 	}
 
 	if clientCtx.Simulate {
-		return 3, "", nil
+		return 3, "", "", nil
 	}
 
 	tx, err := clienttx.BuildUnsignedTx(txf, msgs...)
 	if err != nil {
-		return 3, "", err
+		return 3, "", "", err
 	}
 
 	if !clientCtx.SkipConfirm {
 		out, err := clientCtx.TxConfig.TxJSONEncoder()(tx.GetTx())
 		if err != nil {
-			return 3, "", err
+			return 3, "", "", err
 		}
 
 		_, _ = fmt.Fprintf(os.Stderr, "%s\n\n", out)
@@ -52,27 +52,30 @@ func BroadcastTx(clientCtx client.Context, txf clienttx.Factory, msgs ...sdk.Msg
 
 		if err != nil || !ok {
 			_, _ = fmt.Fprintf(os.Stderr, "%s\n", "cancelled transaction")
-			return 3, "", err
+			return 3, "", "", err
 		}
 	}
 
 	err = clienttx.Sign(txf, clientCtx.GetFromName(), tx, true)
 	if err != nil {
-		return 3, "", err
+		return 3, "", "", err
 	}
+
+	fmt.Printf("gas = %d \n", tx.GetTx().GetGas())
+	fmt.Println(tx.GetTx().GetMsgs())
 
 	txBytes, err := clientCtx.TxConfig.TxEncoder()(tx.GetTx())
 	if err != nil {
-		return 3, "", err
+		return 3, "", "", err
 	}
 
 	// broadcast to a Tendermint node
 	res, err := clientCtx.BroadcastTx(txBytes)
 	if err != nil {
-		return 3, "", err
+		return 3, "", "", err
 	}
 
-	return res.Code, res.TxHash, clientCtx.PrintProto(res)
+	return res.Code, res.RawLog, res.TxHash, clientCtx.PrintProto(res)
 }
 
 // for more info

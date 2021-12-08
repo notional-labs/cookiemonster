@@ -15,6 +15,7 @@ import (
 	"github.com/notional-labs/cookiemonster/invest"
 	"github.com/notional-labs/cookiemonster/query"
 	"github.com/notional-labs/cookiemonster/transaction"
+	"github.com/rs/cors"
 )
 
 func InitAPI() {
@@ -31,21 +32,25 @@ func InitAPI() {
 	accountmanager.DefaultAccountManager = *accountmanager.MustLoadAccountManagerFromFile("/.cookiemonster/accountmanager.json")
 
 	router.HandleFunc("/deposit", Deposit).Methods("POST")
-	router.HandleFunc("/check-account", CheckAccount).Methods("POST")
+	router.HandleFunc("/check-account", CheckAccount).Methods("POST", "OPTIONS")
 	// router.HandleFunc("/identify-pool", IdentifyPool)
 	router.HandleFunc("/auto-investing", AutoInvest).Methods("POST")
 	router.HandleFunc("/pull-reward", PullReward).Methods("POST")
 
 	// router.HandleFunc("/deposit/get-address", CheckAccount)
 
+	handler := cors.Default().Handler(router)
+
 	log.Println("Server is running on port 8000")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	log.Println("1")
+	log.Fatal(http.ListenAndServe(":8000", handler))
 }
 
 func PullReward(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err.Error())
 	}
 	m := &map[string]string{}
 	json.Unmarshal(body, m)
@@ -56,7 +61,8 @@ func PullReward(w http.ResponseWriter, r *http.Request) {
 	cmKeyForUserAddress, err := addressToCMKeyDB.GetCMKeyNameForAddress(userAddress)
 
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err.Error())
 	}
 	claimTx := transaction.ClaimTx{
 		KeyName: cmKeyForUserAddress,
@@ -64,17 +70,17 @@ func PullReward(w http.ResponseWriter, r *http.Request) {
 
 	err = transaction.HandleTx(claimTx)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		panic(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		fmt.Println(err.Error())
 	}
 	w.WriteHeader(200)
 }
 
 func AutoInvest(w http.ResponseWriter, r *http.Request) {
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err.Error())
 	}
 	m := &map[string]string{}
 	json.Unmarshal(body, m)
@@ -85,8 +91,8 @@ func AutoInvest(w http.ResponseWriter, r *http.Request) {
 	addressToCMKeyDB := db.DefaultAddressToCMKeyNameDB
 	cmKeyForUserAddress, err := addressToCMKeyDB.GetCMKeyNameForAddress(userAddress)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		panic(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		fmt.Println(err.Error())
 	}
 
 	investment := invest.Investment{
@@ -104,8 +110,8 @@ func AutoInvest(w http.ResponseWriter, r *http.Request) {
 
 	err = investment.InvestWithOutClaim()
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		panic(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		fmt.Println(err.Error())
 	}
 	fmt.Println(0)
 
@@ -117,10 +123,10 @@ type AddressResponse struct {
 }
 
 func CheckAccount(w http.ResponseWriter, r *http.Request) {
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err.Error())
 	}
 	m := &map[string]string{}
 	json.Unmarshal(body, m)
@@ -143,14 +149,13 @@ func CheckAccount(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(addr)
 	w.WriteHeader(200)
-
 }
 
 func Deposit(w http.ResponseWriter, r *http.Request) {
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	m := &map[string]string{}
 	json.Unmarshal(body, m)
@@ -161,8 +166,7 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println(err.Error())
-		w.WriteHeader(http.StatusNotFound)
-		panic(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
 	} else if res.Code != 0 {
 		// fmt.Println(1)
 
@@ -177,8 +181,7 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 	bankMsg := msg.(*banktypes.MsgSend)
 
 	if bankMsg.ToAddress != accountmanager.DefaultAccountManager.MasterAddress {
-		w.WriteHeader(http.StatusNotFound)
-		panic("wrong deposit address")
+		fmt.Println("ERROR: wrong deposit address")
 	}
 
 	acc := bankMsg.FromAddress
@@ -187,7 +190,8 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 	am := accountmanager.DefaultAccountManager
 	cmAddress, err := db.DefautlAddressToCMAddressDB.GetCMAddressForAddress(acc)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		fmt.Println(err.Error())
 	}
 
 	var cmAddressBz sdk.AccAddress
@@ -195,9 +199,8 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 	if cmAddress == "" {
 		cmAddressBz, err = am.RegisterAccountForAddress(acc)
 		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			panic(err)
-
+			http.Error(w, err.Error(), http.StatusNotFound)
+			fmt.Println(err.Error())
 		}
 	} else {
 		cmAddressBz, _ = sdk.AccAddressFromBech32(cmAddress)
@@ -216,8 +219,8 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 
 	err = transaction.HandleTx(bankSendTx)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		panic(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		fmt.Println(err.Error())
 	}
 	w.Header().Set("Content-Type", "application/json")
 	addr := AddressResponse{

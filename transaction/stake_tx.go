@@ -33,13 +33,14 @@ func Delegate(keyName string, delegateOpt DelegateOption, gas uint64) (string, e
 	amount := sdk.Coin{Denom: delegateOpt.Denom, Amount: delegateOpt.Amount}
 	msg := types.NewMsgDelegate(delAddr, valAddr, amount)
 
-	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+	code, log, txHash, err := BroadcastTx(clientCtx, txf, msg)
 	if err != nil {
 		return txHash, err
 	}
 	if code != 0 {
-		return txHash, fmt.Errorf("tx failed with code %d", code)
+		return txHash, fmt.Errorf("tx failed with code %d with log = %s", code, log)
 	}
+
 	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {
 		return txHash, err
@@ -49,7 +50,7 @@ func Delegate(keyName string, delegateOpt DelegateOption, gas uint64) (string, e
 
 	}
 	if broadcastedTx.Code != 0 {
-		return txHash, fmt.Errorf("tx failed with code %d", code)
+		return txHash, fmt.Errorf("tx failed with code %d with message = %s", code, broadcastedTx.RawLog)
 	}
 	return txHash, nil
 }
@@ -69,6 +70,7 @@ func (delegateTx DelegateTx) Execute() (string, error) {
 	var txHash string
 
 	// if tx failed because of insufficient fee , retry
+	fmt.Println("hello")
 	for i := 0; i < 4; i++ {
 		fmt.Println("\n---------------")
 		fmt.Printf("\n Try %d times\n\n", i+1)

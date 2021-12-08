@@ -44,12 +44,12 @@ func ClaimReward(keyName string, gas uint64) (string, error) {
 		msgs = append(msgs, msg)
 	}
 	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
-	code, txHash, err := BroadcastTx(clientCtx, txf, msgs...)
+	code, log, txHash, err := BroadcastTx(clientCtx, txf, msgs...)
 	if err != nil {
 		return txHash, err
 	}
 	if code != 0 {
-		return txHash, fmt.Errorf("tx failed with code %d", code)
+		return txHash, fmt.Errorf("tx failed with code %d with log = %s", code, log)
 	}
 	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {

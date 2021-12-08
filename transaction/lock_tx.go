@@ -48,12 +48,12 @@ func Lock(keyName string, lockOpt LockOption, gas uint64) (string, error) {
 		sdk.Coins{{Denom: lockOpt.Denom, Amount: lockOpt.Amount}},
 	)
 
-	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+	code, log, txHash, err := BroadcastTx(clientCtx, txf, msg)
 	if err != nil {
 		return txHash, err
 	}
 	if code != 0 {
-		return txHash, fmt.Errorf("tx failed with code %d", code)
+		return txHash, fmt.Errorf("tx failed with code %d with log = %s", code, log)
 	}
 	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
 	if err != nil {

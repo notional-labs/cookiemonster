@@ -34,12 +34,12 @@ func BankSend(keyName string, bankSendOpt BankSendOption, gas uint64) (string, e
 	coins := sdk.Coins([]sdk.Coin{coin})
 	msg := types.NewMsgSend(fromAddr, toAddr, coins)
 
-	code, txHash, err := BroadcastTx(clientCtx, txf, msg)
+	code, log, txHash, err := BroadcastTx(clientCtx, txf, msg)
 	if err != nil {
 		return txHash, err
 	}
 	if code != 0 {
-		return txHash, fmt.Errorf("tx failed with code %d", code)
+		return txHash, fmt.Errorf("tx failed with code %d with log = %s", code, log)
 	}
 
 	broadcastedTx, err := query.QueryTxWithRetry(txHash, 4)
