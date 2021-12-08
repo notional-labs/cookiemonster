@@ -5,6 +5,7 @@ import (
 	// "github.com/osmosis-labs/osmosis/app/params"
 
 	"github.com/cosmos/cosmos-sdk/client/keys"
+	accountmanagercli "github.com/notional-labs/cookiemonster/accountmanager/cli"
 	apicli "github.com/notional-labs/cookiemonster/api/cli"
 	investcli "github.com/notional-labs/cookiemonster/invest/cli"
 	"github.com/notional-labs/cookiemonster/osmosis"
@@ -23,6 +24,8 @@ func NewRootCmd() *cobra.Command {
 		investcli.NewInvestCmd(),
 		investcli.NewAutoInvestCmd(),
 		keys.Commands(osmosis.HomeDir),
+		keys.AddKeyCommand(),
+		accountmanagercli.NewAddMasterKey(),
 	)
 
 	return rootCmd
