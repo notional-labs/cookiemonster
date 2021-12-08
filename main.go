@@ -1,13 +1,7 @@
 package main
 
-import (
-	"os"
-
-	"github.com/notional-labs/cookiemonster/accountmanager"
-	"github.com/notional-labs/cookiemonster/invest"
-	//
-	// "github.com/notional-labs/cookiemonster/transaction"
-)
+//
+// "github.com/notional-labs/cookiemonster/transaction"
 
 func main() {
 	// toAddr, _ := sdk.AccAddressFromBech32("osmo13k9w2pexxtyyfuw7fmxh6rpwwl9udxkk26nfle")
@@ -73,18 +67,18 @@ func main() {
 	// 	fmt.Println(err.Error())
 	// }
 	// txf := transaction.NewTxFactoryFromClientCtx(osmosis.DefaultClientCtx)
-	userHomeDir, _ := os.UserHomeDir()
-	am, err := accountmanager.LoadAccountManagerFromFile(userHomeDir + "/accountmanager.json")
-	if err != nil {
-		panic(err)
-	}
-	//	addr := am.CreateNewAccount()
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	accountmanager.DumpAccountManagerToFile(am, userHomeDir+"/accountmanager.json")
-	investments := am.GetDefaultInvestments()
-	invest.DumpInvestmentsToFile(userHomeDir+"/cookiemonster/investments.json", investments)
+	// userHomeDir, _ := os.UserHomeDir()
+	// am, err := accountmanager.LoadAccountManagerFromFile(userHomeDir + "/accountmanager.json")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// //	addr := am.CreateNewAccount()
+	// //	if err != nil {
+	// //		panic(err)
+	// //	}
+	// accountmanager.DumpAccountManagerToFile(am, userHomeDir+"/accountmanager.json")
+	// investments := am.GetDefaultInvestments()
+	// invest.DumpInvestmentsToFile(userHomeDir+"/cookiemonster/investments.json", investments)
 	//	fmt.Println(addr)
 
 }
