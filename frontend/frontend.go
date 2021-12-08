@@ -7,9 +7,12 @@ import (
 	"net/http"
 )
 
-var content embed.FS
+// https://www.akmittal.dev/posts/go-embed-files/  <- compiler angry if you don't put go:embed ABOVE embed.FS, it's positional
+
 
 //go:embed build
+var content embed.FS
+
 
 func clientHandler() http.Handler {
 	fsys := fs.FS(content)
