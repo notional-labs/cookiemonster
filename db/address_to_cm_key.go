@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 
@@ -9,11 +11,11 @@ import (
 
 var (
 	DefaultAddressToCMKeyNameDBDir = "/.cookiemonster/AddressToCMKeyName.db"
-	DefaultAddressToCMKeyNameDB    = AddressToCMKeyDB{MustOpenDB(DefaultAddressToCMKeyNameDBDir)}
+	DefaultAddressToCMKeyNameDB    AddressToCMKeyDB
 )
 
 type AddressToCMKeyDB struct {
-	db *leveldb.DB
+	DB *leveldb.DB
 }
 
 func (d AddressToCMKeyDB) GetCMKeyNameForAddress(address string) (string, error) {
@@ -21,8 +23,9 @@ func (d AddressToCMKeyDB) GetCMKeyNameForAddress(address string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	keyNameBz, err := d.db.Get(addressBz, nil)
+	keyNameBz, err := d.DB.Get(addressBz, nil)
 	if err == errors.ErrNotFound {
+		fmt.Println("not found")
 		return "", nil
 	} else if err != nil {
 		return "", err
@@ -36,7 +39,7 @@ func (d AddressToCMKeyDB) SetCMKeyNameForAddress(address string, keyName string)
 	if err != nil {
 		return err
 	}
-	err = d.db.Put(addressBz, []byte(keyName), nil)
+	err = d.DB.Put(addressBz, []byte(keyName), nil)
 	return err
 }
 
@@ -45,6 +48,6 @@ func (d AddressToCMKeyDB) DeleteCMKeyNameForAddress(address string) error {
 	if err != nil {
 		return err
 	}
-	err = d.db.Delete(addressBz, nil)
+	err = d.DB.Delete(addressBz, nil)
 	return err
 }

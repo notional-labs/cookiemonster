@@ -2,10 +2,12 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/gorilla/mux"
 	"github.com/notional-labs/cookiemonster/accountmanager"
@@ -16,7 +18,17 @@ import (
 )
 
 func InitAPI() {
+	fmt.Println(5)
 	router := mux.NewRouter().StrictSlash(true)
+	db.DefaultAddressToCMKeyNameDB = db.AddressToCMKeyDB{
+		DB: db.MustOpenDB(db.DefaultAddressToCMKeyNameDBDir),
+	}
+
+	db.DefautlAddressToCMAddressDB = db.AddressToCMAddressDB{
+		DB: db.MustOpenDB(db.DefaultAddressToCMAddressDBDir),
+	}
+
+	accountmanager.DefaultAccountManager = *accountmanager.MustLoadAccountManagerFromFile("/.cookiemonster/accountmanager.json")
 
 	router.HandleFunc("/deposit", Deposit).Methods("POST")
 	router.HandleFunc("/check-account", CheckAccount).Methods("POST")
@@ -31,13 +43,21 @@ func InitAPI() {
 }
 
 func PullReward(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	m := &map[string]string{}
+	json.Unmarshal(body, m)
 
-	userAddress := r.Form.Get("address")
+	userAddress := (*m)["address"]
 
 	addressToCMKeyDB := db.DefaultAddressToCMKeyNameDB
 	cmKeyForUserAddress, err := addressToCMKeyDB.GetCMKeyNameForAddress(userAddress)
 
+	if err != nil {
+		panic(err)
+	}
 	claimTx := transaction.ClaimTx{
 		KeyName: cmKeyForUserAddress,
 	}
@@ -52,11 +72,16 @@ func PullReward(w http.ResponseWriter, r *http.Request) {
 
 func AutoInvest(w http.ResponseWriter, r *http.Request) {
 
-	r.ParseForm()
-
-	userAddress := r.Form.Get("address")
-	poolId := r.Form.Get("pool-id")
-
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	m := &map[string]string{}
+	json.Unmarshal(body, m)
+	fmt.Println(0)
+	userAddress := (*m)["address"]
+	poolId := (*m)["pool-id"]
+	fmt.Println(userAddress)
 	addressToCMKeyDB := db.DefaultAddressToCMKeyNameDB
 	cmKeyForUserAddress, err := addressToCMKeyDB.GetCMKeyNameForAddress(userAddress)
 	if err != nil {
@@ -75,29 +100,36 @@ func AutoInvest(w http.ResponseWriter, r *http.Request) {
 		StakeAddress: "",
 	}
 
+	fmt.Println(0)
+
 	err = investment.InvestWithOutClaim()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		panic(err)
 	}
+	fmt.Println(0)
 
 	w.WriteHeader(200)
 }
 
-type Address struct {
-	address string
+type AddressResponse struct {
+	Address string
 }
 
 func CheckAccount(w http.ResponseWriter, r *http.Request) {
 
-	r.ParseForm()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	m := &map[string]string{}
+	json.Unmarshal(body, m)
 
-	userAddress := r.Form.Get("address")
+	userAddress := (*m)["address"]
 
-	addressToCMAddressDB := db.DefaultAddressToCMAddressDB
+	addressToCMAddressDB := db.DefautlAddressToCMAddressDB
 
 	var cmAddress string
-	var err error
 	for {
 		cmAddress, err = addressToCMAddressDB.GetCMAddressForAddress(userAddress)
 		if err == nil {
@@ -105,8 +137,8 @@ func CheckAccount(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
-	addr := Address{
-		address: cmAddress,
+	addr := AddressResponse{
+		Address: cmAddress,
 	}
 
 	json.NewEncoder(w).Encode(addr)
@@ -115,39 +147,71 @@ func CheckAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func Deposit(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	txHash := r.Form.Get("tx-hash")
-	time.Sleep(5 * time.Second)
-	res, err := query.QueryTxWithRetry(txHash, 5)
+
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		panic(err)
+	}
+	m := &map[string]string{}
+	json.Unmarshal(body, m)
+	// desiredValue := m["tx-hash"]
+	fmt.Println((*m)["tx-hash"])
+	res, err := query.QueryTxWithRetry((*m)["tx-hash"], 5)
+	fmt.Println(9)
+
+	if err != nil {
+		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusNotFound)
 		panic(err)
 	} else if res.Code != 0 {
+		// fmt.Println(1)
+
 		w.WriteHeader(http.StatusNotFound)
-		panic("")
+		panic("ddd")
 	}
+	// fmt.Println(1)
 
 	tx := res.GetTx()
 	msg := tx.GetMsgs()[0]
 
 	bankMsg := msg.(*banktypes.MsgSend)
 
+	if bankMsg.ToAddress != accountmanager.DefaultAccountManager.MasterAddress {
+		w.WriteHeader(http.StatusNotFound)
+		panic("wrong deposit address")
+	}
+
 	acc := bankMsg.FromAddress
 	amount := bankMsg.Amount[0]
 
 	am := accountmanager.DefaultAccountManager
+	cmAddress, err := db.DefautlAddressToCMAddressDB.GetCMAddressForAddress(acc)
+	if err != nil {
+		panic(err)
+	}
 
-	cmAddressBz, err := am.RegisterAccountForAddress(acc)
+	var cmAddressBz sdk.AccAddress
+	fmt.Println(cmAddress)
+	if cmAddress == "" {
+		cmAddressBz, err = am.RegisterAccountForAddress(acc)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			panic(err)
 
+		}
+	} else {
+		cmAddressBz, _ = sdk.AccAddressFromBech32(cmAddress)
+	}
+	fmt.Println(cmAddressBz)
 	sendFundToCmAccountAddressOfUser := transaction.BankSendOption{
 		ToAddr: cmAddressBz,
 		Denom:  "uosmo",
 		Amount: amount.Amount,
 	}
-
+	fmt.Println("len of priv key", len(am.MasterKey))
 	bankSendTx := transaction.BankSendTx{
 		BankSendOpt: sendFundToCmAccountAddressOfUser,
-		KeyName:     "master",
+		KeyName:     accountmanager.MasterKey,
 	}
 
 	err = transaction.HandleTx(bankSendTx)
@@ -156,8 +220,8 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	w.Header().Set("Content-Type", "application/json")
-	addr := Address{
-		address: cmAddressBz.String(),
+	addr := AddressResponse{
+		Address: cmAddressBz.String(),
 	}
 	json.NewEncoder(w).Encode(addr)
 

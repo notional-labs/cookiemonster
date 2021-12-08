@@ -26,6 +26,9 @@ func ClaimReward(keyName string, gas uint64) (string, error) {
 		return "", err
 	}
 	validators := delValsRes.Validators
+	if len(validators) == 0 {
+		return "", nil
+	}
 	// build multi-message transaction
 	msgs := make([]sdk.Msg, 0, len(validators))
 	for _, valAddr := range validators {

@@ -3,6 +3,7 @@ package transaction
 import (
 	"fmt"
 	"os"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -83,6 +84,8 @@ func (bankSendTx BankSendTx) Execute() (string, error) {
 			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
 			gas += 300000
 		} else {
+			time.Sleep(5 * time.Second)
+
 			fmt.Println("\n" + err.Error() + " try again\n")
 		}
 	}

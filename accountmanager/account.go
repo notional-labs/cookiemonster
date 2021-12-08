@@ -3,14 +3,15 @@ package accountmanager
 import (
 	"bufio"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 
-	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/notional-labs/cookiemonster/db"
@@ -18,18 +19,23 @@ import (
 )
 
 var (
-	defaultAccountManagerFile = "/.cookiemonster/accountmanager"
-	DefaultAccountManager     = MustLoadAccountManagerFromFile(defaultAccountManagerFile)
+	DefaultAccountManagerFile = "/.cookiemonster/accountmanager.json"
+	DefaultAccountManager     AccountManager
+	MasterKey                 = "master"
 )
 
 type AccountManager struct {
-	MasterKey        []byte
-	NumOfAccount     int
-	Passphrase       string
-	HashedPassphrase string
+	MasterKey     []byte
+	NumOfAccount  int
+	MasterAddress string
 }
 
-func (am *AccountManager) CreateNewPrivKeyForAddress(Address string) (cryptotypes.PrivKey, error) {
+type AccountManagerLoader struct {
+	MasterKeyHex string
+	NumOfAccount int
+}
+
+func (am *AccountManager) CreateNewPrivKeyForAddress(Address string) cryptotypes.PrivKey {
 	// ctx := osmosis.GetDefaultClientContext()
 	// kb := ctx.Keyring
 
@@ -39,14 +45,48 @@ func (am *AccountManager) CreateNewPrivKeyForAddress(Address string) (cryptotype
 
 	privKeyBzForAddress := privKeyBz32ForAddress[:]
 
+	secp256k1Key := secp256k1.PrivKey{Key: privKeyBzForAddress}
+
 	// accountIdString := am.HashedPassphrase + "_" + strconv.Itoa(am.NumOfAccount)
-	privKeyForAddress, err := legacy.PrivKeyFromBytes(privKeyBzForAddress)
+	// privKeyForAddress, err := legacy.PrivKeyFromBytes(privKeyBzForAddress)
 
 	// uid := "acc" + "-" + accountIdString
 
-	return privKeyForAddress, err
+	return &secp256k1Key
 	// kb.WriteLocalKey(uid, privKeyForAddress, hd.PubKeyType("secp256k1"))
 
+}
+
+func AddMasterKey(privKeyBz []byte) error {
+	ctx := osmosis.GetDefaultClientContext()
+	kb := ctx.Keyring
+
+	privKeyForMaster := &secp256k1.PrivKey{Key: privKeyBz}
+
+	_, err := kb.WriteLocalKey(MasterKey, privKeyForMaster, hd.PubKeyType("secp256k1"))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (am *AccountManager) LoadMasterKey() {
+	ctx := osmosis.GetDefaultClientContext()
+	kb := ctx.Keyring
+
+	privKeyForMaster := &secp256k1.PrivKey{Key: am.MasterKey}
+
+	masterAddressBz := sdk.AccAddress(privKeyForMaster.PubKey().Address())
+
+	masterAddress := masterAddressBz.String()
+
+	am.MasterAddress = masterAddress
+
+	kb.Delete("master")
+
+	kb.WriteLocalKey(MasterKey, privKeyForMaster, hd.PubKeyType("secp256k1"))
+
+	AddMasterKey(am.MasterKey)
 }
 
 // import
@@ -54,22 +94,21 @@ func (am *AccountManager) RegisterAccountForAddress(Address string) (sdk.AccAddr
 	ctx := osmosis.GetDefaultClientContext()
 	kb := ctx.Keyring
 
-	privKeyForAddress, err := am.CreateNewPrivKeyForAddress(Address)
-	if err != nil {
-		return nil, err
-	}
+	privKeyForAddress := am.CreateNewPrivKeyForAddress(Address)
 
-	accountIdString := am.HashedPassphrase + "_" + strconv.Itoa(am.NumOfAccount)
+	accountIdString := strconv.Itoa(am.NumOfAccount)
+
 	uid := "acc" + "-" + accountIdString
-	_, err = kb.WriteLocalKey(uid, privKeyForAddress, hd.PubKeyType("secp256k1"))
+	_, err := kb.WriteLocalKey(uid, privKeyForAddress, hd.PubKeyType("secp256k1"))
 	if err != nil {
 		return nil, err
 	}
+	am.NumOfAccount += 1
 
 	cmAddress := sdk.AccAddress(privKeyForAddress.PubKey().Address().Bytes())
 
 	addressToCMKeyDB := db.DefaultAddressToCMKeyNameDB
-	addressToCMAddressDB := db.DefaultAddressToCMAddressDB
+	addressToCMAddressDB := db.DefautlAddressToCMAddressDB
 
 	err = addressToCMAddressDB.SetCMAddressForAddress(Address, cmAddress.String())
 	if err != nil {
@@ -80,7 +119,7 @@ func (am *AccountManager) RegisterAccountForAddress(Address string) (sdk.AccAddr
 	if err != nil {
 		panic(err)
 	}
-
+	DumpAccountManagerToFile(am, DefaultAccountManagerFile)
 	return cmAddress, nil
 }
 
@@ -104,14 +143,41 @@ func MustLoadAccountManagerFromFile(fileDir string) *AccountManager {
 	reader := bufio.NewReader(file)
 	jsonData, _ := ioutil.ReadAll(reader)
 
-	var am *AccountManager
-	jsonErr := json.Unmarshal(jsonData, &am)
+	var aml *AccountManagerLoader
+	jsonErr := json.Unmarshal(jsonData, &aml)
 	if jsonErr != nil {
 		fmt.Println("Unable to map JSON at " + fileDir + " to Investments")
 		panic(err)
 	}
+
+	masterKey, err := hex.DecodeString(aml.MasterKeyHex)
+	if err != nil {
+		panic(err)
+	}
+	am := &AccountManager{
+		MasterKey:    masterKey,
+		NumOfAccount: aml.NumOfAccount,
+	}
+
+	am.LoadMasterKey()
+	fmt.Println(am)
+
 	return am
 }
+
+// I love Ngan!!!!!!
+// func (am *AccountManager)LoadMasterKey() {
+// 	ctx := osmosis.GetDefaultClientContext()
+// 	kb := ctx.Keyring
+
+// 	privKeyForMaster := &secp256k1.PrivKey{Key: privKeyBz}
+
+// 	_, err := kb.WriteLocalKey("master", privKeyForMaster, hd.PubKeyType("secp256k1"))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func LoadAccountManagerFromFile(fileLocation string) (*AccountManager, error) {
 
@@ -132,13 +198,18 @@ func LoadAccountManagerFromFile(fileLocation string) (*AccountManager, error) {
 	return am, nil
 }
 
-func CreateAccount(am AccountManager)
-
 func DumpAccountManagerToFile(am *AccountManager, fileLocation string) error {
+	homeDir, _ := os.UserHomeDir()
 
-	bz, _ := json.MarshalIndent(am, "", " ")
+	fullDir := homeDir + fileLocation
 
-	err := ioutil.WriteFile(fileLocation, bz, 0644)
+	masterKeyHex := hex.EncodeToString(am.MasterKey)
+	aml := AccountManagerLoader{
+		MasterKeyHex: masterKeyHex,
+		NumOfAccount: am.NumOfAccount,
+	}
+	bz, _ := json.MarshalIndent(aml, "", " ")
+	err := ioutil.WriteFile(fullDir, bz, 0644)
 	if err != nil {
 		return err
 	}
