@@ -54,12 +54,6 @@ jobs:
         yarn run build
         
         
-  sonarqube:
-    name: sonarqube
-    runs-on: ubuntu-latest
-    steps:
-    - name: Official SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v1.0.0
 
 
     
