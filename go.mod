@@ -116,6 +116,6 @@ replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alp
 
 replace github.com/tendermint/tendermint => github.com/tendermint/tendermint v0.34.12
 
-replace github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.42.10-0.20210915013958-01114e89a579
+replace github.com/cosmos/cosmos-sdk => github.com/notional-labs/cosmos-sdk v0.44.2-0.20211208161523-1d46890e7d83
 
 replace github.com/tendermint/tm-db => github.com/osmosis-labs/tm-db v0.6.5-0.20210911033928-ba9154613417
