@@ -1,7 +1,9 @@
-import { Modal, Button, InputNumber, message } from "antd"
+import { InputNumber, message } from "antd"
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { transaction } from "../helpers/transaction"
 import { getKeplr, getCosmosClient } from "../helpers/getKeplr";
+import { deposit } from "../helpers/API/api";
+import { useState } from 'react'
 
 const style = {
     transfer: {
@@ -37,6 +39,7 @@ const style = {
 
 
 const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
+    const [value, setValue] = useState('')
 
     const success = () => {
         message.success('Deposit success', 1);
@@ -46,14 +49,30 @@ const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
         message.error('Deposit failed', 1);
     };
 
+    const handleChange = (e) => {
+        setValue(e.target.value)
+    }
+
+    const checkDisable = () => {
+        if (value === 0){
+            return true
+        }
+        return false
+    }
+
     const handleClick = async () => {
         const { accounts, offlineSigner } = await getKeplr();
         const cosmJS = getCosmosClient(accounts, offlineSigner);
         if (cosmJS != null) {
-            transaction(cookieMonster).then(data => {
+            const amount = value*1000000
+            transaction(cosmJS, amount ,cookieMonster).then(data => {
                 console.log(data)
-                wrapSetter(false)
-                success()
+                deposit(account.address, data.txHash).then(res => {
+                    success()
+                }).catch(() => {
+                    error()
+                    wrapSetter(false)
+                })
             }).catch(() => {
                 error()
                 wrapSetter(false)
@@ -66,12 +85,12 @@ const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
             <div style={style.transfer}>
                 <div style={style.transferInfo}>
                     <p>From</p>
-                    <p>{account.address}</p>
+                    <p>{account.address.substring(0,17) + '...'}</p>
                 </div>
                 <ArrowRightOutlined style={{ fontSize: '2rem', marginTop: '15px' }} />
                 <div style={style.transferInfo}>
                     <p>To</p>
-                    <p>{cookieMonster}</p>
+                    <p>{cookieMonster.substring(0,17) + '...' }</p>
                 </div>
             </div>
             <div style={style.form}>
@@ -82,10 +101,10 @@ const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
                     borderRadius: '10px',
                     border: `2px solid #c4c4c4`,
                     fontSize: '2rem'
-                }} min={0} size='large' />
+                }} min={0} max={Math.floor(parseFloat(account.amount))} size='large' onChange={handleChange}/>
             </div>
             <div style={style.button}>
-                <button onClick={handleClick} style={{ borderRadius: '10px', height: '4rem', fontSize: '1.5rem', backgroundColor: '#9b8da6', color: '#ffffff' }}>
+                <button disabled={checkDisable()} onClick={handleClick} style={{ borderRadius: '10px', height: '4rem', fontSize: '1.5rem', backgroundColor: '#9b8da6', color: '#ffffff' }}>
                     Deposit
                 </button>
             </div>

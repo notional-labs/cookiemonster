@@ -3,8 +3,6 @@ import './App.css';
 
 import Register from './pages/Register';
 import Asset from './pages/Asset/Asset'
-import HomePage from './pages/HomePage';
-import Account from './components/Account';
 import RootScreen from './pages/RunManuallyScreen/RootScreen';
 import DepositButton from './components/DepositButton';
 import DepositModal from './components/DepositModal';
@@ -14,16 +12,15 @@ import { Layout, Menu, Image, message, } from 'antd';
 import {
   HomeOutlined,
   WalletOutlined,
-  UserOutlined,
   ReconciliationOutlined,
 } from '@ant-design/icons';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import { useState, useCallback } from 'react'
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link
+  Link,
 } from "react-router-dom";
 
 import { getKeplr, } from './helpers/getKeplr';
@@ -32,7 +29,7 @@ import logo from './assets/img/logo.png';
 
 import { checkAccount } from './helpers/API/api';
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 const style = {
   div: {
@@ -66,6 +63,10 @@ function App() {
     setDisplayTransactionModal(value)
   }, [setDisplayTransactionModal])
 
+  const wrapSetCookieMonster = useCallback((value) => {
+    setCookieMonster(value)
+  }, [setCookieMonster])
+
   const onCollapse = () => {
     setCollapsed(!collapsed)
     setTimeout(() => {
@@ -81,17 +82,27 @@ function App() {
     message.error('Connect failed', 1);
   };
 
+  const warning = () => {
+    message.warning('Insufficient fund, please deposit to connect to BeanStalk', 5);
+    setTimeout(() => {
+      window.location.href = '/register'
+    }, 1000)
+  };
+
   const getAccount = async () => {
-    const { accounts, offlineSigner } = await getKeplr()
+    const { accounts } = await getKeplr()
     const amount = await getOsmo(accounts[0].address)
     setAccount({
       address: accounts[0].address,
       amount: (parseInt(amount) / 1000000).toString()
     })
     checkAccount('osmo1cy2fkq04yh7zm6v52dm525pvx0fph7ed75lnz7').then(res => {
-      if (res.data.Address !== ''){
+      if (res.data.Address !== '') {
         success()
         setCookieMonster(res.data.Address)
+      }
+      else {
+        warning()
       }
     }).catch(() => {
       error()
@@ -159,9 +170,16 @@ function App() {
             <Content style={{ margin: '2rem' }}>
               <div className="site-layout-background" style={{ padding: 24, paddingTop: '2rem', paddingBottom: '17rem', minHeight: 360, marginTop: '10px' }}>
                 <Routes>
-                  <Route exact path="/" element={<RootScreen />} />
-                  <Route exact path="/asset" element={<Asset address={cookieMonster} />} />
-                  <Route exact path="/account" element={<Register />} />
+                  <Route exact path="/" element={<RootScreen cookieMoster={cookieMonster} account={account} />} />
+                  <Route exact path="/asset" element={<Asset cookieMonster={cookieMonster} />} />
+                  <Route exact path="/register" element={
+                    cookieMonster === '' ?
+                      <Register account={account} wrapSetCookieMonster={wrapSetCookieMonster}/>
+                      :
+                      <div>
+                        Already connect
+                      </div>
+                  } />
                 </Routes>
               </div>
             </Content>

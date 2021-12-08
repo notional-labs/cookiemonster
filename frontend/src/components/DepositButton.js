@@ -1,5 +1,4 @@
 import { TransactionOutlined } from '@ant-design/icons';
-import { transaction } from '../helpers/transaction';
 
 const style = {
     button: {

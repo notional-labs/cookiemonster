@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
 import { message, notification } from 'antd'
+import { autoInvest } from '../../helpers/API/api'
 
-const Screen3 = ({ current, wrapSetter }) => {
+const Screen3 = ({ current, wrapSetter, account }) => {
     const [state, setState] = useState('pending')
 
     useEffect(() => {
         if (current === 3) {
             setState('running')
-            autoInvest()
+            autoInvestProcess()
         }
         else if (current === 0) {
             setState('pending')
+            wrapSetter(0)
         }
     }, [current])
 
@@ -21,12 +23,18 @@ const Screen3 = ({ current, wrapSetter }) => {
         });
     };
 
+    const error = () => {
+        message.error('Auto invest failed', 1);
+    };
 
-    const autoInvest = () => {
-        setTimeout(() => {
-            openNotification('Auto Invest', 'Success')
+    const autoInvestProcess = () => {
+        autoInvest(account.address).then( res => {
+            openNotification('Notification', 'Successfully re-invested OSMO')
             wrapSetter(4)
-        }, 3000)
+        }).catch(() => {
+            error()
+            wrapSetter(0)
+        })
     }
 
     return (

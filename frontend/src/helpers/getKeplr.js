@@ -1,6 +1,4 @@
-import { SigningCosmosClient, 
-    LcdClient,
-    setupBankExtension, } from "@cosmjs/launchpad";
+import { SigningCosmosClient, } from "@cosmjs/launchpad";
 
 
 export const getKeplr = async (chain_id = "osmosis-1") => {

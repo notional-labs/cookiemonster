@@ -1,10 +1,8 @@
-import { Typography, message } from 'antd';
-import { useState } from 'react'
+import { message } from 'antd';
 import { WalletOutlined } from '@ant-design/icons'
 import { getKeplr, getCosmosClient, } from '../helpers/getKeplr';
 import { transaction } from '../helpers/transaction';
-
-const { Title, Paragraph } = Typography;
+import { deposit } from '../helpers/API/api';
 
 const style = {
     div: {
@@ -68,9 +66,7 @@ const style = {
 
 }
 
-const Register = () => {
-    const [address, setAddress] = useState("hello")
-
+const Register = ({account, wrapSetCookieMonster}) => {
     const handleEnter = (e) => {
         e.target.style.transform = 'scale(1.01)'
     }
@@ -78,14 +74,28 @@ const Register = () => {
     const handleLeave = (e) => {
         e.target.style.transform = 'scale(1)'
     }
+
+    const success = () => {
+        message.success('Deposit success', 1);
+    }
+
+    const error = () => {
+        message.error('Deposit failed', 1);
+    }
+
     const handleClickRegister = async () => {
         const { accounts, offlineSigner } = await getKeplr();
         const cosmJS = getCosmosClient(accounts, offlineSigner);
         if (cosmJS != null) {
-            transaction(cosmJS).then(res => {
-
+            transaction(cosmJS, undefined, undefined).then(data => {
+                deposit(account.address, data.txHash).then(res => {
+                    wrapSetCookieMonster(res.data.Address)
+                    success()
+                }).catch(() => {
+                    error()
+                })
             }).catch(err => {
-                
+                error()
             })
 
         }
@@ -107,19 +117,6 @@ const Register = () => {
                         </span>
                     </div>
                 </button>
-            </div>
-            {address !== "" && (
-                <div style={style.addrDiv}>
-                    <Title level={3}>Generated wallet address</Title>
-                    <div style={style.addrContent}>
-                        <Paragraph copyable={{ text: address }}>
-                            {address.length > 100 ? `${address.substring(0, 100)}... ` : `${address} `}
-                        </Paragraph>
-                    </div>
-                </div>
-            )}
-            <div>
-
             </div>
         </div>
     )
