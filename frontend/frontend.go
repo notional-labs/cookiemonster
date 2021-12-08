@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"net/http"
 )
@@ -17,8 +18,11 @@ func clientHandler() http.Handler {
 
 }
 
-func erve() {
+func Serve() {
 	mux := http.NewServeMux()
 	mux.Handle("/", clientHandler())
-	http.ListenAndServe(":3000", mux)
+	err := http.ListenAndServe(":3000", mux)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
