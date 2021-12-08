@@ -1,4 +1,4 @@
-import { useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 
 const Screen4 = ({ current, wrapSetter }) => {
     const [state, setState] = useState('pending')
@@ -6,22 +6,19 @@ const Screen4 = ({ current, wrapSetter }) => {
     useEffect(() => {
         if (current === 4) {
             setState('running')
+            getBalances()
         }
-        else if( current === 0){
+        else if (current === 0) {
             setState('pending')
         }
     }, [current])
 
-    const autoInvest = () => {
+    const getBalances = () => {
         setTimeout(() => {
-        
-        }, 2000)
+            wrapSetter(0)
+        }, 3000)
     }
 
-    if(state === 'running'){
-        autoInvest()
-    }
-    
     return (
         <div style={{
             height: '10rem',

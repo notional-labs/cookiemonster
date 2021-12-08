@@ -1,4 +1,5 @@
-import { useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
+import { message, notification } from 'antd'
 
 const Screen3 = ({ current, wrapSetter }) => {
     const [state, setState] = useState('pending')
@@ -6,22 +7,28 @@ const Screen3 = ({ current, wrapSetter }) => {
     useEffect(() => {
         if (current === 3) {
             setState('running')
+            autoInvest()
         }
-        else if( current === 0){
+        else if (current === 0) {
             setState('pending')
         }
     }, [current])
 
+    const openNotification = (title, mess) => {
+        notification.open({
+            message: title,
+            description: mess
+        });
+    };
+
+
     const autoInvest = () => {
         setTimeout(() => {
+            openNotification('Auto Invest', 'Success')
             wrapSetter(4)
-        }, 2000)
+        }, 3000)
     }
 
-    if(state === 'running'){
-        autoInvest()
-    }
-    
     return (
         <div style={{
             height: '10rem',
@@ -32,7 +39,7 @@ const Screen3 = ({ current, wrapSetter }) => {
             paddingTop: '4.2rem',
             boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.5), 0 6px 20px 0 rgba(0, 0, 0, 0.5)',
         }}>
-            Auto Investing
+            Auto Invest
         </div>
     )
 }

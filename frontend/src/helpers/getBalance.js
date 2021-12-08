@@ -19,7 +19,7 @@ const mapIbc = (balance) => {
             returnBalance.denom = chains[`${key}`]['denom']
             const chain_name = chains[`${key}`]['chain_name'] 
             returnBalance.name = key + ' - ' + chain_name.toUpperCase() 
-            returnBalance.amount = balance.amount
+            returnBalance.amount = (parseInt(balance.amount)/1000000).toString()
             returnBalance.logo = chains[`${key}`]['logo']
         }
     }
@@ -27,7 +27,7 @@ const mapIbc = (balance) => {
         returnBalance.denom = balance.denom
         const chain_name = balance.denom === 'uosmo' ? 'osmo' : 'ion'
         returnBalance.name = chain_name.toUpperCase()
-        returnBalance.amount = balance.amount
+        returnBalance.amount = (parseInt(balance.amount)/1000000).toString()
         returnBalance.logo = balance.denom === 'uosmo' ? osmosisLogo : ionLogo
     }
     return returnBalance
@@ -47,12 +47,12 @@ export const getBalance = async (apiUrl = "https://lcd-osmosis.keplr.app", addre
 }
 
 export const getOsmo = async (address) => {
-    const balances = await getBalance(address)
+    const balances = await getBalance(undefined, address)
     if(balances.length === 0){
         return 0
     }
     const filterBalance = balances.filter(x => x.denom === 'uosmo')
-    return filterBalance[0] .amount
+    return filterBalance[0].amount
 }
 
 export const getKeplrBalances = () => {

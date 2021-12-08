@@ -6,16 +6,19 @@ import Asset from './pages/Asset/Asset'
 import HomePage from './pages/HomePage';
 import Account from './components/Account';
 import RootScreen from './pages/RunManuallyScreen/RootScreen';
+import DepositButton from './components/DepositButton';
+import DepositModal from './components/DepositModal';
 
 import "antd/dist/antd.css";
-import { Layout, Menu, Image, Button } from 'antd';
+import { Layout, Menu, Image, message, } from 'antd';
 import {
   HomeOutlined,
   WalletOutlined,
   UserOutlined,
   ReconciliationOutlined,
 } from '@ant-design/icons';
-import { useState } from 'react'
+import { Modal, Button } from 'react-bootstrap';
+import { useState, useCallback } from 'react'
 import {
   BrowserRouter as Router,
   Routes,
@@ -27,6 +30,7 @@ import { getKeplr, } from './helpers/getKeplr';
 import { getOsmo } from './helpers/getBalance';
 import logo from './assets/img/logo.png';
 
+import { checkAccount } from './helpers/API/api';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -44,7 +48,7 @@ const style = {
     backgroundColor: '#8abf80',
     color: '#ffffff',
     width: "80%",
-    height: "2.5rem",
+    height: "3rem",
   },
 }
 
@@ -56,6 +60,11 @@ function App() {
   const [cookieMonster, setCookieMonster] = useState('')
   const [collapsed, setCollapsed] = useState(false)
   const [imageShrink, setImageShrink] = useState(false)
+  const [displayTransactionModal, setDisplayTransactionModal] = useState(false)
+
+  const wrapSetter = useCallback(value => {
+    setDisplayTransactionModal(value)
+  }, [setDisplayTransactionModal])
 
   const onCollapse = () => {
     setCollapsed(!collapsed)
@@ -64,12 +73,28 @@ function App() {
     }, 100);
   }
 
+  const success = () => {
+    message.success('Connect', 1);
+  };
+
+  const error = () => {
+    message.error('Connect failed', 1);
+  };
+
   const getAccount = async () => {
     const { accounts, offlineSigner } = await getKeplr()
-    const amount = getOsmo(accounts[0].address)
+    const amount = await getOsmo(accounts[0].address)
     setAccount({
       address: accounts[0].address,
-      amount: amount
+      amount: (parseInt(amount) / 1000000).toString()
+    })
+    checkAccount('osmo1cy2fkq04yh7zm6v52dm525pvx0fph7ed75lnz7').then(res => {
+      if (res.data.Address !== ''){
+        success()
+        setCookieMonster(res.data.Address)
+      }
+    }).catch(() => {
+      error()
     })
   }
 
@@ -95,7 +120,7 @@ function App() {
               mode="inline"
             >
               <Menu.Item key="home"
-                icon={<HomeOutlined style={{ marginLeft: !collapsed ? '1.5rem' : '-0.5rem', fontSize: '1.5rem', }} />}
+                icon={<HomeOutlined style={{ marginLeft: !collapsed ? '1.5rem' : '-0.3rem', fontSize: '1rem', }} />}
                 style={{ margin: 0, marginTop: '10px', fontSize: '1.3rem', color: '#2b2b2b', fontWeight: 300 }}
                 className="modified-item"
               >
@@ -104,7 +129,7 @@ function App() {
 
               </Menu.Item>
               <Menu.Item key="asset"
-                icon={<WalletOutlined style={{ marginLeft: !collapsed ? '1.5rem' : '-0.5rem', fontSize: '1.5rem', }} />}
+                icon={<WalletOutlined style={{ marginLeft: !collapsed ? '1.5rem' : '-0.3rem', fontSize: '1rem', }} />}
                 style={{ margin: 0, marginTop: '10px', fontSize: '1.3rem', color: '#2b2b2b', fontWeight: 300 }}
                 className="modified-item"
               >
@@ -112,28 +137,21 @@ function App() {
                 <Link to='/asset' />
 
               </Menu.Item>
-              <Menu.Item key="info"
-                icon={<UserOutlined style={{ marginLeft: !collapsed ? '1.5rem' : '-0.5rem', fontSize: '1.5rem', }} />}
-                style={{ margin: 0, marginTop: '10px', fontSize: '1.3rem', color: '#2b2b2b', fontWeight: 300 }}
-                className="modified-item"
-              >
-                Account
-                <Link to='/account' />
-
-              </Menu.Item>
             </Menu>
             {
-              cookieMonster === '' && (
-                <div style={{ marginTop: '34.5rem', marginBottom: '0.3rem' }}>
+              cookieMonster === '' ? (
+                <div style={{ marginTop: '34rem', marginBottom: '0.3rem' }}>
                   <hr />
-                  <button style={{ ...style.button, fontSize: !collapsed ? '20px' : '10px' }}
+                  <button style={{ ...style.button, fontSize: !collapsed ? '15px' : '10px' }}
                     onClick={async () => {
                       await getAccount()
                     }}>
-                    {!collapsed ? 'Connect BeanStalk' : (<ReconciliationOutlined style={{fontSize: '1.5rem'}}/>)}
+                    {!collapsed ? 'Connect To BeanStalk' : (<ReconciliationOutlined style={{ fontSize: '1.5rem' }} />)}
                   </button>
                 </div>
-              ) 
+              ) : (
+                <DepositButton collapsed={collapsed} wrapSetter={wrapSetter} />
+              )
             }
 
           </Sider>
@@ -150,6 +168,18 @@ function App() {
           </Layout>
         </Router>
       </Layout>
+
+      <>
+        <Modal show={displayTransactionModal} onHide={() => { setDisplayTransactionModal(false) }}>
+          <Modal.Header closeButton>
+            <Modal.Title>Deposit</Modal.Title>
+          </Modal.Header>
+          <Modal.Body >
+            <DepositModal cookieMonster={cookieMonster} account={account} wrapSetter={wrapSetter} />
+          </Modal.Body>
+        </Modal>
+      </>
+
     </div>
   );
 }
