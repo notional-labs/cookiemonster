@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/notional-labs/cookiemonster/cmd/auto-farm/cmd"
+	"github.com/notional-labs/cookiemonster/cmd/cookiemonster/cmd"
 	"github.com/osmosis-labs/osmosis/app/params"
 	// "github.com/osmosis-labs/osmosis/app/params"
 )
