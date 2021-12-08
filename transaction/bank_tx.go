@@ -81,7 +81,7 @@ func (bankSendTx BankSendTx) Execute() (string, error) {
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
-			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas")
 			gas += 300000
 		} else {
 			time.Sleep(5 * time.Second)

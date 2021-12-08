@@ -80,10 +80,10 @@ func (delegateTx DelegateTx) Execute() (string, error) {
 			return txHash, nil
 		}
 		if err.Error() == "insufficient fee" {
-			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas\n")
+			fmt.Println("\nTx failed because of insufficient fee, try again with higher gas")
 			gas += 300000
 		} else {
-			fmt.Println("\n" + err.Error() + " try again\n")
+			fmt.Println("\n" + err.Error() + " try again")
 		}
 	}
 	return txHash, err
