@@ -63,35 +63,46 @@ func (investment Investment) Invest(reportPath string) error {
 	return nil
 }
 
-func getEpochIdx() int64 {
+func getEpochIdx() (int64, error) {
 	epoch, err := query.QueryEpoch()
 	if err != nil {
 		fmt.Println("Err Epoch", err)
-		return -1
+		return -1, err
 	}
 	fmt.Println("Farming in epoch ", epoch)
-	return epoch
+	return epoch, nil
 }
 
 func (investment Investment) InvestToDie(reportPath string) error {
 	keyName := investment.KeyName
-	currentEpoch := getEpochIdx()
+	currentEpoch, err := getEpochIdx()
+	if err != nil {
+		return err
+	}
+
 	// 1 claim reward
 	claimTx := transaction.ClaimTx{KeyName: keyName}
 	// execute claim tx right away
-	err := transaction.HandleTx(claimTx, reportPath)
+	err = transaction.HandleTx(claimTx, reportPath)
 	if err != nil {
 		return err
 	}
 	for {
-		osmosisEpoch := getEpochIdx()
+		osmosisEpoch, err := getEpochIdx()
+		if err != nil {
+			return err
+		}
+
 		if currentEpoch < osmosisEpoch {
 			keyName := investment.KeyName
-			currentEpoch := getEpochIdx()
+			currentEpoch, err := getEpochIdx()
+			if err != nil {
+				return err
+			}
 			// 1 claim reward
 			claimTx := transaction.ClaimTx{KeyName: keyName}
 			// execute claim tx right away
-			err := transaction.HandleTx(claimTx, reportPath)
+			err = transaction.HandleTx(claimTx, reportPath)
 			if err != nil {
 				return err
 			}
