@@ -86,7 +86,7 @@ func AutoInvest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 	}
 	m := &map[string]string{}
-	json.Unmarshal(body, m)
+	err = json.Unmarshal(body, m)
 	if err != nil {
 		fmt.Println(err)
 	}
