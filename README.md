@@ -1,10 +1,10 @@
 # Cookiemonster
 Cookiemonster is an open source tool for the automatic managment of liquidity provision and staking in Osmosis, and Soon(TM), other Cosmos IBC enabled blockchains.  Planned feature expansion includes:
 
--[ ] Validator Management from a disconnected signer
--[ ] Osmo <-> Sif arbitrage
--[ ] Osmo <-> Gdex arbitrage
--[ ] Staking claims at optimal intervals
+- [x] Validator Management from a disconnected signer
+- [x] Osmo <-> Sif arbitrage
+- [x] Osmo <-> Gdex arbitrage
+- [x] Staking claims at optimal intervals
 
 
 ## Compile it
