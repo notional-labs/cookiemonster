@@ -6,7 +6,7 @@ jobs:
 
 # Yeah, this makes releases that run in  a single click and serve on port 3000 for windows, mac and linux. 
   build:
-    runs-on: ubuntu-latest
+    runs-on:  ${{ matrix.os }}
     name: build
     strategy:
       matrix:
@@ -22,6 +22,7 @@ jobs:
           go build .
       - uses: actions/upload-artifact@v2
         with:
+          name:  ${{ matrix.os }}
           path: cmd/cookiemonster/cookiemonster
       
 

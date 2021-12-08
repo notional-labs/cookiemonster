@@ -18,7 +18,7 @@ const style = {
     }
 }
 
-const Asset = ({ address }) => {
+const Asset = ({ cookieMonster }) => {
     const [listAsset, setListAsset] = useState([]);
 
     const success = () => {
@@ -34,10 +34,10 @@ const Asset = ({ address }) => {
     };
 
     useEffect(() => {
-        console.log(address)
-        if (address !== '') {
+        console.log(cookieMonster)
+        if (cookieMonster !== '') {
             (() => {
-                getBalance(undefined, address).then(balances => {
+                getBalance(undefined, cookieMonster).then(balances => {
                     if (balances.length > 0) {
                         setListAsset([...balances])
                         success()
@@ -48,19 +48,7 @@ const Asset = ({ address }) => {
                 })
             })()
         }
-        else {
-            (() => {
-                getBalance(undefined, 'osmo1cy2fkq04yh7zm6v52dm525pvx0fph7ed75lnz7').then(balances => {
-                    if (balances.length > 0) {
-                        setListAsset([...balances])
-                        success()
-                    }
-                }).catch(() => {
-                    error()
-                })
-            })()
-        }
-    }, [])
+    }, [cookieMonster])
 
     const columns = [
         {
@@ -88,7 +76,8 @@ const Asset = ({ address }) => {
             fixed: 'left',
         },
     ];
-    return (
+
+    return cookieMonster !== '' ? (
         <div style={style.div}>
             <div style={style.divTitle}>
                 <Title>Osmosis Assets</Title>
@@ -99,6 +88,10 @@ const Asset = ({ address }) => {
                 columns={columns}
                 style={{ marginTop: '3rem', borderRadius: '5px' }}
             />
+        </div>
+    ) : (
+        <div>
+            connect to beanstalk to check asset
         </div>
     )
 }

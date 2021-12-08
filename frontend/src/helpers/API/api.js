@@ -1,9 +1,10 @@
 import axios from "axios";
 
-const root_Url = 'http://192.168.1.29:8000'
+const root_Url = 'http://localhost:8000'
 
 export const checkAccount = async (address) => {
     const res = await axios.post(`${root_Url}/check-account`, { address })
+    console.log(res)
     return res
 }
 
