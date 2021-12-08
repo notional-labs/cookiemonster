@@ -11,8 +11,11 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - run: go build ./...
+      - run: go build cmd/cookiemonster/...
       - uses: actions/upload-artifact@v2
+        with:
+          path: cmd/cookiemonster/cookiemonster
+      
 
 
   test:
