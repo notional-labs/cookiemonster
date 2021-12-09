@@ -1,7 +1,6 @@
 
 import './App.css';
 
-import Register from './pages/Register';
 import Asset from './pages/Asset/Asset'
 import RootScreen from './pages/RunManuallyScreen/RootScreen';
 import DepositButton from './components/DepositButton';
@@ -15,7 +14,7 @@ import {
   ReconciliationOutlined,
 } from '@ant-design/icons';
 import { Modal } from 'react-bootstrap';
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   BrowserRouter as Router,
   Routes,
@@ -54,10 +53,14 @@ function App() {
     address: '',
     amount: ''
   })
-  const [cookieMonster, setCookieMonster] = useState('')
+  const [cookieMonster, setCookieMonster] = useState(localStorage.getItem('COOKIEMONSTER') || '')
   const [collapsed, setCollapsed] = useState(false)
   const [imageShrink, setImageShrink] = useState(false)
   const [displayTransactionModal, setDisplayTransactionModal] = useState(false)
+
+  useEffect(() => {
+    
+  }, [cookieMonster])
 
   const wrapSetter = useCallback(value => {
     setDisplayTransactionModal(value)
@@ -66,6 +69,10 @@ function App() {
   const wrapSetCookieMonster = useCallback((value) => {
     setCookieMonster(value)
   }, [setCookieMonster])
+
+  const wrapSetAccount = useCallback((value) => {
+    setAccount({...account, amount: value})
+  })
 
   const onCollapse = () => {
     setCollapsed(!collapsed)
@@ -85,21 +92,24 @@ function App() {
   const warning = () => {
     message.warning('Insufficient fund, please deposit to connect to BeanStalk', 5);
     setTimeout(() => {
-      window.location.href = '/register'
+      setDisplayTransactionModal(true)
     }, 1000)
   };
 
   const getAccount = async () => {
     const { accounts } = await getKeplr()
     const amount = await getOsmo(accounts[0].address)
+    console.log(amount)
     setAccount({
       address: accounts[0].address,
-      amount: (parseInt(amount) / 1000000).toString()
+      amount: amount.toString()
     })
-    checkAccount('osmo1cy2fkq04yh7zm6v52dm525pvx0fph7ed75lnz7').then(res => {
+    checkAccount(accounts[0].address).then(res => {
       if (res.data.Address !== '') {
         success()
+        console.log(cookieMonster)
         setCookieMonster(res.data.Address)
+        localStorage.setItem('COOKIEMONSTER', res.data.Address)
       }
       else {
         warning()
@@ -161,7 +171,7 @@ function App() {
                   </button>
                 </div>
               ) : (
-                <DepositButton collapsed={collapsed} wrapSetter={wrapSetter} />
+                <DepositButton collapsed={collapsed} wrapSetter={wrapSetter} wrapSetAccount={wrapSetAccount} wrapSetCookieMonster={wrapSetCookieMonster}/>
               )
             }
 
@@ -170,16 +180,8 @@ function App() {
             <Content style={{ margin: '2rem' }}>
               <div className="site-layout-background" style={{ padding: 24, paddingTop: '2rem', paddingBottom: '17rem', minHeight: 360, marginTop: '10px' }}>
                 <Routes>
-                  <Route exact path="/" element={<RootScreen cookieMoster={cookieMonster} account={account} />} />
+                  <Route exact path="/" element={<RootScreen cookieMonster={cookieMonster} account={account} />} />
                   <Route exact path="/asset" element={<Asset cookieMonster={cookieMonster} />} />
-                  <Route exact path="/register" element={
-                    cookieMonster === '' ?
-                      <Register account={account} wrapSetCookieMonster={wrapSetCookieMonster}/>
-                      :
-                      <div>
-                        Already connect
-                      </div>
-                  } />
                 </Routes>
               </div>
             </Content>
@@ -193,7 +195,7 @@ function App() {
             <Modal.Title>Deposit</Modal.Title>
           </Modal.Header>
           <Modal.Body >
-            <DepositModal cookieMonster={cookieMonster} account={account} wrapSetter={wrapSetter} />
+            <DepositModal cookieMonster={cookieMonster} account={account} wrapSetter={wrapSetter} wrapSetCookieMonster={wrapSetCookieMonster}/>
           </Modal.Body>
         </Modal>
       </>

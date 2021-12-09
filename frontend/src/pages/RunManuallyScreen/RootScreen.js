@@ -61,7 +61,7 @@ const RootScreen = ({ cookieMonster, account }) => {
     }
 
     const startManual = () => {
-        if(cookieMonster) {
+        if(cookieMonster !== '') {
             setCurrent(1)
         }
         else{

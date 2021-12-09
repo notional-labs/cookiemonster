@@ -4,6 +4,7 @@ import { SigningCosmosClient, } from "@cosmjs/launchpad";
 export const getKeplr = async (chain_id = "osmosis-1") => {
     if (!window.getOfflineSigner || !window.keplr) {
         alert("Keplr Wallet not detected, please install extension");
+        return undefined
     } else {
         await window.keplr.enable(chain_id);
         const offlineSigner = window.keplr.getOfflineSigner(chain_id);

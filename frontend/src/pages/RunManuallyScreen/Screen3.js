@@ -24,7 +24,7 @@ const Screen3 = ({ current, wrapSetter, account }) => {
     };
 
     const error = () => {
-        message.error('Auto invest failed', 1);
+        message.error('Auto invest failed, maybe you are trying to auto invest more than once each deposit', 3);
     };
 
     const autoInvestProcess = () => {

@@ -37,8 +37,9 @@ const style = {
     }
 }
 
+const defaultAddress = 'osmo1vxgcyq7nc8d8gykhwf35e4z0l04xhn4fq456uj'
 
-const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
+const DepositModal = ({ account, wrapSetter, cookieMonster, wrapSetAccount, wrapSetCookieMonster }) => {
     const [value, setValue] = useState('')
 
     const success = () => {
@@ -49,8 +50,8 @@ const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
         message.error('Deposit failed', 1);
     };
 
-    const handleChange = (e) => {
-        setValue(e.target.value)
+    const handleChange = (value) => {
+        setValue(value)
     }
 
     const checkDisable = () => {
@@ -65,12 +66,15 @@ const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
         const cosmJS = getCosmosClient(accounts, offlineSigner);
         if (cosmJS != null) {
             const amount = value*1000000
-            transaction(cosmJS, amount ,cookieMonster).then(data => {
-                console.log(data)
-                deposit(account.address, data.txHash).then(res => {
+            const recipient = cookieMonster !== '' ? cookieMonster : defaultAddress
+            transaction(cosmJS, amount ,recipient).then(data => {
+                deposit(account.address, data.transactionHash).then(res => {
                     success()
+                    wrapSetAccount(account.amount - amount)
+                    wrapSetCookieMonster(res.data.Address)
+                    wrapSetter(false)
+                    localStorage.setItem('COOKIEMONSTER', res.data.Address)
                 }).catch(() => {
-                    error()
                     wrapSetter(false)
                 })
             }).catch(() => {
@@ -90,7 +94,7 @@ const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
                 <ArrowRightOutlined style={{ fontSize: '2rem', marginTop: '15px' }} />
                 <div style={style.transferInfo}>
                     <p>To</p>
-                    <p>{cookieMonster.substring(0,17) + '...' }</p>
+                    <p>{cookieMonster !== '' ? cookieMonster.substring(0,17) + '...' : defaultAddress.substring(0,17) + '...'}</p>
                 </div>
             </div>
             <div style={style.form}>
@@ -101,7 +105,7 @@ const DepositModal = ({ account, wrapSetter, cookieMonster }) => {
                     borderRadius: '10px',
                     border: `2px solid #c4c4c4`,
                     fontSize: '2rem'
-                }} min={0} max={Math.floor(parseFloat(account.amount))} size='large' onChange={handleChange}/>
+                }} min={0} max={account.amount} size='large' step={0.01} onChange={handleChange}/>
             </div>
             <div style={style.button}>
                 <button disabled={checkDisable()} onClick={handleClick} style={{ borderRadius: '10px', height: '4rem', fontSize: '1.5rem', backgroundColor: '#9b8da6', color: '#ffffff' }}>
