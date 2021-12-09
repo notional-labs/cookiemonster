@@ -77,7 +77,8 @@ const DepositModal = ({ account, wrapSetter, cookieMonster, wrapSetAccount, wrap
                 }).catch(() => {
                     wrapSetter(false)
                 })
-            }).catch(() => {
+            }).catch((e) => {
+                console.log(e);
                 error()
                 wrapSetter(false)
             })
