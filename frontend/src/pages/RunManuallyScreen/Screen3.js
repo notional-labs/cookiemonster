@@ -44,7 +44,8 @@ const Screen3 = ({ current, wrapSetter, account }) => {
             borderRadius: '10px',
             borderWidth: '30px',
             backgroundColor: state === 'running' ? '#8abf80' : '#e6e6e6',
-            paddingTop: '4.2rem',
+            lineHeight:'10rem',
+            fontSize: '2rem',
             boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.5), 0 6px 20px 0 rgba(0, 0, 0, 0.5)',
         }}>
             Auto Invest
