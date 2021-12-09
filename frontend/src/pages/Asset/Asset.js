@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { getBalance } from '../../helpers/getBalance';
+import { getTotal } from '../../helpers/convertPrice';
 import { Image, Table, Typography, message, } from 'antd';
 import './Asset.css'
+import image from '../../assets/img/plant.png'
 
 const { Title, } = Typography;
 
@@ -20,6 +22,7 @@ const style = {
 
 const Asset = ({ cookieMonster }) => {
     const [listAsset, setListAsset] = useState([]);
+    const [asset, setAsset] = useState(0)
 
     const success = () => {
         message.success('Fetching success', 1);
@@ -39,10 +42,13 @@ const Asset = ({ cookieMonster }) => {
             (() => {
                 getBalance(undefined, cookieMonster).then(balances => {
                     if (balances.length > 0) {
-                        setListAsset([...balances])
                         success()
+                        setListAsset([...balances])
+                        getTotal(balances).then(total => setAsset(total))
                     }
-                    warning()
+                    else{
+                        warning()
+                    }
                 }).catch(() => {
                     error()
                 })
@@ -55,12 +61,9 @@ const Asset = ({ cookieMonster }) => {
             dataIndex: 'logo',
             key: 'logo',
             fixed: 'left',
-            render: (logo) => {
-                <Image
-                    width={50}
-                    src={logo}
-                />
-            }
+            width: 20,
+            render: (logo) => <img width={40} src={logo} />
+            
         },
         {
             title: 'Asset/Chain',
@@ -80,9 +83,12 @@ const Asset = ({ cookieMonster }) => {
     return cookieMonster !== '' ? (
         <div style={style.div}>
             <div style={style.divTitle}>
-                <Title>Osmosis Assets</Title>
+                <Title>BeanStalk Assets</Title>
             </div>
             <hr />
+            <div style={{marginBottom: '1rem', ...style.divTitle}}>
+                Total Assets: {asset} USD
+            </div>
             <Table
                 dataSource={listAsset}
                 columns={columns}
@@ -91,7 +97,8 @@ const Asset = ({ cookieMonster }) => {
         </div>
     ) : (
         <div>
-            connect to beanstalk to check asset
+            <img width={400} src={image} style={{opacity: '50%', marginBottom: '3rem', marginTop: '50px'}}/>
+            <p style={{fontSize: '30px'}}>Connect To BeanStalk To Check Assets</p>
         </div>
     )
 }

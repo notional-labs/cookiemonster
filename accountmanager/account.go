@@ -109,6 +109,7 @@ func (am *AccountManager) RegisterAccountForAddress(Address string) (sdk.AccAddr
 	accountIdString := strconv.Itoa(am.NumOfAccount)
 
 	uid := "acc" + "-" + accountIdString
+	fmt.Println(sdk.AccAddress(privKeyForAddress.PubKey().Address()).String())
 	_, err := kb.WriteLocalKey(uid, privKeyForAddress, hd.PubKeyType("secp256k1"))
 	if err != nil {
 		return nil, err

@@ -12,9 +12,14 @@ const style = {
     },
 }
 
-const DepositButton = ({ collapsed, wrapSetter }) => {
+const DepositButton = ({ collapsed, wrapSetter, wrapSetCookieMonster }) => {
     const handleClick = () => {
         wrapSetter(true)
+    }
+
+    const handleDisconnect = () => {
+        localStorage.removeItem('COOKIEMONSTER')
+        wrapSetCookieMonster('')
     }
 
     return (
@@ -23,6 +28,12 @@ const DepositButton = ({ collapsed, wrapSetter }) => {
             <button style={{ ...style.button, fontSize: !collapsed ? '15px' : '10px' }}
                 onClick={handleClick}>
                 {!collapsed ? <div>Deposit <TransactionOutlined style={{ fontSize: '1.5rem' }} /></div>
+                    :
+                    (<TransactionOutlined style={{ fontSize: '1.5rem' }} />)}
+            </button>
+            <button style={{ ...style.button, backgroundColor: '#ed897e', fontSize: !collapsed ? '15px' : '10px', marginTop: '10px' }}
+                onClick={handleDisconnect}>
+                {!collapsed ? <div>Disconnect <TransactionOutlined style={{ fontSize: '1.5rem' }} /></div>
                     :
                     (<TransactionOutlined style={{ fontSize: '1.5rem' }} />)}
             </button>

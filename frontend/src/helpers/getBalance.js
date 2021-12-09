@@ -11,7 +11,8 @@ const mapIbc = (balance) => {
         denom: '',
         name: '',
         amount: '',
-        logo: ''
+        logo: '',
+        coingecko: ''
     }
     if(balance.denom.substring(0,4) === "ibc/"){
         const key = ibc[`${balance.denom}`]
@@ -21,6 +22,7 @@ const mapIbc = (balance) => {
             returnBalance.name = key + ' - ' + chain_name.toUpperCase() 
             returnBalance.amount = (parseInt(balance.amount)/1000000).toString()
             returnBalance.logo = chains[`${key}`]['logo']
+            returnBalance.coingecko = chains[`${key}`]['coingecko']
         }
     }
     else {
@@ -29,6 +31,7 @@ const mapIbc = (balance) => {
         returnBalance.name = chain_name.toUpperCase()
         returnBalance.amount = (parseInt(balance.amount)/1000000).toString()
         returnBalance.logo = balance.denom === 'uosmo' ? osmosisLogo : ionLogo
+        returnBalance.coingecko = balance.denom === 'uosmo' ? 'osmosis' : 'ion'
     }
     return returnBalance
 } 

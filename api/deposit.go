@@ -204,6 +204,7 @@ func Deposit(w http.ResponseWriter, r *http.Request) {
 
 	am := accountmanager.DefaultAccountManager
 	cmAddress, err := db.DefautlAddressToCMAddressDB.GetCMAddressForAddress(acc)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		fmt.Println(err.Error())
