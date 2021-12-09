@@ -5,6 +5,7 @@ import Screen1 from './Screen1';
 import Screen2 from './Screen2';
 import Screen3 from './Screen3';
 import Screen4 from './Screen4';
+import { checkReward } from '../../helpers/checkReward';
 
 const { Title, } = Typography;
 
@@ -45,7 +46,7 @@ const style = {
     }
 }
 
-const RootScreen = ({ cookieMonster, account }) => {
+const RootScreen = ({ cookieMonster, account, autoInvestAble }) => {
     const [current, setCurrent] = useState(0)
 
     const wrapSetter = useCallback(value => {
@@ -61,16 +62,16 @@ const RootScreen = ({ cookieMonster, account }) => {
     }
 
     const startManual = () => {
-        if(cookieMonster !== '') {
+        if (cookieMonster !== '') {
             setCurrent(1)
         }
-        else{
-            warning()
+        else {
+            warning('Connect to BeanStalk to use this feature')
         }
     }
 
-    const warning = () => {
-        message.warning('Connect to BeanStalk to use this feature', 2);
+    const warning = (mess) => {
+        message.warning(mess, 2);
     };
 
     return (
@@ -80,16 +81,16 @@ const RootScreen = ({ cookieMonster, account }) => {
             </div>
             <hr />
             <div style={{ ...style.flexDiv, marginTop: '2rem' }}>
-                <Screen1 current={current} wrapSetter={wrapSetter} cookieMonster={cookieMonster} account={account} />
+                <Screen1 current={current} wrapSetter={wrapSetter} cookieMonster={cookieMonster} account={account} autoInvestAble={autoInvestAble}/>
                 <CaretRightFilled style={{ fontSize: '10rem', color: '#7a7a7a' }} />
                 <Screen2 current={current} wrapSetter={wrapSetter} account={account} />
                 <CaretRightFilled style={{ fontSize: '10rem', color: '#7a7a7a' }} />
                 <Screen3 current={current} wrapSetter={wrapSetter} account={account} />
                 <CaretRightFilled style={{ fontSize: '10rem', color: '#7a7a7a' }} />
-                <Screen4 current={current} wrapSetter={wrapSetter} account={account} />
+                <Screen4 current={current} wrapSetter={wrapSetter} account={account} cookieMonster={cookieMonster}/>
             </div>
             <div>
-                <button 
+                <button
                     style={{ ...style.button, backgroundColor: '#8abf80', }}
                     onClick={startManual}
                     onMouseEnter={handleEnter}

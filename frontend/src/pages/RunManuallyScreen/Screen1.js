@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { pullReward } from '../../helpers/API/api'
-import { getOsmo } from '../../helpers/getBalance'
 import { message } from 'antd'
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
+import { checkReward } from '../../helpers/checkReward'
 
 const Screen1 = ({ current, wrapSetter, cookieMonster, account }) => {
     const [state, setState] = useState('pending')
     const [show, setShow] = useState(false)
+    const [value, setValue] = useState(0)
 
     useEffect(() => {
         if (current === 1) {
@@ -30,17 +31,27 @@ const Screen1 = ({ current, wrapSetter, cookieMonster, account }) => {
     const fetchReward = () => {
         pullReward(account.address).then(res => {
             success()
-            setShow(true)
-            wrapSetter(2)
+            getReward().then(res => {
+                setValue(res)
+                setShow(true)
+                wrapSetter(2)
+            })
         }).catch(() => {
             error()
             wrapSetter(0)
         })
     }
 
-    const getAmount = async () => {
-        const amount = await getOsmo(cookieMonster)
-        return (parseInt(amount) / 1000000).toString()
+    const getReward = async () => {
+        const res = await checkReward(cookieMonster)
+        if (res.data.total.length > 0) {
+            const osmo = res.data.total.filter(x => x.denom === 'uosmo')
+            if (osmo.length > 0) {
+                return osmo[0].amount
+            }
+            return 0
+        }
+        return 0
     }
 
     return (
@@ -51,9 +62,7 @@ const Screen1 = ({ current, wrapSetter, cookieMonster, account }) => {
                 placement='bottom'
                 overlay={
                     <Tooltip>
-                        <strong>{async () => {
-                            await getAmount()
-                        }}</strong>
+                        <strong>{value}</strong>
                     </Tooltip>
                 }
             >

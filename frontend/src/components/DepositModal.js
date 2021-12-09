@@ -73,7 +73,7 @@ const DepositModal = ({ account, wrapSetter, cookieMonster, wrapSetAccount, wrap
                     wrapSetAccount(account.amount - amount)
                     wrapSetCookieMonster(res.data.Address)
                     wrapSetter(false)
-                    localStorage.setItem('COOKIEMONSTER', res.data.Address)
+                    // localStorage.setItem('COOKIEMONSTER', res.data.Address)
                 }).catch(() => {
                     wrapSetter(false)
                 })

@@ -7,7 +7,7 @@ import DepositButton from './components/DepositButton';
 import DepositModal from './components/DepositModal';
 
 import "antd/dist/antd.css";
-import { Layout, Menu, Image, message, } from 'antd';
+import { Layout, Menu, Image, message, notification } from 'antd';
 import {
   HomeOutlined,
   WalletOutlined,
@@ -27,6 +27,7 @@ import { getOsmo } from './helpers/getBalance';
 import logo from './assets/img/logo.png';
 
 import { checkAccount } from './helpers/API/api';
+import { checkReward } from './helpers/checkReward';
 
 const { Content, Sider } = Layout;
 
@@ -57,10 +58,27 @@ function App() {
   const [collapsed, setCollapsed] = useState(false)
   const [imageShrink, setImageShrink] = useState(false)
   const [displayTransactionModal, setDisplayTransactionModal] = useState(false)
+  const [autoInvestAble, setAutoInvestAble] = useState(false)
 
   useEffect(() => {
-    
+    if(cookieMonster !== ''){
+      console.log()
+      checkReward(cookieMonster).then(res => {
+        if(res.data.rewards.length > 0){
+          console.log('yay')
+          openNotification('Rewards', 'You got rewards')
+          setAutoInvestAble(true)
+        }
+      })
+    }
   }, [cookieMonster])
+
+  const openNotification = (title, mess) => {
+    notification.open({
+        message: title,
+        description: mess
+    });
+};
 
   const wrapSetter = useCallback(value => {
     setDisplayTransactionModal(value)
@@ -109,7 +127,7 @@ function App() {
         success()
         console.log(cookieMonster)
         setCookieMonster(res.data.Address)
-        localStorage.setItem('COOKIEMONSTER', res.data.Address)
+        // localStorage.setItem('COOKIEMONSTER', res.data.Address)
       }
       else {
         warning()
@@ -180,7 +198,7 @@ function App() {
             <Content style={{ margin: '2rem' }}>
               <div className="site-layout-background" style={{ padding: 24, paddingTop: '2rem', paddingBottom: '17rem', minHeight: 360, marginTop: '10px' }}>
                 <Routes>
-                  <Route exact path="/" element={<RootScreen cookieMonster={cookieMonster} account={account} />} />
+                  <Route exact path="/" element={<RootScreen cookieMonster={cookieMonster} account={account} autoInvestAble={autoInvestAble} />} />
                   <Route exact path="/asset" element={<Asset cookieMonster={cookieMonster} />} />
                 </Routes>
               </div>
