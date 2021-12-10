@@ -20,6 +20,7 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.AddCommand(
 		investcli.NewInvestCmd(),
 		keys.Commands(osmosis.HomeDir),
+		investcli.NewInvestToDieCmd(),
 	)
 
 	return rootCmd
