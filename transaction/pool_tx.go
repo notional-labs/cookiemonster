@@ -160,7 +160,7 @@ func SwapAndPool(keyName string, swapAndPoolOption SwapAndPoolOption, gas uint64
 	if err != nil {
 		return txHash, err
 	}
-	if code == 11 {
+	if code == 11 || code == 19 {
 		return txHash, fmt.Errorf("insufficient fee")
 	}
 	if code != 0 {

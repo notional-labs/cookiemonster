@@ -13,10 +13,10 @@ type Txs []Tx
 
 func HandleTx(tx Tx, reportPath string) error {
 	tx.Prompt()
-	yesOrNo := Confirmation()
-	if yesOrNo == false {
-		return nil
-	}
+	// yesOrNo := Confirmation()
+	// if yesOrNo == false {
+	// 	return nil
+	// }
 	txHash, err := tx.Execute()
 	if err != nil {
 		return err

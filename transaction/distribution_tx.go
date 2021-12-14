@@ -40,6 +40,11 @@ func ClaimReward(keyName string, gas uint64) (string, error) {
 		}
 		msgs = append(msgs, msg)
 	}
+
+	if len(msgs) == 0 {
+		return "", nil
+	}
+
 	txf := NewTxFactoryFromClientCtx(clientCtx).WithGas(gas)
 	code, txHash, err := BroadcastTx(clientCtx, txf, msgs...)
 	if err != nil {

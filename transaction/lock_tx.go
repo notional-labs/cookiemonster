@@ -59,7 +59,7 @@ func Lock(keyName string, lockOpt LockOption, gas uint64) (string, error) {
 	if err != nil {
 		return txHash, err
 	}
-	if broadcastedTx.Code == 11 {
+	if broadcastedTx.Code == 11 || broadcastedTx.Code == 19 {
 		return txHash, fmt.Errorf("insufficient fee")
 
 	}

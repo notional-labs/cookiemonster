@@ -7,7 +7,7 @@ import (
 
 var (
 	ChainId = "osmosis-1"
-	Node    = "https://osmosis-1.technofractal.com:443"
+	Node    = "http://162.55.132.230:2001"
 	HomeDir = DefaultNodeHome()
 )
 

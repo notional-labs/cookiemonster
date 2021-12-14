@@ -36,7 +36,7 @@ func GetDefaultClientContext() client.Context {
 	}
 
 	// keyring and client setting
-	kr, _ := client.NewKeyringFromBackend(defaultClientCtx, "os")
+	kr, _ := client.NewKeyringFromBackend(defaultClientCtx, "test")
 	client, _ := client.NewClientFromNode(Node)
 
 	defaultClientCtx = defaultClientCtx.WithKeyring(kr).
