@@ -45,7 +45,7 @@ One-liner coming Soon(TM)
 ]
 ```
 3. run: `auto-invest invest ~/.cookiemonster/investments.json`.  This cmd will run ONE investment : Claim -> Pooling -> Staking. It finish when all transaction is success or 4 times broadcast. </br>
-  Or run: `auto-farm invest_non_stop ~/.cookiemonster/investments.json`.   This cmd will run loop of investment each one epoch in osmosis.
+  Or run: `auto-farm invest_non_stop ~/.cookiemonster/investments.json`.   This cmd will run loop of investment for each epoch in osmosis.
 
 
 
