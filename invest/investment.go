@@ -131,44 +131,28 @@ func Stake(keyName string, stakeAmount *big.Int, stakeAddress string, reportPath
 }
 
 func (investment Investment) InvestToDie(reportPath string) error {
-	keyName := investment.KeyName
-	currentEpoch, err := getEpochIdx()
-	if err != nil {
-		return err
-	}
-
-	// 1 claim reward
-	claimTx := transaction.ClaimTx{KeyName: keyName}
-	// execute claim tx right away
-	err = transaction.HandleTx(claimTx, reportPath)
-	if err != nil {
-		return err
-	}
+	var lastEpochId int64
 	for {
-		osmosisEpoch, err := getEpochIdx()
+		currentEpochId, err := GetEpochIdx()
+		if err != nil {
+			return err
+		}
+		if currentEpochId == lastEpochId {
+			time.Sleep(9 * time.Minute)
+			continue
+		}
+		fmt.Println("Farming in epoch ", currentEpochId)
+
+		keyName := investment.KeyName
+		lastEpochId = currentEpochId
+		// 1 claim reward
+		claimTx := transaction.ClaimTx{KeyName: keyName}
+		// execute claim tx right away
+		err = transaction.HandleTx(claimTx, reportPath)
 		if err != nil {
 			return err
 		}
 
-		if currentEpoch < osmosisEpoch {
-			keyName := investment.KeyName
-			currentEpoch, err := getEpochIdx()
-			if err != nil {
-				return err
-			}
-			// 1 claim reward
-			claimTx := transaction.ClaimTx{KeyName: keyName}
-			// execute claim tx right away
-			err = transaction.HandleTx(claimTx, reportPath)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println("Get Reward in Epoch ", currentEpoch)
-			fmt.Println("Farming Continue ")
-
-			break
-		}
 		uosmoBalance, err := query.QueryUosmoBalance(keyName)
 		if err != nil {
 			return err
@@ -176,6 +160,7 @@ func (investment Investment) InvestToDie(reportPath string) error {
 
 		// poling
 		poolStrategy := investment.PoolStrategy
+
 		totalPoolAmount := XPercentageOf(uosmoBalance, investment.PoolPercentage)
 		err = BatchPool(keyName, totalPoolAmount, poolStrategy, investment.Duration, reportPath)
 		if err != nil {
@@ -189,19 +174,16 @@ func (investment Investment) InvestToDie(reportPath string) error {
 			return err
 		}
 
-		fmt.Println("sleeping till next epoch")
-		time.Sleep(1 * time.Hour)
 		// 4 transfer
+		fmt.Println("sleeping until next epochs")
 	}
-	return nil
 }
 
-func getEpochIdx() (int64, error) {
+func GetEpochIdx() (int64, error) {
 	epoch, err := query.QueryEpoch()
 	if err != nil {
 		fmt.Println("Err Epoch", err)
 		return -1, err
 	}
-	fmt.Println("Farming in epoch ", epoch)
 	return epoch, nil
 }
