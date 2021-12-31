@@ -7,7 +7,7 @@ import (
 	"github.com/notional-labs/cookiemonster/osmosis"
 
 	"github.com/cosmos/cosmos-sdk/types"
-	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 )
 
 func QueryTx(txHash string) (*types.TxResponse, error) {
@@ -18,7 +18,8 @@ func QueryTx(txHash string) (*types.TxResponse, error) {
 	}
 
 	// If hash is given, then query the tx by hash.
-	output, err := authclient.QueryTx(clientCtx, txHash)
+	output, err := authtx.QueryTx(clientCtx, txHash)
+
 	if err != nil {
 		return nil, err
 	}

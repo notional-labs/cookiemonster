@@ -15,7 +15,7 @@ func GetDefaultClientContext() client.Context {
 
 	// set fields to default value
 	defaultClientCtx := client.Context{
-		JSONMarshaler:     encodingConfig.Marshaler,
+		Codec:             encodingConfig.Marshaler,
 		InterfaceRegistry: encodingConfig.InterfaceRegistry,
 		TxConfig:          encodingConfig.TxConfig,
 		LegacyAmino:       encodingConfig.Amino,

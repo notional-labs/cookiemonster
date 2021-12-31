@@ -33,6 +33,25 @@ func QuerySpotPrice(poolId int, tokenInDenom string, tokenOutDenom string) (floa
 	return spotPrice, nil
 }
 
+func QuerySpotPrices() ([]string, ){
+	clientCtx := osmosis.GetDefaultClientContext()
+
+	queryClient := types.NewQueryClient(clientCtx)
+
+
+	res, err := queryClient.PoolsAndPrices(context.Background(), &types.QueryPoolsAndSpotPricesRequest{})
+	if err != nil {
+		return 0, err
+	}
+
+	spotPriceString := res.GetPriceIn()
+	
+	spotPrice, _ := strconv.ParseFloat(spotPriceString, 64)
+	return spotPrice, nil
+
+
+}
+
 func QueryPools() ([]types.Pool, error) {
 	clientCtx := osmosis.GetDefaultClientContext()
 

@@ -16,18 +16,9 @@ import (
 // It will return an error upon failure.
 func BroadcastTx(clientCtx client.Context, txf clienttx.Factory, msgs ...sdk.Msg) (uint32, string, error) {
 	txf, err := clienttx.PrepareFactory(clientCtx, txf)
+
 	if err != nil {
 		return 3, "", err
-	}
-
-	if txf.SimulateAndExecute() || clientCtx.Simulate {
-		_, adjusted, err := clienttx.CalculateGas(clientCtx.QueryWithData, txf, msgs...)
-		if err != nil {
-			return 3, "", err
-		}
-
-		txf = txf.WithGas(adjusted)
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n", clienttx.GasEstimateResponse{GasEstimate: txf.Gas()})
 	}
 
 	if clientCtx.Simulate {
