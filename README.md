@@ -40,6 +40,9 @@ One-liner coming Soon(TM)
 
 2. run: `auto-farm initapi`
 
+or run it via golang: 
+`go run cmd/cookiemonster/main.go initapi`
+
 
 
 ## License
